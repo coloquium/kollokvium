@@ -5,7 +5,7 @@ let app = express();
 
 import {ThorIO} from 'thor-io.vnext';
 
-import {Broker} from './controllers/broker'
+import {Broker} from './backend/controllers/broker'
 
 let thorIO = new ThorIO.Engine(
     [

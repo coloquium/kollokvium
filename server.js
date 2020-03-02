@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 let express = require("express");
 let app = express();
 const thor_io_vnext_1 = require("thor-io.vnext");
-const broker_1 = require("./controllers/broker");
+const broker_1 = require("./backend/controllers/broker");
 let thorIO = new thor_io_vnext_1.ThorIO.Engine([
     broker_1.Broker,
 ]);
