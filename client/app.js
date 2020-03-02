@@ -18,9 +18,10 @@ class App {
                 startButton.disabled = true;
             }
         });
-        const addRemoteVideo = (mediaStream) => {
+        const addRemoteVideo = (mediaStream, peerId) => {
             let video = document.createElement("video");
             video.srcObject = mediaStream;
+            video.setAttribute("id", "p" + peerId);
             video.autoplay = true;
             document.querySelector(".remote").append(video);
             document.querySelector(".remote").classList.remove("hide");
@@ -68,12 +69,17 @@ class App {
                 this.rtcClient.ConnectContext();
                 console.log("looks like we are abut to join a context...", ctx);
             };
-            this.rtcClient.OnContextDisconnected = (lost) => {
-                console.log("lost c");
+            this.rtcClient.OnContextDisconnected = (peer) => {
+                console.log("lost connection to", peer);
+                document.querySelector("#p" + peer.id).remove();
             };
-            this.rtcClient.OnRemoteStream = (mediaStream, connection) => {
-                console.log("looks like we got a remote media steam", mediaStream);
-                addRemoteVideo(mediaStream);
+            this.rtcClient.OnContextConnected = (peer) => {
+                console.log("connected to", peer);
+                addRemoteVideo(peer.stream, peer.id);
+            };
+            this.rtcClient.OnRemoteTrack = (track, connection) => {
+                console.log("looks like we got a remote media steamTrack", track);
+                // addRemoteVideo(mediaStream);
             };
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
@@ -81,7 +87,12 @@ class App {
             broker.OnOpen = (ci) => {
                 console.log("connected to broker");
                 // now get a media stream for local
-                navigator.getUserMedia({ video: true, audio: true }, (mediaStream) => {
+                navigator.getUserMedia({
+                    video: {
+                        width: { min: 640, ideal: 1280 },
+                        height: { min: 400, ideal: 720 }
+                    }, audio: true,
+                }, (mediaStream) => {
                     this.rtcClient.AddLocalStream(mediaStream);
                     addLocalVideo(mediaStream);
                 }, (err) => {

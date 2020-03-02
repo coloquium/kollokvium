@@ -81,13 +81,7 @@
 
         .local video {
             max-height: 120px;
-            border: 2px solid #333;
-        }
-        #slug{
-            padding: .5rem 1rem;
-    font-size: 1.25rem;
-    line-height: 1.5;
-    border-radius: .3rem
+            border: 2px solid #fff;
         }
     </style>
 </head>
@@ -103,20 +97,21 @@
             <div class="d-flex h-100 text-center align-items-center">
                 <div class="w-100 text-white">
                     <h1 class="display-3">ThorRTC</h1>
-                    <p class="lead my-5">Made with Thor-io.vnext + WebRTC Libraries</p>
-
-
-
-
-                            <input type="text" id="slug" placeholder="Enter any room name..">
-                                    <button class="btn btn-primary btn-lg" type="button" disabled>start</button>
-                             
+                    <p class="lead my-5">made with <strong>thor-io.vnext</strong> and it's WebRTC Libraries</p>
+                    <div class="input-group mb-3 col-md-6 mx-auto">
+                        <input type="text" id="slug" placeholder="Enter any room name." value=""
+                            class="form-control form-control-lg">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary bt-lg" type="button" disabled>JOIN</button>
+                        </div>
                     </div>
-            </div>
 
                 </div>
             </div>
-        
+
+        </div>
+        </div>
+
         <div class="local">
             <video autoplay muted></video>
         </div>

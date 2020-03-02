@@ -1,6 +1,6 @@
 {
   "name": "simpleconf",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
-    "thor-io.client-vnext": "^1.0.9",
+    "thor-io.client-vnext": "^1.1.0",
     "thor-io.vnext": "^1.5.1",
     "webrtc-adapter": "^7.5.0"
   }

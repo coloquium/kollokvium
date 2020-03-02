@@ -17,39 +17,40 @@ export class App {
 
     constructor() {
 
-        let fullScreenVideo =    document.querySelector(".full")  as HTMLVideoElement;
+        let fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("button") as HTMLInputElement;
-       
 
-        slug.addEventListener("keyup",()=> {
 
-            if(slug.value.length >= 6){
+        slug.addEventListener("keyup", () => {
+
+            if (slug.value.length >= 6) {
                 startButton.disabled = false;
-            }else{
+            } else {
                 startButton.disabled = true;
             }
 
         });
 
-        const addRemoteVideo = (mediaStream:MediaStream) => {
+        const addRemoteVideo = (mediaStream: MediaStream,peerId:string) => {
             let video = document.createElement("video");
             video.srcObject = mediaStream;
+            video.setAttribute("id","p" +peerId);
             video.autoplay = true;
             document.querySelector(".remote").append(video);
             document.querySelector(".remote").classList.remove("hide");
-          
-            video.addEventListener("click",(e:any) => {
+
+            video.addEventListener("click", (e: any) => {
                 fullScreenVideo.play();
                 fullScreenVideo.srcObject = e.target.srcObject;
             });
 
         }
 
-        const addLocalVideo = (mediaStream:MediaStream) => {
+        const addLocalVideo = (mediaStream: MediaStream) => {
             let video = document.querySelector(".local video") as HTMLVideoElement;
-            video.srcObject = mediaStream;          
-         
+            video.srcObject = mediaStream;
+
         }
 
         const rtcConfig = {
@@ -63,13 +64,13 @@ export class App {
             ]
         };
 
-        
+
         startButton.addEventListener("click", () => {
             startButton.classList.add("hide");
-                document.querySelector(".overlay").classList.add("d-none");
-                document.querySelector(".join").classList.add("d-none");
-              
-                this.rtcClient.ChangeContext(slug.value);               
+            document.querySelector(".overlay").classList.add("d-none");
+            document.querySelector(".join").classList.add("d-none");
+
+            this.rtcClient.ChangeContext(slug.value);
         });
         // if local ws://localhost:1337/     
         this.factory = this.connect("wss://simpleconf.herokuapp.com/", {})
@@ -82,9 +83,9 @@ export class App {
 
             this.rtcClient = new ThorIOClient.WebRTC(broker, rtcConfig);
 
-            this.rtcClient.OnLocalStream =  (mediaStream:MediaStream) => {
-              
-                
+            this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
+
+
             }
 
             // this will fire when url has a parameter
@@ -97,52 +98,62 @@ export class App {
 
             };
 
-            this.rtcClient.OnContextChanged =  (ctx) => {
+            this.rtcClient.OnContextChanged = (ctx) => {
 
-            
+
                 this.rtcClient.ConnectContext();
-                console.log("looks like we are abut to join a context...",ctx);
-            
+                console.log("looks like we are abut to join a context...", ctx);
+
 
             }
 
 
-            this.rtcClient.OnContextDisconnected = (lost) => {
-                    console.log("lost c")
+            this.rtcClient.OnContextDisconnected = (peer) => {
+                console.log("lost connection to", peer)
+                document.querySelector("#p" + peer.id).remove();
             };
 
+            this.rtcClient.OnContextConnected = (peer) => {
+                console.log("connected to",peer);
+                addRemoteVideo(peer.stream,peer.id);
 
-            
-            this.rtcClient.OnRemoteStream =  (mediaStream:MediaStream, connection:any) => {
-                console.log("looks like we got a remote media steam" ,mediaStream);
-                addRemoteVideo(mediaStream);
+            }
+
+
+            this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
+                console.log("looks like we got a remote media steamTrack", track);
+               // addRemoteVideo(mediaStream);
 
             }
 
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
-            
+
             }
 
             broker.OnOpen = (ci: any) => {
                 console.log("connected to broker");
                 // now get a media stream for local
-                
 
-                navigator.getUserMedia({ video: true, audio: true }, (mediaStream: MediaStream) => {
-                   
+                navigator.getUserMedia({
+                    video: {
+                        width: { min: 640, ideal: 1280 },
+                        height: { min: 400, ideal: 720 }
+                    }, audio: true,
+                }, (mediaStream: MediaStream) => {
+
                     this.rtcClient.AddLocalStream(mediaStream);
-                
-                        addLocalVideo(mediaStream);
-                  
-                           
-                },  (err) => {
+
+                    addLocalVideo(mediaStream);
+
+
+                }, (err) => {
                     console.error(err);
                 });
-               
 
 
-               
+
+
 
 
             }
