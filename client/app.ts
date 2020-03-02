@@ -71,9 +71,8 @@ export class App {
               
                 this.rtcClient.ChangeContext(slug.value);               
         });
-
-
-        this.factory = this.connect("ws://localhost:1337/", {})
+        // if local ws://localhost:1337/     
+        this.factory = this.connect("wss://simpleconf.herokuapp.com/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
