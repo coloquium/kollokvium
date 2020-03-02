@@ -1,0 +1,142 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        header {
+            position: relative;
+            background-color: black;
+            height: 100vh;
+            min-height: 25rem;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        header .full {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: 0;
+            -ms-transform: translateX(-50%) translateY(-50%);
+            -moz-transform: translateX(-50%) translateY(-50%);
+            -webkit-transform: translateX(-50%) translateY(-50%);
+            transform: translateX(-50%) translateY(-50%);
+        }
+
+        header .container {
+            position: relative;
+            z-index: 2;
+        }
+
+
+        header .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: black;
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+
+
+        .remote {
+            height: 140px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            padding: 1rem;
+            background-color: black;
+            opacity: 0.5;
+        }
+
+        .remote video {
+            float: left;
+            max-height: 100px;
+            border: 2px solid #fff;
+        }
+
+        .local {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .local video {
+            max-height: 120px;
+            border: 2px solid #333;
+        }
+        #slug{
+            padding: .5rem 1rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    border-radius: .3rem
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="overlay"></div>
+        <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop" class="full">
+            <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4">
+        </video>
+        <div class="container h-100 join">
+            <div class="d-flex h-100 text-center align-items-center">
+                <div class="w-100 text-white">
+                    <h1 class="display-3">THOR</h1>
+                    <p class="lead my-5">Made with thor-io.vnext + WebRTC Librarys</p>
+
+
+
+
+                            <input type="text" id="slug" placeholder="Enter any room name..">
+                                    <button class="btn btn-primary btn-lg" type="button" disabled>start</button>
+                             
+                    </div>
+            </div>
+
+                </div>
+            </div>
+        
+        <div class="local">
+            <video autoplay muted></video>
+        </div>
+    </header>
+
+
+
+    <nav class="remote hide">
+
+    </nav>
+
+
+
+
+
+
+
+    </div>
+
+    <script src="build/app-bundle.js"></script>
+</body>
+
+</html>
