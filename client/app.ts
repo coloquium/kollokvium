@@ -210,10 +210,7 @@ export class App {
             broker.OnOpen = (ci: any) => {
                 console.log("connected to broker, no get a local media stream");             
                 navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { min: 640, ideal: 1280 },
-                        height: { min: 400, ideal: 720 }
-                    }, audio: true,
+                    video:true, audio: true,
                 }).then( (mediaStream: MediaStream) => {
                     this.rtcClient.AddLocalStream(mediaStream);
                     addLocalVideo(mediaStream);
