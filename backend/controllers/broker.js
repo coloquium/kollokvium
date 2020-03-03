@@ -10,13 +10,30 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const thor_io_vnext_1 = require("thor-io.vnext");
+// Controller will be know as "broker", and not seald ( seald = true, is background sevices),
+// controller (broker) will pass a heartbeat to client each 2 seconds to keep alive. 
 let Broker = class Broker extends thor_io_vnext_1.ThorIO.Controllers.BrokerController {
     constructor(connection) {
         super(connection);
     }
+    // extend 'broker' with a custom method 'foo' -> client calls "foo" and controller (broker) passes data to all in "bar"
+    foo(data) {
+        this.invokeToAll(data, "bar");
+    }
 };
+__decorate([
+    thor_io_vnext_1.CanInvoke(true) // use decorators to make methods public to client.
+    ,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "foo", null);
+__decorate([
+    thor_io_vnext_1.CanSet(true),
+    __metadata("design:type", Number)
+], Broker.prototype, "age", void 0);
 Broker = __decorate([
-    thor_io_vnext_1.ControllerProperties("broker", false, 2000),
+    thor_io_vnext_1.ControllerProperties("broker", false, 2 * 1000),
     __metadata("design:paramtypes", [thor_io_vnext_1.ThorIO.Connection])
 ], Broker);
 exports.Broker = Broker;

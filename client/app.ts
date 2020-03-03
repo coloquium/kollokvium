@@ -19,9 +19,6 @@ export class App {
         ]
     };
 
-
-
-
     sendMessage(sender: string, message: string) {
 
         if (sender.length == 0) sender = "NoName"
@@ -47,9 +44,6 @@ export class App {
     }
 
     constructor() {
-
-
-
 
         const joinSlug = location.hash.replace("#", "");
 
