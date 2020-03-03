@@ -6,6 +6,8 @@ Colloquium (Latin colloquium) is a living, developing example.
 
 A live exampled deployed at Heroku can be found here https://kollokvium.herokuapp.com/
 
+Post issues, questions, ideas or anything you may think of under isses in this repo.
+
 Regards
 
 Team Kollokvium
