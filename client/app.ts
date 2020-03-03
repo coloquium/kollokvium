@@ -8,26 +8,37 @@ export class App {
     factory: ThorIOClient.Factory;
     rtcClient: ThorIOClient.WebRTC;
 
-     rtcConfig = {
+    rtcConfig = {
         "iceTransports": 'all',
         "rtcpMuxPolicy": "require",
         "bundlePolicy": "max-bundle",
         "iceServers": [
             {
                 "urls": "stun:stun.l.google.com:19302"
+            },
+            {
+                urls: ["turn:173.194.72.127:19305?transport=udp",
+                    "turn:[2404:6800:4008:C01::7F]:19305?transport=udp",
+                    "turn:173.194.72.127:443?transport=tcp",
+                    "turn:[2404:6800:4008:C01::7F]:443?transport=tcp"
+                ],
+                username: "CKjCuLwFEgahxNRjuTAYzc/s6OMT",
+                credential: "u1SQDR/SQsPQIxXNWQT7czc/G4c="
             }
         ]
     };
 
 
-    sendMessage(sender:string,message:string){
 
-        if(sender.length ==0) sender = "NoName"
+
+    sendMessage(sender: string, message: string) {
+
+        if (sender.length == 0) sender = "NoName"
 
         const data = {
-            text:message,
-            from: sender 
-        
+            text: message,
+            from: sender
+
         }
         this.factory.GetProxy("broker").Invoke("instantMessage",
             data
@@ -46,20 +57,23 @@ export class App {
 
     constructor() {
 
+
+
+
         const joinSlug = location.hash.replace("#", "");
 
         let fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         let shareContainer = document.querySelector("#share-container");
-        
+
         let chatWindow = document.querySelector(".chat") as HTMLElement;
 
         let chatMessage = document.querySelector("#chat-message") as HTMLInputElement;
         let chatNick = document.querySelector("#chat-nick") as HTMLInputElement;
         let chatMessages = document.querySelector("#chatmessages") as HTMLElement;
-        
-        
+
+
 
 
         let clipBoard = new ClipboardJS("#share-link", {
@@ -74,17 +88,17 @@ export class App {
             startButton.disabled = false;
         }
 
-        document.querySelector("#close-chat").addEventListener("click",() => {
+        document.querySelector("#close-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
         });
-        document.querySelector("#show-chat").addEventListener("click",() => {
+        document.querySelector("#show-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
         });
 
 
-  
 
-       
+
+
         const addRemoteVideo = (mediaStream: MediaStream, peerId: string) => {
             if (!shareContainer.classList.contains("hide")) {
                 shareContainer.classList.add("hide");
@@ -107,7 +121,7 @@ export class App {
             video.srcObject = mediaStream;
         }
 
-       
+
 
 
         slug.addEventListener("keyup", () => {
@@ -123,11 +137,11 @@ export class App {
 
         chatNick.value = Math.random().toString(36).substring(8);
 
-        chatNick.addEventListener("click",() => {
+        chatNick.addEventListener("click", () => {
             chatNick.value = "";
         })
 
-    
+
 
 
         startButton.addEventListener("click", () => {
@@ -141,49 +155,49 @@ export class App {
         });
 
         // if local ws://localhost:1337/     
-       //  wss://simpleconf.herokuapp.com/
+        //  wss://simpleconf.herokuapp.com/
         this.factory = this.connect("wss://simpleconf.herokuapp.com/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
         }
         this.factory.OnOpen = (broker: ThorIOClient.Proxy) => {
-            
+
             console.log("OnOpen", broker)
 
 
-                // hook up chat functions...
+            // hook up chat functions...
 
-                 broker.On("instantMessage",(im:any) =>{
-                 
-                     let message = document.createElement("p");
+            broker.On("instantMessage", (im: any) => {
 
-                     
+                let message = document.createElement("p");
 
-                     message.textContent = im.text;
 
-                     let sender = document.createElement("mark");
-                     sender.textContent = im.from;
 
-                     message.prepend(sender);
+                message.textContent = im.text;
 
-                     chatMessages.prepend(message);
-                });
+                let sender = document.createElement("mark");
+                sender.textContent = im.from;
 
-                chatMessage.addEventListener("keyup",(e) => {
-           
-                    if(e.keyCode == 13){    
-                        
-                            this.sendMessage(chatNick.value, chatMessage.value)
-                            chatMessage.value = "";
-                    }
-                });
+                message.prepend(sender);
+
+                chatMessages.prepend(message);
+            });
+
+            chatMessage.addEventListener("keyup", (e) => {
+
+                if (e.keyCode == 13) {
+
+                    this.sendMessage(chatNick.value, chatMessage.value)
+                    chatMessage.value = "";
+                }
+            });
 
 
             this.rtcClient = new ThorIOClient.WebRTC(broker, this.rtcConfig);
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
-            }      
+            }
             this.rtcClient.OnContextConnected = (ctx) => {
             };
             this.rtcClient.OnContextCreated = (ctx) => {
@@ -202,23 +216,26 @@ export class App {
                 addRemoteVideo(peer.stream, peer.id);
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
-                console.log("looks like we got a remote media steamTrack", track);               
+                console.log("looks like we got a remote media steamTrack", track);
             }
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
             }
             broker.OnOpen = (ci: any) => {
-                console.log("connected to broker, no get a local media stream");             
+                console.log("connected to broker, no get a local media stream");
                 navigator.mediaDevices.getUserMedia({
-                    video:true, audio: true,
-                }).then( (mediaStream: MediaStream) => {
+                    video: {
+                        width: { min: 640, ideal: 1280 },
+                        height: { min: 400, ideal: 720 }
+                    }, audio: true,
+                }).then((mediaStream: MediaStream) => {
                     this.rtcClient.AddLocalStream(mediaStream);
                     addLocalVideo(mediaStream);
                 }).catch(err => {
                     console.error(err);
                 });
             }
-            broker.Connect();          
+            broker.Connect();
         };
     }
 

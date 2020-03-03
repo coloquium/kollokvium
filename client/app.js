@@ -14,6 +14,15 @@ class App {
             "iceServers": [
                 {
                     "urls": "stun:stun.l.google.com:19302"
+                },
+                {
+                    urls: ["turn:173.194.72.127:19305?transport=udp",
+                        "turn:[2404:6800:4008:C01::7F]:19305?transport=udp",
+                        "turn:173.194.72.127:443?transport=tcp",
+                        "turn:[2404:6800:4008:C01::7F]:443?transport=tcp"
+                    ],
+                    username: "CKjCuLwFEgahxNRjuTAYzc/s6OMT",
+                    credential: "u1SQDR/SQsPQIxXNWQT7czc/G4c="
                 }
             ]
         };
@@ -132,7 +141,10 @@ class App {
             broker.OnOpen = (ci) => {
                 console.log("connected to broker, no get a local media stream");
                 navigator.mediaDevices.getUserMedia({
-                    video: true, audio: true,
+                    video: {
+                        width: { min: 640, ideal: 1280 },
+                        height: { min: 400, ideal: 720 }
+                    }, audio: true,
                 }).then((mediaStream) => {
                     this.rtcClient.AddLocalStream(mediaStream);
                     addLocalVideo(mediaStream);
