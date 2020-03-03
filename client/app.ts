@@ -142,7 +142,7 @@ export class App {
 
         // if local ws://localhost:1337/     
        //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connect("ws://localhost:1337/", {})
+        this.factory = this.connect("wss://simpleconf.herokuapp.com/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
