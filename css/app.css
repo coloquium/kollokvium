@@ -1,3 +1,6 @@
+body{
+    font-family: 'Nanum Gothic', sans-serif;
+}
 header {
     position: relative;
     background-color: black;
@@ -55,9 +58,13 @@ header .overlay {
 
 #remote-videos video {
     float: left;
-    max-height: 100px;
+   
     border: 2px solid #fff;
     margin-right: 1rem;
+    max-height: 80px;
+
+    object-fit: cover;
+
 }
 
 .local {
@@ -78,10 +85,13 @@ header .overlay {
     transform: rotateY(180deg);    
 }
 
-.tools{
-   
-}
+
 
 #chatmessages mark {
     margin-right: 1rem;
+}
+
+.custom-heading{
+    font-family: 'Nanum Gothic', sans-serif;
+    font-weight: 800;
 }

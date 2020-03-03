@@ -80,20 +80,17 @@ export class App {
             chatWindow.classList.toggle("d-none");
         });
 
-
-
-
-
         const addRemoteVideo = (mediaStream: MediaStream, peerId: string) => {
             if (!shareContainer.classList.contains("hide")) {
                 shareContainer.classList.add("hide");
             }
             let video = document.createElement("video");
+            video.classList.add("rounded","mx-auto","d-block");
+
             video.srcObject = mediaStream;
             video.setAttribute("id", "p" + peerId);
             video.autoplay = true;
             document.querySelector("#remote-videos").append(video);
-
 
             video.addEventListener("click", (e: any) => {
                 fullScreenVideo.play();
