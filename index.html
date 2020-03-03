@@ -1,98 +1,19 @@
 <html>
 
 <head>
+    <title>ThorRTC | A free multi-party video conference for you and your friends!</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css"
+        integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <style>
-        header {
-            position: relative;
-            background-color: black;
-            height: 100vh;
-            min-height: 25rem;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        header .full {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: 0;
-            -ms-transform: translateX(-50%) translateY(-50%);
-            -moz-transform: translateX(-50%) translateY(-50%);
-            -webkit-transform: translateX(-50%) translateY(-50%);
-            transform: translateX(-50%) translateY(-50%);
-        }
-
-        header .container {
-            position: relative;
-            z-index: 2;
-        }
-
-
-        header .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            background-color: black;
-            opacity: 0.5;
-            z-index: 1;
-        }
-
-
-
-        .remote {
-            height: auto;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 10;
-            padding: 1rem;
-            background-color:#fff;
-            opacity: 0.6;
-        }
-
-        .remote video {
-            float: left;
-            max-height: 100px;
-            border: 2px solid #fff;
-            margin-right: 1rem;
-        }
-
-        .local {
-            position: absolute;
-            bottom: 1rem;
-            right: 1rem;
-
-        }
-
-        .hide {
-            display: none;
-        }
-
-        .local video {
-            max-height: 100px;
-            max-width: 180px;
-            border: 2px solid #fff;
-        }
-    </style>
-</head>
-
+    <link rel="stylesheet" href="css/app.css">
 <body>
 
     <header>
         <div class="overlay"></div>
-        <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop" class="full">
+        <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop" class="full" width="1920" height="1080">
             <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4">
         </video>
         <div class="container h-100 join">
@@ -104,41 +25,100 @@
                         <input type="text" id="slug" placeholder="Enter any room name." value=""
                             class="form-control form-control-lg">
                         <div class="input-group-append">
-                            <button id="joinconference" class="btn btn-primary bt-lg" type="button" disabled>JOIN</button>
+                            <button id="joinconference" class="btn btn-primary bt-lg" type="button"
+                                disabled>JOIN</button>
                         </div>
                     </div>
 
                 </div>
             </div>
+           
 
         </div>
+
+        <div class="container h-100 chat d-none">
+                <div class="d-flex h-100 text-left align-items-center">
+                    <div class="w-100 text-dark">
+                        
+                            <div class="card bg-light d-flex h-50" >
+                                    <div class="card-header">Chat
+
+                                    <span style="float:right" id="close-chat">
+                                            <span aria-hidden="true">&times;</span>
+                                    </span>
+
+                                    </div>
+                            <div class="card-body" style="overflow:auto">
+                                <p class="card-text" id="chatmessages">
+                                  
+                            </p>
+                            </div>
+                            <div class="card-footer">
+
+                                <div class="form">
+                                    <div class="form-row">
+                                            <div class="form-group col-md-2">
+                                                    <input type="email" class="form-control" id="chat-nick" value="John Doe">
+                                            </div>
+                                            <div class="form-group col-md-10">
+                                                    <input type="email" class="form-control" id="chat-message" placeholder="What do you want to say?">
+                                            </div>
+                                        </div>  
+                                        </div>
+
+                            </div>
+                          </div>
+                      
+    
+                    </div>
+                </div>
+               
+    
+            </div>
+
+
+       
         </div>
+    
 
         <div class="local">
+           
             <video autoplay muted width="640" height="480"></video>
         </div>
     </header>
 
-   
+
 
     <nav class="remote hide">
-        <div class="container">
+        <div class="container-fluid" id="share-container">
             <div class="row">
                 <div class="col-md-8 mx-auto">
                     <h5> No others here, that's not much of a meeting!</h5>
                     <p class="lead mt-1">
-                            Ok,Invite others by sharing page link!
+                        Ok,Invite others by sharing page link!
                         <button class="btn btn-primary mx-2 bt-sm" id="share-link">copy link</button>
                     </p>
                 </div>
             </div>
         </div>
+     
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12" id="remote-videos">
+
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+                <div class="tools">
+
+      
+                        <button id="show-chat" class="btn btn-primary">
+                                <i class="fas fa-comment-alt"></i>
+                            </button>
+                        </div>  
+        </div>
     </nav>
-
-
-
-
-
 
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/7.3.0/adapter.js"></script>

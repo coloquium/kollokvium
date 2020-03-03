@@ -1,0 +1,86 @@
+header {
+    position: relative;
+    background-color: black;
+    height: 100vh;
+    min-height: 25rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+header .full {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 0;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+
+header .container {
+    position: relative;
+    z-index: 2;
+}
+
+
+header .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    opacity: 0.5;
+    z-index: 1;
+}
+
+
+
+.remote {
+    height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    padding: 1rem;
+    background-color: #fff;
+    opacity: 0.6;
+}
+
+#remote-videos video {
+    float: left;
+    max-height: 100px;
+    border: 2px solid #fff;
+    margin-right: 1rem;
+}
+
+.local {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+
+}
+
+.hide {
+    display: none;
+}
+
+.local video {
+    max-height: 100px;
+    max-width: 180px;
+    border: 2px solid #fff;
+}
+
+.tools{
+   
+}
+
+#chatmessages mark {
+    margin-right: 1rem;
+}

@@ -8,6 +8,32 @@ export class App {
     factory: ThorIOClient.Factory;
     rtcClient: ThorIOClient.WebRTC;
 
+     rtcConfig = {
+        "iceTransports": 'all',
+        "rtcpMuxPolicy": "require",
+        "bundlePolicy": "max-bundle",
+        "iceServers": [
+            {
+                "urls": "stun:stun.l.google.com:19302"
+            }
+        ]
+    };
+
+
+    sendMessage(sender:string,message:string){
+
+        if(sender.length ==0) sender = "NoName"
+
+        const data = {
+            text:message,
+            from: sender 
+        
+        }
+        this.factory.GetProxy("broker").Invoke("instantMessage",
+            data
+        );
+    }
+
     connect(brokerUrl: string, config: any): ThorIOClient.Factory {
 
 
@@ -20,76 +46,92 @@ export class App {
 
     constructor() {
 
+        const joinSlug = location.hash.replace("#", "");
 
         let fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
-        let shareContainer = document.querySelector(".remote .container");
+        let shareContainer = document.querySelector("#share-container");
+        
+        let chatWindow = document.querySelector(".chat") as HTMLElement;
 
-        const joinSlug = location.hash.replace("#","");
+        let chatMessage = document.querySelector("#chat-message") as HTMLInputElement;
+        let chatNick = document.querySelector("#chat-nick") as HTMLInputElement;
+        let chatMessages = document.querySelector("#chatmessages") as HTMLElement;
+        
+        
 
-        let clipBoard = new ClipboardJS("#share-link",{
-            text:(t) => {
-             t.textContent = "Done!"
-              return location.origin + "/#" + slug.value;  
+
+        let clipBoard = new ClipboardJS("#share-link", {
+            text: (t) => {
+                t.textContent = "Done!"
+                return location.origin + "/#" + slug.value;
             }
         });
 
-        if(joinSlug.length >= 6){
+        if (joinSlug.length >= 6) {
             slug.value = joinSlug;
-            startButton.disabled = false;   
+            startButton.disabled = false;
         }
 
-        slug.addEventListener("keyup", () => {
-
-            if (slug.value.length >= 6) {
-                startButton.disabled = false;
-            } else {
-                startButton.disabled = true;
-            }
-
+        document.querySelector("#close-chat").addEventListener("click",() => {
+            chatWindow.classList.toggle("d-none");
+        });
+        document.querySelector("#show-chat").addEventListener("click",() => {
+            chatWindow.classList.toggle("d-none");
         });
 
-        const addRemoteVideo = (mediaStream: MediaStream,peerId:string) => {
-            if(!shareContainer.classList.contains("hide")){
+
+  
+
+       
+        const addRemoteVideo = (mediaStream: MediaStream, peerId: string) => {
+            if (!shareContainer.classList.contains("hide")) {
                 shareContainer.classList.add("hide");
             }
             let video = document.createElement("video");
             video.srcObject = mediaStream;
-            video.setAttribute("id","p" +peerId);
+            video.setAttribute("id", "p" + peerId);
             video.autoplay = true;
-            document.querySelector(".remote").append(video);
-           
+            document.querySelector("#remote-videos").append(video);
+
 
             video.addEventListener("click", (e: any) => {
                 fullScreenVideo.play();
                 fullScreenVideo.srcObject = e.target.srcObject;
             });
-
         }
 
         const addLocalVideo = (mediaStream: MediaStream) => {
-           
             let video = document.querySelector(".local video") as HTMLVideoElement;
             video.srcObject = mediaStream;
-
         }
 
-        const rtcConfig = {
-            "iceTransports": 'all',
-            "rtcpMuxPolicy": "require",
-            "bundlePolicy": "max-bundle",
-            "iceServers": [
-                {
-                    "urls": "stun:stun.l.google.com:19302"
-                }
-            ]
-        };
+       
+
+
+        slug.addEventListener("keyup", () => {
+            if (slug.value.length >= 6) {
+                startButton.disabled = false;
+            } else {
+                startButton.disabled = true;
+            }
+        });
+
+
+        // set a random nick..
+
+        chatNick.value = Math.random().toString(36).substring(8);
+
+        chatNick.addEventListener("click",() => {
+            chatNick.value = "";
+        })
+
+    
 
 
         startButton.addEventListener("click", () => {
             startButton.classList.add("hide");
-
             document.querySelector(".remote").classList.remove("hide");
 
             document.querySelector(".overlay").classList.add("d-none");
@@ -97,101 +139,90 @@ export class App {
 
             this.rtcClient.ChangeContext(slug.value);
         });
+
         // if local ws://localhost:1337/     
-        this.factory = this.connect("wss://simpleconf.herokuapp.com/", {})
+       //  wss://simpleconf.herokuapp.com/
+        this.factory = this.connect("ws://localhost:1337/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
         }
         this.factory.OnOpen = (broker: ThorIOClient.Proxy) => {
+            
             console.log("OnOpen", broker)
 
-            this.rtcClient = new ThorIOClient.WebRTC(broker, rtcConfig);
+
+                // hook up chat functions...
+
+                 broker.On("instantMessage",(im:any) =>{
+                 
+                     let message = document.createElement("p");
+
+                     
+
+                     message.textContent = im.text;
+
+                     let sender = document.createElement("mark");
+                     sender.textContent = im.from;
+
+                     message.prepend(sender);
+
+                     chatMessages.prepend(message);
+                });
+
+                chatMessage.addEventListener("keyup",(e) => {
+           
+                    if(e.keyCode == 13){    
+                        
+                            this.sendMessage(chatNick.value, chatMessage.value)
+                            chatMessage.value = "";
+                    }
+                });
+
+
+            this.rtcClient = new ThorIOClient.WebRTC(broker, this.rtcConfig);
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
-
-
-            }
-
-            // this will fire when url has a parameter
-
+            }      
             this.rtcClient.OnContextConnected = (ctx) => {
-
             };
-
             this.rtcClient.OnContextCreated = (ctx) => {
-
             };
-
             this.rtcClient.OnContextChanged = (ctx) => {
-
-
                 this.rtcClient.ConnectContext();
                 console.log("looks like we are abut to join a context...", ctx);
-
-
             }
-
-
             this.rtcClient.OnContextDisconnected = (peer) => {
                 console.log("lost connection to", peer)
                 document.querySelector("#p" + peer.id).remove();
             };
-
             this.rtcClient.OnContextConnected = (peer) => {
-                console.log("connected to",peer);
+                console.log("connected to", peer);
                 document.querySelector(".remote").classList.remove("hide");
-
-                addRemoteVideo(peer.stream,peer.id);
-
+                addRemoteVideo(peer.stream, peer.id);
             }
-
-
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
-                console.log("looks like we got a remote media steamTrack", track);
-               // addRemoteVideo(mediaStream);
-
+                console.log("looks like we got a remote media steamTrack", track);               
             }
-
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
-
             }
-
             broker.OnOpen = (ci: any) => {
-                console.log("connected to broker");
-                // now get a media stream for local
-
-                navigator.getUserMedia({
+                console.log("connected to broker, no get a local media stream");             
+                navigator.mediaDevices.getUserMedia({
                     video: {
                         width: { min: 640, ideal: 1280 },
                         height: { min: 400, ideal: 720 }
                     }, audio: true,
-                }, (mediaStream: MediaStream) => {
-
+                }).then( (mediaStream: MediaStream) => {
                     this.rtcClient.AddLocalStream(mediaStream);
-
                     addLocalVideo(mediaStream);
-
-
-                }, (err) => {
+                }).catch(err => {
                     console.error(err);
                 });
-
-
-
-
-
-
             }
-
-            broker.Connect();
-
-            window["T"] = this.rtcClient;
+            broker.Connect();          
         };
-
-
-
     }
 
     static getInstance() {

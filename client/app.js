@@ -6,16 +6,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const thor_io_client_vnext_1 = require("thor-io.client-vnext");
 const clipboard_1 = __importDefault(require("clipboard"));
 class App {
-    connect(brokerUrl, config) {
-        var url = brokerUrl;
-        return new thor_io_client_vnext_1.ThorIOClient.Factory(url, ["broker"]);
-    }
     constructor() {
+        this.rtcConfig = {
+            "iceTransports": 'all',
+            "rtcpMuxPolicy": "require",
+            "bundlePolicy": "max-bundle",
+            "iceServers": [
+                {
+                    "urls": "stun:stun.l.google.com:19302"
+                }
+            ]
+        };
+        const joinSlug = location.hash.replace("#", "");
         let fullScreenVideo = document.querySelector(".full");
         let slug = document.querySelector("#slug");
         let startButton = document.querySelector("#joinconference");
-        let shareContainer = document.querySelector(".remote .container");
-        const joinSlug = location.hash.replace("#", "");
+        let shareContainer = document.querySelector("#share-container");
+        let chatWindow = document.querySelector(".chat");
+        let chatMessage = document.querySelector("#chat-message");
+        let chatNick = document.querySelector("#chat-nick");
+        let chatMessages = document.querySelector("#chatmessages");
         let clipBoard = new clipboard_1.default("#share-link", {
             text: (t) => {
                 t.textContent = "Done!";
@@ -26,13 +36,11 @@ class App {
             slug.value = joinSlug;
             startButton.disabled = false;
         }
-        slug.addEventListener("keyup", () => {
-            if (slug.value.length >= 6) {
-                startButton.disabled = false;
-            }
-            else {
-                startButton.disabled = true;
-            }
+        document.querySelector("#close-chat").addEventListener("click", () => {
+            chatWindow.classList.toggle("d-none");
+        });
+        document.querySelector("#show-chat").addEventListener("click", () => {
+            chatWindow.classList.toggle("d-none");
         });
         const addRemoteVideo = (mediaStream, peerId) => {
             if (!shareContainer.classList.contains("hide")) {
@@ -42,7 +50,7 @@ class App {
             video.srcObject = mediaStream;
             video.setAttribute("id", "p" + peerId);
             video.autoplay = true;
-            document.querySelector(".remote").append(video);
+            document.querySelector("#remote-videos").append(video);
             video.addEventListener("click", (e) => {
                 fullScreenVideo.play();
                 fullScreenVideo.srcObject = e.target.srcObject;
@@ -52,16 +60,19 @@ class App {
             let video = document.querySelector(".local video");
             video.srcObject = mediaStream;
         };
-        const rtcConfig = {
-            "iceTransports": 'all',
-            "rtcpMuxPolicy": "require",
-            "bundlePolicy": "max-bundle",
-            "iceServers": [
-                {
-                    "urls": "stun:stun.l.google.com:19302"
-                }
-            ]
-        };
+        slug.addEventListener("keyup", () => {
+            if (slug.value.length >= 6) {
+                startButton.disabled = false;
+            }
+            else {
+                startButton.disabled = true;
+            }
+        });
+        // set a random nick..
+        chatNick.value = Math.random().toString(36).substring(8);
+        chatNick.addEventListener("click", () => {
+            chatNick.value = "";
+        });
         startButton.addEventListener("click", () => {
             startButton.classList.add("hide");
             document.querySelector(".remote").classList.remove("hide");
@@ -70,16 +81,31 @@ class App {
             this.rtcClient.ChangeContext(slug.value);
         });
         // if local ws://localhost:1337/     
-        this.factory = this.connect("wss://simpleconf.herokuapp.com/", {});
+        //  wss://simpleconf.herokuapp.com/
+        this.factory = this.connect("ws://localhost:1337/", {});
         this.factory.OnClose = (reason) => {
             console.error(reason);
         };
         this.factory.OnOpen = (broker) => {
             console.log("OnOpen", broker);
-            this.rtcClient = new thor_io_client_vnext_1.ThorIOClient.WebRTC(broker, rtcConfig);
+            // hook up chat functions...
+            broker.On("instantMessage", (im) => {
+                let message = document.createElement("p");
+                message.textContent = im.text;
+                let sender = document.createElement("mark");
+                sender.textContent = im.from;
+                message.prepend(sender);
+                chatMessages.prepend(message);
+            });
+            chatMessage.addEventListener("keyup", (e) => {
+                if (e.keyCode == 13) {
+                    this.sendMessage(chatNick.value, chatMessage.value);
+                    chatMessage.value = "";
+                }
+            });
+            this.rtcClient = new thor_io_client_vnext_1.ThorIOClient.WebRTC(broker, this.rtcConfig);
             this.rtcClient.OnLocalStream = (mediaStream) => {
             };
-            // this will fire when url has a parameter
             this.rtcClient.OnContextConnected = (ctx) => {
             };
             this.rtcClient.OnContextCreated = (ctx) => {
@@ -99,29 +125,39 @@ class App {
             };
             this.rtcClient.OnRemoteTrack = (track, connection) => {
                 console.log("looks like we got a remote media steamTrack", track);
-                // addRemoteVideo(mediaStream);
             };
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
             };
             broker.OnOpen = (ci) => {
-                console.log("connected to broker");
-                // now get a media stream for local
-                navigator.getUserMedia({
+                console.log("connected to broker, no get a local media stream");
+                navigator.mediaDevices.getUserMedia({
                     video: {
                         width: { min: 640, ideal: 1280 },
                         height: { min: 400, ideal: 720 }
                     }, audio: true,
-                }, (mediaStream) => {
+                }).then((mediaStream) => {
                     this.rtcClient.AddLocalStream(mediaStream);
                     addLocalVideo(mediaStream);
-                }, (err) => {
+                }).catch(err => {
                     console.error(err);
                 });
             };
             broker.Connect();
-            window["T"] = this.rtcClient;
         };
+    }
+    sendMessage(sender, message) {
+        if (sender.length == 0)
+            sender = "NoName";
+        const data = {
+            text: message,
+            from: sender
+        };
+        this.factory.GetProxy("broker").Invoke("instantMessage", data);
+    }
+    connect(brokerUrl, config) {
+        var url = brokerUrl;
+        return new thor_io_client_vnext_1.ThorIOClient.Factory(url, ["broker"]);
     }
     static getInstance() {
         return new App();
