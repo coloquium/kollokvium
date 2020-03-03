@@ -1,5 +1,5 @@
 # Kollokvium (colloquium)
 
-Detta är ett exempel på applikationer som bygger på thor-io vnext- och dess WebRTC-API (abstraction layer). Det ger dig en videokonferens med flera parry med rumsfunktion. Syftet med detta är att visa, värda och bevisa kapaciteten i ramverket.
+This is an example of applications based on thor-io vnext and its abstraction layer WebRTC API. It gives you a multi-parry video conference with room function. The purpose of this is to show, value and prove the capacity of the framework.
 
-Kollokvium (latin colloquium) är ett levande, utvecklande exempel.
+Colloquium (Latin colloquium) is a living, developing example.
