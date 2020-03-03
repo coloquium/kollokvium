@@ -82,7 +82,7 @@ class App {
         });
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connect("wss://simpleconf.herokuapp.com/", {});
+        this.factory = this.connect("wss://kollokvium.herokuapp.com/", {});
         this.factory.OnClose = (reason) => {
             console.error(reason);
         };
