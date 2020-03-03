@@ -1,5 +1,8 @@
 import { ThorIOClient } from 'thor-io.client-vnext'
 import adapter from 'webrtc-adapter';
+import ClipboardJS from 'clipboard';
+
+
 
 export class App {
     factory: ThorIOClient.Factory;
@@ -17,10 +20,25 @@ export class App {
 
     constructor() {
 
+
         let fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
         let slug = document.querySelector("#slug") as HTMLInputElement;
-        let startButton = document.querySelector("button") as HTMLInputElement;
+        let startButton = document.querySelector("#joinconference") as HTMLInputElement;
+        let shareContainer = document.querySelector(".remote .container");
 
+        const joinSlug = location.hash.replace("#","");
+
+        let clipBoard = new ClipboardJS("#share-link",{
+            text:(t) => {
+             t.textContent = "Done!"
+              return location.origin + "/#" + slug.value;  
+            }
+        });
+
+        if(joinSlug.length >= 6){
+            slug.value = joinSlug;
+            startButton.disabled = false;   
+        }
 
         slug.addEventListener("keyup", () => {
 
@@ -33,12 +51,15 @@ export class App {
         });
 
         const addRemoteVideo = (mediaStream: MediaStream,peerId:string) => {
+            if(!shareContainer.classList.contains("hide")){
+                shareContainer.classList.add("hide");
+            }
             let video = document.createElement("video");
             video.srcObject = mediaStream;
             video.setAttribute("id","p" +peerId);
             video.autoplay = true;
             document.querySelector(".remote").append(video);
-            document.querySelector(".remote").classList.remove("hide");
+           
 
             video.addEventListener("click", (e: any) => {
                 fullScreenVideo.play();
@@ -48,6 +69,7 @@ export class App {
         }
 
         const addLocalVideo = (mediaStream: MediaStream) => {
+           
             let video = document.querySelector(".local video") as HTMLVideoElement;
             video.srcObject = mediaStream;
 
@@ -67,6 +89,9 @@ export class App {
 
         startButton.addEventListener("click", () => {
             startButton.classList.add("hide");
+
+            document.querySelector(".remote").classList.remove("hide");
+
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
 
@@ -115,6 +140,8 @@ export class App {
 
             this.rtcClient.OnContextConnected = (peer) => {
                 console.log("connected to",peer);
+                document.querySelector(".remote").classList.remove("hide");
+
                 addRemoteVideo(peer.stream,peer.id);
 
             }

@@ -51,21 +51,22 @@
 
 
         .remote {
-            height: 140px;
+            height: auto;
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             z-index: 10;
             padding: 1rem;
-            background-color: black;
-            opacity: 0.5;
+            background-color:#fff;
+            opacity: 0.6;
         }
 
         .remote video {
             float: left;
             max-height: 100px;
             border: 2px solid #fff;
+            margin-right: 1rem;
         }
 
         .local {
@@ -80,7 +81,8 @@
         }
 
         .local video {
-            max-height: 120px;
+            max-height: 100px;
+            max-width: 180px;
             border: 2px solid #fff;
         }
     </style>
@@ -97,12 +99,12 @@
             <div class="d-flex h-100 text-center align-items-center">
                 <div class="w-100 text-white">
                     <h1 class="display-3">ThorRTC</h1>
-                    <p class="lead my-5">made with <strong>thor-io.vnext</strong> and it's WebRTC Libraries</p>
+                    <p class="lead my-5">A free multi-party video conference for you and your friends! </p>
                     <div class="input-group mb-3 col-md-6 mx-auto">
                         <input type="text" id="slug" placeholder="Enter any room name." value=""
                             class="form-control form-control-lg">
                         <div class="input-group-append">
-                            <button class="btn btn-primary bt-lg" type="button" disabled>JOIN</button>
+                            <button id="joinconference" class="btn btn-primary bt-lg" type="button" disabled>JOIN</button>
                         </div>
                     </div>
 
@@ -113,14 +115,24 @@
         </div>
 
         <div class="local">
-            <video autoplay muted></video>
+            <video autoplay muted width="640" height="480"></video>
         </div>
     </header>
 
-
+   
 
     <nav class="remote hide">
-
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <h5> No others here, that's not much of a meeting!</h5>
+                    <p class="lead mt-1">
+                            Ok,Invite others by sharing page link!
+                        <button class="btn btn-primary mx-2 bt-sm" id="share-link">copy link</button>
+                    </p>
+                </div>
+            </div>
+        </div>
     </nav>
 
 
@@ -128,9 +140,8 @@
 
 
 
-
     </div>
-
+   
     <script src="build/app-bundle.js"></script>
 </body>
 

@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const thor_io_client_vnext_1 = require("thor-io.client-vnext");
+const clipboard_1 = __importDefault(require("clipboard"));
 class App {
     connect(brokerUrl, config) {
         var url = brokerUrl;
@@ -9,7 +13,19 @@ class App {
     constructor() {
         let fullScreenVideo = document.querySelector(".full");
         let slug = document.querySelector("#slug");
-        let startButton = document.querySelector("button");
+        let startButton = document.querySelector("#joinconference");
+        let shareContainer = document.querySelector(".remote .container");
+        const joinSlug = location.hash.replace("#", "");
+        let clipBoard = new clipboard_1.default("#share-link", {
+            text: (t) => {
+                t.textContent = "Done!";
+                return location.origin + "/#" + slug.value;
+            }
+        });
+        if (joinSlug.length >= 6) {
+            slug.value = joinSlug;
+            startButton.disabled = false;
+        }
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
@@ -19,12 +35,14 @@ class App {
             }
         });
         const addRemoteVideo = (mediaStream, peerId) => {
+            if (!shareContainer.classList.contains("hide")) {
+                shareContainer.classList.add("hide");
+            }
             let video = document.createElement("video");
             video.srcObject = mediaStream;
             video.setAttribute("id", "p" + peerId);
             video.autoplay = true;
             document.querySelector(".remote").append(video);
-            document.querySelector(".remote").classList.remove("hide");
             video.addEventListener("click", (e) => {
                 fullScreenVideo.play();
                 fullScreenVideo.srcObject = e.target.srcObject;
@@ -46,6 +64,7 @@ class App {
         };
         startButton.addEventListener("click", () => {
             startButton.classList.add("hide");
+            document.querySelector(".remote").classList.remove("hide");
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
             this.rtcClient.ChangeContext(slug.value);
@@ -75,6 +94,7 @@ class App {
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 console.log("connected to", peer);
+                document.querySelector(".remote").classList.remove("hide");
                 addRemoteVideo(peer.stream, peer.id);
             };
             this.rtcClient.OnRemoteTrack = (track, connection) => {
