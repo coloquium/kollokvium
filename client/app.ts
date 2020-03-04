@@ -98,12 +98,17 @@ export class App {
             });
         }
 
+
+        
         const addLocalVideo = (mediaStream: MediaStream) => {
             let video = document.querySelector(".local video") as HTMLVideoElement;
             video.srcObject = mediaStream;
         }
 
 
+        slug.addEventListener("click",() => {
+            $("#slug").popover('show');
+        })
 
 
         slug.addEventListener("keyup", () => {
@@ -127,6 +132,8 @@ export class App {
 
 
         startButton.addEventListener("click", () => {
+
+            $("#slug").popover('hide');
             startButton.classList.add("hide");
             document.querySelector(".remote").classList.remove("hide");
 

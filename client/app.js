@@ -47,6 +47,7 @@ class App {
                 shareContainer.classList.add("hide");
             }
             let video = document.createElement("video");
+            video.classList.add("rounded", "mx-auto", "d-block");
             video.srcObject = mediaStream;
             video.setAttribute("id", "p" + peerId);
             video.autoplay = true;
@@ -60,6 +61,9 @@ class App {
             let video = document.querySelector(".local video");
             video.srcObject = mediaStream;
         };
+        slug.addEventListener("click", () => {
+            $("#slug").popover('show');
+        });
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
@@ -74,6 +78,7 @@ class App {
             chatNick.value = "";
         });
         startButton.addEventListener("click", () => {
+            $("#slug").popover('hide');
             startButton.classList.add("hide");
             document.querySelector(".remote").classList.remove("hide");
             document.querySelector(".overlay").classList.add("d-none");

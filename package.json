@@ -10,10 +10,14 @@
   "author": "",
   "license": "SEE LICENSE IN licence.md",
   "dependencies": {
+    "@types/bootstrap": "^4.3.1",
     "@types/clipboard": "^2.0.1",
+    "@types/jquery": "^3.3.33",
     "clipboard": "^2.0.4",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
+    "install": "^0.13.0",
+    "npm": "^6.14.2",
     "thor-io.client-vnext": "^1.1.0",
     "thor-io.vnext": "^1.5.1",
     "webrtc-adapter": "^7.5.0"
