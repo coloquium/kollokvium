@@ -95,3 +95,12 @@ header .overlay {
     font-family: 'Nanum Gothic', sans-serif;
     font-weight: 800;
 }
+
+.our-brand{
+    position: absolute;
+    top:1rem;
+    right:1rem;
+    padding: 1rem;
+    z-index: 100;
+    color: #fff;
+}

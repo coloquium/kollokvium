@@ -133,6 +133,7 @@ export class App {
 
         startButton.addEventListener("click", () => {
 
+            document.querySelector(".our-brand").remove();
             $("#slug").popover('hide');
             startButton.classList.add("hide");
             document.querySelector(".remote").classList.remove("hide");
