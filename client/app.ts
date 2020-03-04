@@ -1,12 +1,13 @@
-import { ThorIOClient } from 'thor-io.client-vnext'
+import { Factory, WebRTC } from 'thor-io.client-vnext'
 import adapter from 'webrtc-adapter';
 import ClipboardJS from 'clipboard';
+import { Controller } from 'thor-io.client-vnext/src/Controller';
 
 
 
 export class App {
-    factory: ThorIOClient.Factory;
-    rtcClient: ThorIOClient.WebRTC;
+    factory: Factory;
+    rtcClient: WebRTC;
 
     rtcConfig = {
         "iceTransports": 'all',
@@ -28,19 +29,13 @@ export class App {
             from: sender
 
         }
-        this.factory.GetProxy("broker").Invoke("instantMessage",
+        this.factory.GetController("broker").Invoke("instantMessage",
             data
         );
     }
 
-    connect(brokerUrl: string, config: any): ThorIOClient.Factory {
-
-
-
-
-        var url = brokerUrl;
-        return new ThorIOClient.Factory(url, ["broker"]);
-
+    connect(url: string, config: any): Factory {
+        return new Factory(url, ["broker"]);
     }
 
     constructor() {
@@ -59,14 +54,14 @@ export class App {
         let chatMessages = document.querySelector("#chatmessages") as HTMLElement;
 
 
-
-
         let clipBoard = new ClipboardJS("#share-link", {
             text: (t) => {
                 t.textContent = "Done!"
                 return location.origin + "/#" + slug.value;
             }
         });
+
+        
 
         if (joinSlug.length >= 6) {
             slug.value = joinSlug;
@@ -146,12 +141,15 @@ export class App {
 
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connect("wss://kollokvium.herokuapp.com/", {})
+        this.factory = this.connect("ws://localhost:1337/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
         }
-        this.factory.OnOpen = (broker: ThorIOClient.Proxy) => {
+        this.factory.OnOpen = (broker: Controller) => {
+
+          //  let broker = this.factory.GetProxy("broker");
+
 
             console.log("OnOpen", broker)
 
@@ -184,7 +182,7 @@ export class App {
             });
 
 
-            this.rtcClient = new ThorIOClient.WebRTC(broker, this.rtcConfig);
+            this.rtcClient = new WebRTC(broker, this.rtcConfig);
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
             }

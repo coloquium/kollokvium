@@ -88,11 +88,12 @@ class App {
         });
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connect("wss://kollokvium.herokuapp.com/", {});
+        this.factory = this.connect("ws://localhost:1337/", {});
         this.factory.OnClose = (reason) => {
             console.error(reason);
         };
         this.factory.OnOpen = (broker) => {
+            //  let broker = this.factory.GetProxy("broker");
             console.log("OnOpen", broker);
             // hook up chat functions...
             broker.On("instantMessage", (im) => {
@@ -109,7 +110,7 @@ class App {
                     chatMessage.value = "";
                 }
             });
-            this.rtcClient = new thor_io_client_vnext_1.ThorIOClient.WebRTC(broker, this.rtcConfig);
+            this.rtcClient = new thor_io_client_vnext_1.WebRTC(broker, this.rtcConfig);
             this.rtcClient.OnLocalStream = (mediaStream) => {
             };
             this.rtcClient.OnContextConnected = (ctx) => {
@@ -159,11 +160,10 @@ class App {
             text: message,
             from: sender
         };
-        this.factory.GetProxy("broker").Invoke("instantMessage", data);
+        this.factory.GetController("broker").Invoke("instantMessage", data);
     }
-    connect(brokerUrl, config) {
-        var url = brokerUrl;
-        return new thor_io_client_vnext_1.ThorIOClient.Factory(url, ["broker"]);
+    connect(url, config) {
+        return new thor_io_client_vnext_1.Factory(url, ["broker"]);
     }
     static getInstance() {
         return new App();
