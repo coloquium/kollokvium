@@ -242,12 +242,6 @@ export class App {
             chatWindow.classList.toggle("d-none");
         });
 
-
-
-        
-      
-
-
         slug.addEventListener("click",() => {
             $("#slug").popover('show');
         })
@@ -274,7 +268,7 @@ export class App {
 
 
         startButton.addEventListener("click", () => {
-
+            document.querySelector("#share-screen").classList.add("hide");
             document.querySelector(".our-brand").remove();
             $("#slug").popover('hide');
             startButton.classList.add("hide");
@@ -367,6 +361,10 @@ export class App {
                         height: { min: 400, ideal: 720 }
                     }, audio: true,
                 }).then((mediaStream: MediaStream) => {
+
+
+
+                    
                     this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
                     this.addLocalVideo(mediaStream);

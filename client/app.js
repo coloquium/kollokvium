@@ -99,6 +99,7 @@ class App {
             chatNick.value = "";
         });
         startButton.addEventListener("click", () => {
+            document.querySelector("#share-screen").classList.add("hide");
             document.querySelector(".our-brand").remove();
             $("#slug").popover('hide');
             startButton.classList.add("hide");
