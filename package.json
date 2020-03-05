@@ -13,13 +13,14 @@
     "@types/bootstrap": "^4.3.1",
     "@types/clipboard": "^2.0.1",
     "@types/jquery": "^3.3.33",
-    "clipboard": "^2.0.5",
+    "clipboard": "^2.0.6",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
+    "i": "^0.3.6",
     "install": "^0.13.0",
     "npm": "^6.14.2",
     "thor-io.client-vnext": "^2.0.2-beta.2",
-    "thor-io.vnext": "^1.5.1",
+    "thor-io.vnext": "^2.0.3-beta.3",
     "webrtc-adapter": "^7.5.0"
   }
 }

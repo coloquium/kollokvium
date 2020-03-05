@@ -4,12 +4,120 @@ import ClipboardJS from 'clipboard';
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 
 
+export class AppParticipant {
+
+        audioTracks: Array<MediaStreamTrack>;
+        videoTracks: Array<MediaStreamTrack>;
+
+        onVideoAdded:(id:string,s:MediaStream) => void;
+        
+        constructor(public id:string){
+            this.videoTracks = new Array<MediaStreamTrack>();
+            this.audioTracks = new Array<MediaStreamTrack>();
+        }
+        addVideoTrack(t:MediaStreamTrack){
+                this.videoTracks.push(t)
+                let stream = new MediaStream([t]);
+                t.onended =() => {
+                    // todo: would be an delagated event
+                    document.querySelector(".p" + this.id).remove();
+                }
+                this.onVideoAdded(this.id,stream);
+        }
+        addAudioTrack(t:MediaStreamTrack){
+            this.audioTracks.push(t)
+
+            let audio = new Audio();
+            audio.autoplay = true;
+            audio.srcObject = new MediaStream([t]);        
+
+    }
+    addTrack(t:MediaStreamTrack){
+        t.kind == "video" ? this.addVideoTrack(t) : this.addAudioTrack(t);
+    }
+}
 
 export class App {
     factory: Factory;
     rtcClient: WebRTC;
 
+    localMediaStream:MediaStream;
+    Slug: string;
+
+    participants:Map<string,AppParticipant>;
+    shareContainer: any;
+    fullScreenVideo: HTMLVideoElement;
+
+    shareScreen(){
+
+        const gdmOptions = {
+            video: {
+              cursor: "always"
+            },
+            audio:false
+          };
+
+        //   audio: {
+        //     echoCancellation: true,
+        //     noiseSuppression: true,
+        //     sampleRate: 44100
+        //   }
+        
+         navigator.mediaDevices["getDisplayMedia"](gdmOptions).then( (stream:MediaStream) => {
+           
+            
+            //this.rtcClient.AddLocalStream(stream);
+
+            stream.getVideoTracks().forEach ( (t:MediaStreamTrack) => {
+                this.rtcClient.LocalStreams[0].addTrack(t);
+            });
+
+       
+            this.addLocalVideo(stream);
+
+            document.querySelector("#share-screen").classList.add("hide")
+           
+
+
+         }).catch(err => console.error)
+         
+    
+    }
+
+    muteVideo(evt:any):void{
+        let el = evt.target as HTMLElement;
+        el.classList.toggle("fa-video");
+        el.classList.toggle("fa-video-slash")
+        let mediaTrack = this.localMediaStream.getVideoTracks();   
+
+        mediaTrack.forEach( (track:MediaStreamTrack) => {              
+                track.enabled = !track.enabled;              
+            
+        });
+        
+    }
+    muteAudio(evt:any):void{     
+        let el = evt.target as HTMLElement;
+        el.classList.toggle("fa-microphone");
+        el.classList.toggle("fa-microphone-slash")
+        let mediaTrack = this.localMediaStream.getAudioTracks();        
+        mediaTrack.forEach( (track:MediaStreamTrack) => {              
+                track.enabled = !track.enabled;              
+            
+        });
+        
+    }
+
+    addLocalVideo(mediaStream: MediaStream)  {
+        let video = document.createElement("video") as HTMLVideoElement;
+        video.autoplay = true;
+        video.srcObject = mediaStream;     
+        let container = document.querySelector(".local") as HTMLElement;
+        container.append(video);     
+       
+    }
     rtcConfig = {
+        "sdpSemantics": 'plan-b',
         "iceTransports": 'all',
         "rtcpMuxPolicy": "require",
         "bundlePolicy": "max-bundle",
@@ -21,13 +129,10 @@ export class App {
     };
 
     sendMessage(sender: string, message: string) {
-
         if (sender.length == 0) sender = "NoName"
-
         const data = {
             text: message,
             from: sender
-
         }
         this.factory.GetController("broker").Invoke("instantMessage",
             data
@@ -38,20 +143,82 @@ export class App {
         return new Factory(url, ["broker"]);
     }
 
+
+
+    addRemoteVideo (id:string,mediaStream: MediaStream)  {
+
+          
+
+        if (!this.shareContainer.classList.contains("hide")) {
+            this.shareContainer.classList.add("hide");
+        }
+
+        let video = document.createElement("video");
+        video.classList.add("rounded","mx-auto","d-block");
+
+        video.srcObject = mediaStream ;
+        video.setAttribute("class", "p" + id);
+        video.autoplay = true;
+        document.querySelector("#remote-videos").append(video);
+
+        video.addEventListener("click", (e: any) => {
+            this.fullScreenVideo.play();
+            this.fullScreenVideo.srcObject = e.target.srcObject;
+        });
+
+     
+       
+    }
+    tryAddParticipant(id:string):AppParticipant{
+        if(this.participants.has(id)){
+            return this.participants.get(id);
+        }else{
+            this.participants.set(id,new AppParticipant(id));
+            let p =  this.participants.get(id);
+            p.onVideoAdded = (id:string,mediaStream:MediaStream) =>
+            {
+                console.log(id,mediaStream);
+                this.addRemoteVideo(id,mediaStream);
+            }
+          
+        
+
+            return p;
+        }
+    }
+
     constructor() {
 
-        const joinSlug = location.hash.replace("#", "");
+        this.participants = new Map<string,AppParticipant>();
 
-        let fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
+        this.Slug = location.hash.replace("#", "");
+
+        this.fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
-        let shareContainer = document.querySelector("#share-container");
+        this.shareContainer = document.querySelector("#share-container");
 
         let chatWindow = document.querySelector(".chat") as HTMLElement;
 
         let chatMessage = document.querySelector("#chat-message") as HTMLInputElement;
         let chatNick = document.querySelector("#chat-nick") as HTMLInputElement;
         let chatMessages = document.querySelector("#chatmessages") as HTMLElement;
+
+
+        let muteAudio = document.querySelector("#mute-local-audio") as HTMLElement;
+        let muteVideo = document.querySelector("#mute-local-video") as HTMLElement;
+        let screen = document.querySelector("#share-screen") as HTMLElement;
+    
+        muteAudio.addEventListener("click",(e) => {
+             this.muteAudio(e)
+        });
+        muteVideo.addEventListener("click",(e) => {
+            this.muteVideo(e)
+        });
+        
+        screen.addEventListener("click",() => {
+            this.shareScreen();
+        });
 
 
         let clipBoard = new ClipboardJS("#share-link", {
@@ -63,8 +230,8 @@ export class App {
 
         
 
-        if (joinSlug.length >= 6) {
-            slug.value = joinSlug;
+        if (this.Slug.length >= 6) {
+            slug.value = this.Slug;
             startButton.disabled = false;
         }
 
@@ -75,30 +242,10 @@ export class App {
             chatWindow.classList.toggle("d-none");
         });
 
-        const addRemoteVideo = (mediaStream: MediaStream, peerId: string) => {
-            if (!shareContainer.classList.contains("hide")) {
-                shareContainer.classList.add("hide");
-            }
-            let video = document.createElement("video");
-            video.classList.add("rounded","mx-auto","d-block");
-
-            video.srcObject = mediaStream;
-            video.setAttribute("id", "p" + peerId);
-            video.autoplay = true;
-            document.querySelector("#remote-videos").append(video);
-
-            video.addEventListener("click", (e: any) => {
-                fullScreenVideo.play();
-                fullScreenVideo.srcObject = e.target.srcObject;
-            });
-        }
 
 
         
-        const addLocalVideo = (mediaStream: MediaStream) => {
-            let video = document.querySelector(".local video") as HTMLVideoElement;
-            video.srcObject = mediaStream;
-        }
+      
 
 
         slug.addEventListener("click",() => {
@@ -141,16 +288,13 @@ export class App {
 
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connect("ws://localhost:1337/", {})
+        this.factory = this.connect("wss://kollokvium.herokuapp.com/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
         }
         this.factory.OnOpen = (broker: Controller) => {
-
           //  let broker = this.factory.GetProxy("broker");
-
-
             console.log("OnOpen", broker)
 
 
@@ -173,14 +317,14 @@ export class App {
             });
 
             chatMessage.addEventListener("keyup", (e) => {
-
                 if (e.keyCode == 13) {
-
                     this.sendMessage(chatNick.value, chatMessage.value)
                     chatMessage.value = "";
                 }
             });
 
+
+      
 
             this.rtcClient = new WebRTC(broker, this.rtcConfig);
 
@@ -194,17 +338,23 @@ export class App {
                 this.rtcClient.ConnectContext();
                 console.log("looks like we are abut to join a context...", ctx);
             }
-            this.rtcClient.OnContextDisconnected = (peer) => {
-                console.log("lost connection to", peer)
-                document.querySelector("#p" + peer.id).remove();
+            this.rtcClient.OnContextDisconnected = (peer) => {             
+                document.querySelector(".p" + peer.id).remove();
             };
             this.rtcClient.OnContextConnected = (peer) => {
-                console.log("connected to", peer);
+         
                 document.querySelector(".remote").classList.remove("hide");
-                addRemoteVideo(peer.stream, peer.id);
+               // addRemoteVideo(peer.stream, peer.id);
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
-                console.log("looks like we got a remote media steamTrack", track);
+             
+                let participant = this.tryAddParticipant(connection.id);
+
+                participant.addTrack(track)
+
+    
+                
+                console.log(participant);
             }
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
@@ -217,8 +367,9 @@ export class App {
                         height: { min: 400, ideal: 720 }
                     }, audio: true,
                 }).then((mediaStream: MediaStream) => {
+                    this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
-                    addLocalVideo(mediaStream);
+                    this.addLocalVideo(mediaStream);
                 }).catch(err => {
                     console.error(err);
                 });

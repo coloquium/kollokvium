@@ -5,9 +5,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const thor_io_client_vnext_1 = require("thor-io.client-vnext");
 const clipboard_1 = __importDefault(require("clipboard"));
+class AppParticipant {
+    constructor(id) {
+        this.id = id;
+        this.videoTracks = new Array();
+        this.audioTracks = new Array();
+    }
+    addVideoTrack(t) {
+        this.videoTracks.push(t);
+        let stream = new MediaStream([t]);
+        t.onended = () => {
+            // todo: would be an delagated event
+            document.querySelector(".p" + this.id).remove();
+        };
+        this.onVideoAdded(this.id, stream);
+    }
+    addAudioTrack(t) {
+        this.audioTracks.push(t);
+        let audio = new Audio();
+        audio.autoplay = true;
+        audio.srcObject = new MediaStream([t]);
+    }
+    addTrack(t) {
+        t.kind == "video" ? this.addVideoTrack(t) : this.addAudioTrack(t);
+    }
+}
+exports.AppParticipant = AppParticipant;
 class App {
     constructor() {
         this.rtcConfig = {
+            "sdpSemantics": 'plan-b',
             "iceTransports": 'all',
             "rtcpMuxPolicy": "require",
             "bundlePolicy": "max-bundle",
@@ -17,23 +44,36 @@ class App {
                 }
             ]
         };
-        const joinSlug = location.hash.replace("#", "");
-        let fullScreenVideo = document.querySelector(".full");
+        this.participants = new Map();
+        this.Slug = location.hash.replace("#", "");
+        this.fullScreenVideo = document.querySelector(".full");
         let slug = document.querySelector("#slug");
         let startButton = document.querySelector("#joinconference");
-        let shareContainer = document.querySelector("#share-container");
+        this.shareContainer = document.querySelector("#share-container");
         let chatWindow = document.querySelector(".chat");
         let chatMessage = document.querySelector("#chat-message");
         let chatNick = document.querySelector("#chat-nick");
         let chatMessages = document.querySelector("#chatmessages");
+        let muteAudio = document.querySelector("#mute-local-audio");
+        let muteVideo = document.querySelector("#mute-local-video");
+        let screen = document.querySelector("#share-screen");
+        muteAudio.addEventListener("click", (e) => {
+            this.muteAudio(e);
+        });
+        muteVideo.addEventListener("click", (e) => {
+            this.muteVideo(e);
+        });
+        screen.addEventListener("click", () => {
+            this.shareScreen();
+        });
         let clipBoard = new clipboard_1.default("#share-link", {
             text: (t) => {
                 t.textContent = "Done!";
                 return location.origin + "/#" + slug.value;
             }
         });
-        if (joinSlug.length >= 6) {
-            slug.value = joinSlug;
+        if (this.Slug.length >= 6) {
+            slug.value = this.Slug;
             startButton.disabled = false;
         }
         document.querySelector("#close-chat").addEventListener("click", () => {
@@ -42,25 +82,6 @@ class App {
         document.querySelector("#show-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
         });
-        const addRemoteVideo = (mediaStream, peerId) => {
-            if (!shareContainer.classList.contains("hide")) {
-                shareContainer.classList.add("hide");
-            }
-            let video = document.createElement("video");
-            video.classList.add("rounded", "mx-auto", "d-block");
-            video.srcObject = mediaStream;
-            video.setAttribute("id", "p" + peerId);
-            video.autoplay = true;
-            document.querySelector("#remote-videos").append(video);
-            video.addEventListener("click", (e) => {
-                fullScreenVideo.play();
-                fullScreenVideo.srcObject = e.target.srcObject;
-            });
-        };
-        const addLocalVideo = (mediaStream) => {
-            let video = document.querySelector(".local video");
-            video.srcObject = mediaStream;
-        };
         slug.addEventListener("click", () => {
             $("#slug").popover('show');
         });
@@ -88,7 +109,7 @@ class App {
         });
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connect("ws://localhost:1337/", {});
+        this.factory = this.connect("wss://kollokvium.herokuapp.com/", {});
         this.factory.OnClose = (reason) => {
             console.error(reason);
         };
@@ -122,16 +143,16 @@ class App {
                 console.log("looks like we are abut to join a context...", ctx);
             };
             this.rtcClient.OnContextDisconnected = (peer) => {
-                console.log("lost connection to", peer);
-                document.querySelector("#p" + peer.id).remove();
+                document.querySelector(".p" + peer.id).remove();
             };
             this.rtcClient.OnContextConnected = (peer) => {
-                console.log("connected to", peer);
                 document.querySelector(".remote").classList.remove("hide");
-                addRemoteVideo(peer.stream, peer.id);
+                // addRemoteVideo(peer.stream, peer.id);
             };
             this.rtcClient.OnRemoteTrack = (track, connection) => {
-                console.log("looks like we got a remote media steamTrack", track);
+                let participant = this.tryAddParticipant(connection.id);
+                participant.addTrack(track);
+                console.log(participant);
             };
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
@@ -144,14 +165,61 @@ class App {
                         height: { min: 400, ideal: 720 }
                     }, audio: true,
                 }).then((mediaStream) => {
+                    this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
-                    addLocalVideo(mediaStream);
+                    this.addLocalVideo(mediaStream);
                 }).catch(err => {
                     console.error(err);
                 });
             };
             broker.Connect();
         };
+    }
+    shareScreen() {
+        const gdmOptions = {
+            video: {
+                cursor: "always"
+            },
+            audio: false
+        };
+        //   audio: {
+        //     echoCancellation: true,
+        //     noiseSuppression: true,
+        //     sampleRate: 44100
+        //   }
+        navigator.mediaDevices["getDisplayMedia"](gdmOptions).then((stream) => {
+            //this.rtcClient.AddLocalStream(stream);
+            stream.getVideoTracks().forEach((t) => {
+                this.rtcClient.LocalStreams[0].addTrack(t);
+            });
+            this.addLocalVideo(stream);
+            document.querySelector("#share-screen").classList.add("hide");
+        }).catch(err => console.error);
+    }
+    muteVideo(evt) {
+        let el = evt.target;
+        el.classList.toggle("fa-video");
+        el.classList.toggle("fa-video-slash");
+        let mediaTrack = this.localMediaStream.getVideoTracks();
+        mediaTrack.forEach((track) => {
+            track.enabled = !track.enabled;
+        });
+    }
+    muteAudio(evt) {
+        let el = evt.target;
+        el.classList.toggle("fa-microphone");
+        el.classList.toggle("fa-microphone-slash");
+        let mediaTrack = this.localMediaStream.getAudioTracks();
+        mediaTrack.forEach((track) => {
+            track.enabled = !track.enabled;
+        });
+    }
+    addLocalVideo(mediaStream) {
+        let video = document.createElement("video");
+        video.autoplay = true;
+        video.srcObject = mediaStream;
+        let container = document.querySelector(".local");
+        container.append(video);
     }
     sendMessage(sender, message) {
         if (sender.length == 0)
@@ -164,6 +232,35 @@ class App {
     }
     connect(url, config) {
         return new thor_io_client_vnext_1.Factory(url, ["broker"]);
+    }
+    addRemoteVideo(id, mediaStream) {
+        if (!this.shareContainer.classList.contains("hide")) {
+            this.shareContainer.classList.add("hide");
+        }
+        let video = document.createElement("video");
+        video.classList.add("rounded", "mx-auto", "d-block");
+        video.srcObject = mediaStream;
+        video.setAttribute("class", "p" + id);
+        video.autoplay = true;
+        document.querySelector("#remote-videos").append(video);
+        video.addEventListener("click", (e) => {
+            this.fullScreenVideo.play();
+            this.fullScreenVideo.srcObject = e.target.srcObject;
+        });
+    }
+    tryAddParticipant(id) {
+        if (this.participants.has(id)) {
+            return this.participants.get(id);
+        }
+        else {
+            this.participants.set(id, new AppParticipant(id));
+            let p = this.participants.get(id);
+            p.onVideoAdded = (id, mediaStream) => {
+                console.log(id, mediaStream);
+                this.addRemoteVideo(id, mediaStream);
+            };
+            return p;
+        }
     }
     static getInstance() {
         return new App();
