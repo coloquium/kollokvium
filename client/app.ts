@@ -111,6 +111,7 @@ export class App {
     addLocalVideo(mediaStream: MediaStream)  {
         let video = document.createElement("video") as HTMLVideoElement;
         video.autoplay = true;
+        video.muted = true;
         video.srcObject = mediaStream;     
         let container = document.querySelector(".local") as HTMLElement;
         container.append(video);     
