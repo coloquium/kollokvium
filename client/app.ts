@@ -2,40 +2,10 @@ import { Factory, WebRTC } from 'thor-io.client-vnext'
 import adapter from 'webrtc-adapter';
 import ClipboardJS from 'clipboard';
 import { Controller } from 'thor-io.client-vnext/src/Controller';
+import { AppParticipant } from './AppParticipant';
+import { SlugHistory } from './SlugHistory';
 
 
-export class AppParticipant {
-
-        audioTracks: Array<MediaStreamTrack>;
-        videoTracks: Array<MediaStreamTrack>;
-
-        onVideoAdded:(id:string,s:MediaStream) => void;
-        
-        constructor(public id:string){
-            this.videoTracks = new Array<MediaStreamTrack>();
-            this.audioTracks = new Array<MediaStreamTrack>();
-        }
-        addVideoTrack(t:MediaStreamTrack){
-                this.videoTracks.push(t)
-                let stream = new MediaStream([t]);
-                t.onended =() => {
-                    // todo: would be an delagated event
-                    document.querySelector(".p" + this.id).remove();
-                }
-                this.onVideoAdded(this.id,stream);
-        }
-        addAudioTrack(t:MediaStreamTrack){
-            this.audioTracks.push(t)
-
-            let audio = new Audio();
-            audio.autoplay = true;
-            audio.srcObject = new MediaStream([t]);        
-
-    }
-    addTrack(t:MediaStreamTrack){
-        t.kind == "video" ? this.addVideoTrack(t) : this.addAudioTrack(t);
-    }
-}
 
 export class App {
     factory: Factory;
@@ -47,41 +17,23 @@ export class App {
     participants:Map<string,AppParticipant>;
     shareContainer: any;
     fullScreenVideo: HTMLVideoElement;
+    peerId: any;
+    numOfChatMessagesUnread: number;
 
     shareScreen(){
-
         const gdmOptions = {
             video: {
               cursor: "always"
             },
             audio:false
-          };
-
-        //   audio: {
-        //     echoCancellation: true,
-        //     noiseSuppression: true,
-        //     sampleRate: 44100
-        //   }
-        
+          };       
          navigator.mediaDevices["getDisplayMedia"](gdmOptions).then( (stream:MediaStream) => {
-           
-            
-            //this.rtcClient.AddLocalStream(stream);
-
             stream.getVideoTracks().forEach ( (t:MediaStreamTrack) => {
                 this.rtcClient.LocalStreams[0].addTrack(t);
             });
-
-       
             this.addLocalVideo(stream);
-
             document.querySelector("#share-screen").classList.add("hide")
-           
-
-
-         }).catch(err => console.error)
-         
-    
+         }).catch(err => console.error)        
     }
 
     muteVideo(evt:any):void{
@@ -141,15 +93,11 @@ export class App {
         );
     }
 
-    connect(url: string, config: any): Factory {
+    connectToServer(url: string, config: any): Factory {
         return new Factory(url, ["broker"]);
     }
 
-
-
     addRemoteVideo (id:string,mediaStream: MediaStream)  {
-
-          
 
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
@@ -167,10 +115,8 @@ export class App {
             this.fullScreenVideo.play();
             this.fullScreenVideo.srcObject = e.target.srcObject;
         });
-
-     
-       
     }
+
     tryAddParticipant(id:string):AppParticipant{
         if(this.participants.has(id)){
             return this.participants.get(id);
@@ -179,37 +125,51 @@ export class App {
             let p =  this.participants.get(id);
             p.onVideoAdded = (id:string,mediaStream:MediaStream) =>
             {
-                console.log(id,mediaStream);
                 this.addRemoteVideo(id,mediaStream);
-            }
-          
-        
-
+            }        
             return p;
         }
     }
 
+    /**
+     * Creates an instance of App.
+     * @memberof App
+     */
     constructor() {
 
+        this.peerId = null;
+        this.numOfChatMessagesUnread = 0;
+        
         this.participants = new Map<string,AppParticipant>();
+        
+        let slugHistory = new SlugHistory();
+
 
         this.Slug = location.hash.replace("#", "");
 
         this.fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
-        let slug = document.querySelector("#slug") as HTMLInputElement;
-        let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         this.shareContainer = document.querySelector("#share-container");
 
+        let slug = document.querySelector("#slug") as HTMLInputElement;
+        let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         let chatWindow = document.querySelector(".chat") as HTMLElement;
-
         let chatMessage = document.querySelector("#chat-message") as HTMLInputElement;
         let chatNick = document.querySelector("#chat-nick") as HTMLInputElement;
         let chatMessages = document.querySelector("#chatmessages") as HTMLElement;
 
-
         let muteAudio = document.querySelector("#mute-local-audio") as HTMLElement;
         let muteVideo = document.querySelector("#mute-local-video") as HTMLElement;
-        let screen = document.querySelector("#share-screen") as HTMLElement;
+        let startScreenShare = document.querySelector("#share-screen") as HTMLElement;
+
+        let unreadBadge = document.querySelector("#unread-messages") as HTMLElement;
+
+
+        slugHistory.getHistory().forEach( (slug:string) => {
+            const option = document.createElement("option");
+            option.setAttribute("value",slug);
+            document.querySelector("#slug-history").prepend(option);    
+        });
+
     
         muteAudio.addEventListener("click",(e) => {
              this.muteAudio(e)
@@ -218,7 +178,7 @@ export class App {
             this.muteVideo(e)
         });
         
-        screen.addEventListener("click",() => {
+        startScreenShare.addEventListener("click",() => {
             this.shareScreen();
         });
 
@@ -229,8 +189,7 @@ export class App {
                 return location.origin + "/#" + slug.value;
             }
         });
-
-        
+       
 
         if (this.Slug.length >= 6) {
             slug.value = this.Slug;
@@ -239,9 +198,17 @@ export class App {
 
         document.querySelector("#close-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
+            unreadBadge.classList.add("d-none");
+            this.numOfChatMessagesUnread = 0;
+            unreadBadge.textContent = "0";
+
         });
         document.querySelector("#show-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
+            unreadBadge.classList.add("d-none");
+            this.numOfChatMessagesUnread = 0;
+            unreadBadge.textContent = "0";
+            
         });
 
         slug.addEventListener("click",() => {
@@ -270,7 +237,8 @@ export class App {
 
 
         startButton.addEventListener("click", () => {
-            document.querySelector("#share-screen").classList.add("hide");
+            document.querySelector("#share-screen").classList.toggle("d-none");
+            document.querySelector("#show-chat").classList.toggle("d-none");
             document.querySelector(".our-brand").remove();
             $("#slug").popover('hide');
             startButton.classList.add("hide");
@@ -279,12 +247,14 @@ export class App {
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
 
+            slugHistory.addToHistory(slug.value);
+            
             this.rtcClient.ChangeContext(slug.value);
         });
 
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connect("wss://kollokvium.herokuapp.com/", {})
+        this.factory = this.connectToServer("wss://kollokvium.herokuapp.com/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
@@ -298,9 +268,8 @@ export class App {
 
             broker.On("instantMessage", (im: any) => {
 
+                this.numOfChatMessagesUnread ++;
                 let message = document.createElement("p");
-
-
 
                 message.textContent = im.text;
 
@@ -310,6 +279,14 @@ export class App {
                 message.prepend(sender);
 
                 chatMessages.prepend(message);
+
+                if(chatWindow.classList.contains("d-none")){
+
+                
+                    unreadBadge.classList.remove("d-none");
+                    unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
+                }
+            
             });
 
             chatMessage.addEventListener("keyup", (e) => {
@@ -329,6 +306,8 @@ export class App {
             this.rtcClient.OnContextConnected = (ctx) => {
             };
             this.rtcClient.OnContextCreated = (ctx) => {
+                console.log(ctx);
+
             };
             this.rtcClient.OnContextChanged = (ctx) => {
                 this.rtcClient.ConnectContext();

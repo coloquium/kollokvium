@@ -109,6 +109,15 @@ header .overlay {
     
 }
 
+.controls span.badge {
+    float: right;
+    position: absolute;
+    z-index: 100;
+    /* right: 0; */
+    bottom: 60;
+    margin-left: 20px;
+}
+
 
 
 .controls i {
