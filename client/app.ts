@@ -1,4 +1,4 @@
-import { Factory, WebRTC } from 'thor-io.client-vnext'
+import { Factory, WebRTC, BinaryMessage, Message } from 'thor-io.client-vnext'
 import adapter from 'webrtc-adapter';
 import ClipboardJS from 'clipboard';
 import { Controller } from 'thor-io.client-vnext/src/Controller';
@@ -7,7 +7,66 @@ import { SlugHistory } from './SlugHistory';
 
 
 
+export class ReadFile {
+
+
+        static read(f:any):Promise<any>{
+         
+             return new Promise<any>( (resolve,reject) => {
+                let reader = new FileReader();
+                    reader.onerror = reject
+                    reader.onload = (function (tf) {
+                        return function (e:any) {
+                            resolve({buffer:e.target.result,tf:tf});
+                        };
+                    })(f);
+                    reader.readAsArrayBuffer(f);
+             });                   
+        }
+}
+
+
 export class App {
+    shareFile: HTMLElement;
+    fileReceived(fileinfo: any, arrayBuffer: ArrayBuffer) {    
+
+        const dt = new Date();
+        const p = document.createElement("p");
+        p.textContent = "Here is shared a file... ";
+       
+       
+             const blob = new Blob([arrayBuffer], {
+                type: fileinfo.mimeType
+            });
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const download = document.createElement("a");
+            download.setAttribute("href", blobUrl);
+            download.textContent = fileinfo.name;
+            download.setAttribute("download", fileinfo.name);
+
+            p.append(download);
+
+            document.querySelector("#chatmessages").prepend(p);
+            
+     
+    }
+    sendFile(fileInfo:any,buffer:ArrayBuffer){
+      
+        var message = new Message("fileShare",
+                  fileInfo,"broker",buffer);
+                    let bm = new BinaryMessage(message.toString(),buffer);           
+                  this.factory.GetController("broker").InvokeBinary(bm.Buffer);
+    }
+
+    readFile(evt) {
+        const file = evt.target.files[0];
+        ReadFile.read(file).then( (result:any) => {
+            console.log("file read result",result);
+        });
+    }
+
+
     factory: Factory;
     rtcClient: WebRTC;
 
@@ -19,6 +78,7 @@ export class App {
     fullScreenVideo: HTMLVideoElement;
     peerId: any;
     numOfChatMessagesUnread: number;
+    
 
     shareScreen(){
         const gdmOptions = {
@@ -137,6 +197,11 @@ export class App {
      */
     constructor() {
 
+
+       
+
+        if(!location.href.includes("https://"))
+
         this.peerId = null;
         this.numOfChatMessagesUnread = 0;
         
@@ -149,6 +214,8 @@ export class App {
 
         this.fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
         this.shareContainer = document.querySelector("#share-container");
+        this.shareFile = document.querySelector("#share-file") as HTMLElement;
+
 
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
@@ -161,7 +228,43 @@ export class App {
         let muteVideo = document.querySelector("#mute-local-video") as HTMLElement;
         let startScreenShare = document.querySelector("#share-screen") as HTMLElement;
 
+
+
+        // jQuery hack for file share
+        $("#share-file").popover({
+            trigger:"manual",
+            sanitize:false,
+            placement: "top",
+            title: 'Select the file to share.',
+            html:true,
+            content:  $('#share-form').html()
+        }).on("inserted.bs.popover",(e) => {          
+                $(".file-selected").on("change",(evt:any) => {
+                    const file = evt.target.files[0];
+                    ReadFile.read(file).then( (result) => {
+                        console.log("file read",result);
+                        this.sendFile({
+                            name: result.tf.name,
+                            size: result.tf.size,
+                            mimeType: result.tf.type
+                        },result.buffer);
+                        $("#share-file").popover("hide");
+                    });
+                });
+        });
+
+        
+            document.querySelector("#share-file").addEventListener("click", () => {
+                $("#share-file").popover("show");
+            });
+       
+
+    
+
         let unreadBadge = document.querySelector("#unread-messages") as HTMLElement;
+
+
+
 
 
         slugHistory.getHistory().forEach( (slug:string) => {
@@ -237,6 +340,8 @@ export class App {
 
 
         startButton.addEventListener("click", () => {
+
+            document.querySelector("#share-file").classList.toggle("d-none");
             document.querySelector("#share-screen").classList.toggle("d-none");
             document.querySelector("#show-chat").classList.toggle("d-none");
             document.querySelector(".our-brand").remove();
@@ -254,7 +359,7 @@ export class App {
 
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connectToServer("wss://kollokvium.herokuapp.com/", {})
+        this.factory = this.connectToServer("wss://simpleconf.herokuapp.com/", {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
@@ -262,6 +367,11 @@ export class App {
         this.factory.OnOpen = (broker: Controller) => {
           //  let broker = this.factory.GetProxy("broker");
             console.log("OnOpen", broker)
+
+
+            broker.On("fileShare",(fileinfo,arrayBuffer)=> { 
+                this.fileReceived(fileinfo,arrayBuffer)
+            });
 
 
             // hook up chat functions...
@@ -366,6 +476,10 @@ export class App {
 
 document.addEventListener("DOMContentLoaded", () => {
 
+
+
+    if(!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://","https://")
+    
     App.getInstance();
 
 

@@ -145,3 +145,9 @@ header .overlay {
     z-index: 100;
     color: #fff;
 }
+
+#file-form{
+
+    position: absolute;
+    z-index: 200;
+}

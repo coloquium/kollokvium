@@ -7,6 +7,21 @@ const thor_io_client_vnext_1 = require("thor-io.client-vnext");
 const clipboard_1 = __importDefault(require("clipboard"));
 const AppParticipant_1 = require("./AppParticipant");
 const SlugHistory_1 = require("./SlugHistory");
+class ReadFile {
+    static read(f) {
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            reader.onerror = reject;
+            reader.onload = (function (tf) {
+                return function (e) {
+                    resolve({ buffer: e.target.result, tf: tf });
+                };
+            })(f);
+            reader.readAsArrayBuffer(f);
+        });
+    }
+}
+exports.ReadFile = ReadFile;
 class App {
     /**
      * Creates an instance of App.
@@ -24,13 +39,15 @@ class App {
                 }
             ]
         };
-        this.peerId = null;
+        if (!location.href.includes("https://"))
+            this.peerId = null;
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map();
         let slugHistory = new SlugHistory_1.SlugHistory();
         this.Slug = location.hash.replace("#", "");
         this.fullScreenVideo = document.querySelector(".full");
         this.shareContainer = document.querySelector("#share-container");
+        this.shareFile = document.querySelector("#share-file");
         let slug = document.querySelector("#slug");
         let startButton = document.querySelector("#joinconference");
         let chatWindow = document.querySelector(".chat");
@@ -40,6 +57,31 @@ class App {
         let muteAudio = document.querySelector("#mute-local-audio");
         let muteVideo = document.querySelector("#mute-local-video");
         let startScreenShare = document.querySelector("#share-screen");
+        // jQuery hack for file share
+        $("#share-file").popover({
+            trigger: "manual",
+            sanitize: false,
+            placement: "top",
+            title: 'Select the file to share.',
+            html: true,
+            content: $('#share-form').html()
+        }).on("inserted.bs.popover", (e) => {
+            $(".file-selected").on("change", (evt) => {
+                const file = evt.target.files[0];
+                ReadFile.read(file).then((result) => {
+                    console.log("file read", result);
+                    this.sendFile({
+                        name: result.tf.name,
+                        size: result.tf.size,
+                        mimeType: result.tf.type
+                    }, result.buffer);
+                    $("#share-file").popover("hide");
+                });
+            });
+        });
+        document.querySelector("#share-file").addEventListener("click", () => {
+            $("#share-file").popover("show");
+        });
         let unreadBadge = document.querySelector("#unread-messages");
         slugHistory.getHistory().forEach((slug) => {
             const option = document.createElement("option");
@@ -94,6 +136,7 @@ class App {
             chatNick.value = "";
         });
         startButton.addEventListener("click", () => {
+            document.querySelector("#share-file").classList.toggle("d-none");
             document.querySelector("#share-screen").classList.toggle("d-none");
             document.querySelector("#show-chat").classList.toggle("d-none");
             document.querySelector(".our-brand").remove();
@@ -107,13 +150,16 @@ class App {
         });
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connectToServer("wss://kollokvium.herokuapp.com/", {});
+        this.factory = this.connectToServer("wss://simpleconf.herokuapp.com/", {});
         this.factory.OnClose = (reason) => {
             console.error(reason);
         };
         this.factory.OnOpen = (broker) => {
             //  let broker = this.factory.GetProxy("broker");
             console.log("OnOpen", broker);
+            broker.On("fileShare", (fileinfo, arrayBuffer) => {
+                this.fileReceived(fileinfo, arrayBuffer);
+            });
             // hook up chat functions...
             broker.On("instantMessage", (im) => {
                 this.numOfChatMessagesUnread++;
@@ -178,6 +224,32 @@ class App {
             };
             broker.Connect();
         };
+    }
+    fileReceived(fileinfo, arrayBuffer) {
+        const dt = new Date();
+        const p = document.createElement("p");
+        p.textContent = "Here is shared a file... ";
+        const blob = new Blob([arrayBuffer], {
+            type: fileinfo.mimeType
+        });
+        const blobUrl = window.URL.createObjectURL(blob);
+        const download = document.createElement("a");
+        download.setAttribute("href", blobUrl);
+        download.textContent = fileinfo.name;
+        download.setAttribute("download", fileinfo.name);
+        p.append(download);
+        document.querySelector("#chatmessages").prepend(p);
+    }
+    sendFile(fileInfo, buffer) {
+        var message = new thor_io_client_vnext_1.Message("fileShare", fileInfo, "broker", buffer);
+        let bm = new thor_io_client_vnext_1.BinaryMessage(message.toString(), buffer);
+        this.factory.GetController("broker").InvokeBinary(bm.Buffer);
+    }
+    readFile(evt) {
+        const file = evt.target.files[0];
+        ReadFile.read(file).then((result) => {
+            console.log("file read result", result);
+        });
     }
     shareScreen() {
         const gdmOptions = {
@@ -266,5 +338,7 @@ class App {
 }
 exports.App = App;
 document.addEventListener("DOMContentLoaded", () => {
+    if (!(location.href.includes("https://") || location.href.includes("http://localhost")))
+        location.href = location.href.replace("http://", "https://");
     App.getInstance();
 });

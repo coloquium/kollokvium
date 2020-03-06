@@ -22,6 +22,16 @@ export class Broker extends  BrokerController {
 
     // // this property can be set from client, by calling set property, and then be use to filter clients based  on it state (property)
     // @CanSet(true)
-    // age:number
+    // age:numberz
+
+    @CanInvoke(true)
+    fileShare(fileInfo: any, topic: any, controller: any, blob: any) {
+        var expression = (pre: BrokerController) => {
+            return pre.Peer.context >= this.Peer.context;
+        };
+        this.invokeTo(expression,{text:"File shared (see '" + fileInfo.name + "')",from:'Kollokvium'}, "instantMessage", this.alias);   
+        this.invokeTo(expression,fileInfo, "fileShare", this.alias, blob);
+    }
+
 
 }

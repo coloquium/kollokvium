@@ -16,7 +16,28 @@ let Broker = class Broker extends thor_io_vnext_1.BrokerController {
     constructor(connection) {
         super(connection);
     }
+    // extend 'broker' with a custom method 'foo' -> client calls "foo" and controller (broker) passes data to all in "bar"
+    // @CanInvoke(true)  // use decorators to make methods public to client.
+    // foo(data:any){
+    //     this.invokeToAll(data,"bar");
+    // }
+    // // this property can be set from client, by calling set property, and then be use to filter clients based  on it state (property)
+    // @CanSet(true)
+    // age:numberz
+    fileShare(fileInfo, topic, controller, blob) {
+        var expression = (pre) => {
+            return pre.Peer.context >= this.Peer.context;
+        };
+        this.invokeTo(expression, { text: "File shared (see '" + fileInfo.name + "')", from: 'Kollokvium' }, "instantMessage", this.alias);
+        this.invokeTo(expression, fileInfo, "fileShare", this.alias, blob);
+    }
 };
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object, Object]),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "fileShare", null);
 Broker = __decorate([
     thor_io_vnext_1.ControllerProperties("broker", false, 2 * 1000),
     __metadata("design:paramtypes", [thor_io_vnext_1.Connection])
