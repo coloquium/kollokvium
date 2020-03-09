@@ -5,8 +5,6 @@ import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { SlugHistory } from './SlugHistory';
 
-
-
 export class ReadFile {
 
 

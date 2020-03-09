@@ -1,6 +1,6 @@
 license
 
-Copyright (c) 2020 Magnus Thor ( aka. Thor-IO ) & Belys Invest AB
+Copyright (c) 2020 Belys Invest AB
 
 Permission is hereby granted free of charge to anyone who obtains a copy of this software and associated 
 documentation files (the "Software"), 

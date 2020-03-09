@@ -8,16 +8,6 @@ let RTC = new thor_io_vnext_1.ThorIO([
     broker_1.Broker,
 ]);
 require("express-ws")(app);
-// app.use(function (req, res, next) {
-//     if (req.secure) {
-//         next();
-//     } else {
-//         if (req.headers.host.includes("localhost")) {
-//             next()
-//         } else
-//             res.redirect('https://' + req.headers.host + req.url);
-//     }
-// });
 app.use("/", express.static("."));
 app.ws("/", function (ws, req) {
     RTC.addWebSocket(ws, req);
