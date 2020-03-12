@@ -12,12 +12,12 @@
     <link rel="stylesheet" href="css/app.css">
 <body>
 
-    <audio>
+    <div id="remtote-audio-nodes" class="hide">
 
-    </audio>
-
+    </div>
+ 
     <div class="our-brand">
-        Kollokvium&trade;
+        Kollokvium
     </div>
 
     <header>
@@ -31,9 +31,17 @@
                 <div class="w-100 text-white">
                     <h1 class="display-4 custom-heading">
                         <img src="img/logo.png" class="img-responsive" style="max-height:80px;filter:invert()">
-                        Kollokvium&trade;</h1>
+                        Kollokvium</h1>
                     <p class="lead my-5">A free multi-party video conference for you and your friends brought to you by thor-io</p>
                     <div class="input-group mb-3 col-md-6 mx-auto">
+
+                        <div class="input-group-prepend" id="random-slug" data-container="body" data-toggle="popover"" data-placement="top" 
+                        data-content="Generate random room name....">
+                            <button class="btn btn-secondary bt-lg" title="Generate a random room name..." id="generate-slug">
+                                <i class="fas fa-dice fa-2x"></i>
+                            </button>
+                        </div>
+
                         <input  list="slug-history" type="text" id="slug" placeholder="Enter any room name..." value=""
                             class="form-control form-control-lg" data-container="body" data-toggle="popover"
                             data-placement="top"
@@ -42,6 +50,7 @@
                             <datalist id="slug-history">
                                 
                             </datalist>
+
 
                         <div class="input-group-append">
                             <button id="joinconference" class="btn btn-primary bt-lg" type="button"

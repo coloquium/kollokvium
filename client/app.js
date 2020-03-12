@@ -7,27 +7,18 @@ const thor_io_client_vnext_1 = require("thor-io.client-vnext");
 const clipboard_1 = __importDefault(require("clipboard"));
 const AppParticipant_1 = require("./AppParticipant");
 const SlugHistory_1 = require("./SlugHistory");
-class ReadFile {
-    static read(f) {
-        return new Promise((resolve, reject) => {
-            let reader = new FileReader();
-            reader.onerror = reject;
-            reader.onload = (function (tf) {
-                return function (e) {
-                    resolve({ buffer: e.target.result, tf: tf });
-                };
-            })(f);
-            reader.readAsArrayBuffer(f);
-        });
-    }
-}
-exports.ReadFile = ReadFile;
+const ReadFile_1 = require("./ReadFile");
 class App {
     /**
-     * Creates an instance of App.
+     * Creates an instance of App - Kollokvium
      * @memberof App
      */
     constructor() {
+        /**
+         * PeerConnection configuration
+         *
+         * @memberof App
+         */
         this.rtcConfig = {
             "sdpSemantics": 'plan-b',
             "iceTransports": 'all',
@@ -57,6 +48,8 @@ class App {
         let muteAudio = document.querySelector("#mute-local-audio");
         let muteVideo = document.querySelector("#mute-local-video");
         let startScreenShare = document.querySelector("#share-screen");
+        let unreadBadge = document.querySelector("#unread-messages");
+        let generateSlug = document.querySelector("#generate-slug");
         // jQuery hack for file share
         $("#share-file").popover({
             trigger: "manual",
@@ -68,8 +61,7 @@ class App {
         }).on("inserted.bs.popover", (e) => {
             $(".file-selected").on("change", (evt) => {
                 const file = evt.target.files[0];
-                ReadFile.read(file).then((result) => {
-                    console.log("file read", result);
+                ReadFile_1.ReadFile.read(file).then((result) => {
                     this.sendFile({
                         name: result.tf.name,
                         size: result.tf.size,
@@ -79,14 +71,14 @@ class App {
                 });
             });
         });
-        document.querySelector("#share-file").addEventListener("click", () => {
-            $("#share-file").popover("show");
-        });
-        let unreadBadge = document.querySelector("#unread-messages");
         slugHistory.getHistory().forEach((slug) => {
             const option = document.createElement("option");
             option.setAttribute("value", slug);
             document.querySelector("#slug-history").prepend(option);
+        });
+        generateSlug.addEventListener("click", () => {
+            slug.value = Math.random().toString(36).substring(2).toLocaleLowerCase();
+            startButton.disabled = false;
         });
         muteAudio.addEventListener("click", (e) => {
             this.muteAudio(e);
@@ -106,6 +98,7 @@ class App {
         if (this.Slug.length >= 6) {
             slug.value = this.Slug;
             startButton.disabled = false;
+            document.querySelector("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
         }
         document.querySelector("#close-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
@@ -155,8 +148,7 @@ class App {
             console.error(reason);
         };
         this.factory.OnOpen = (broker) => {
-            //  let broker = this.factory.GetProxy("broker");
-            console.log("OnOpen", broker);
+            this.rtcClient = new thor_io_client_vnext_1.WebRTC(broker, this.rtcConfig);
             broker.On("fileShare", (fileinfo, arrayBuffer) => {
                 this.fileReceived(fileinfo, arrayBuffer);
             });
@@ -180,7 +172,6 @@ class App {
                     chatMessage.value = "";
                 }
             });
-            this.rtcClient = new thor_io_client_vnext_1.WebRTC(broker, this.rtcConfig);
             this.rtcClient.OnLocalStream = (mediaStream) => {
             };
             this.rtcClient.OnContextConnected = (ctx) => {
@@ -201,8 +192,13 @@ class App {
             };
             this.rtcClient.OnRemoteTrack = (track, connection) => {
                 let participant = this.tryAddParticipant(connection.id);
-                participant.addTrack(track);
-                console.log(participant);
+                participant.addTrack(track, (el) => {
+                    document.querySelector("#remtote-audio-nodes").append(el);
+                });
+                // fires when lost a stream 
+                participant.onVideoTrackLost = (id, stream, track) => {
+                    document.querySelector(".p" + id).remove();
+                };
             };
             this.rtcClient.OnContextCreated = function (ctx) {
                 console.log("got a context from the broker", ctx);
@@ -225,10 +221,16 @@ class App {
             broker.Connect();
         };
     }
+    /**
+     * Adds a fileshare message to chat, when someone shared a file...
+     *
+     * @param {*} fileinfo
+     * @param {ArrayBuffer} arrayBuffer
+     * @memberof App
+     */
     fileReceived(fileinfo, arrayBuffer) {
-        const dt = new Date();
         const p = document.createElement("p");
-        p.textContent = "Here is shared a file... ";
+        p.textContent = "Hye,here is shared file... ";
         const blob = new Blob([arrayBuffer], {
             type: fileinfo.mimeType
         });
@@ -240,17 +242,23 @@ class App {
         p.append(download);
         document.querySelector("#chatmessages").prepend(p);
     }
+    /**
+     * Send a file to all in conference
+     *
+     * @param {*} fileInfo
+     * @param {ArrayBuffer} buffer
+     * @memberof App
+     */
     sendFile(fileInfo, buffer) {
         var message = new thor_io_client_vnext_1.Message("fileShare", fileInfo, "broker", buffer);
         let bm = new thor_io_client_vnext_1.BinaryMessage(message.toString(), buffer);
         this.factory.GetController("broker").InvokeBinary(bm.Buffer);
     }
-    readFile(evt) {
-        const file = evt.target.files[0];
-        ReadFile.read(file).then((result) => {
-            console.log("file read result", result);
-        });
-    }
+    /**
+     * Prompt user for a screen , tab, window.
+     * and add the media stream to share
+     * @memberof App
+     */
     shareScreen() {
         const gdmOptions = {
             video: {
@@ -266,6 +274,12 @@ class App {
             document.querySelector("#share-screen").classList.add("hide");
         }).catch(err => console.error);
     }
+    /**
+     * Mute local video  ( self )
+     *
+     * @param {*} evt
+     * @memberof App
+     */
     muteVideo(evt) {
         let el = evt.target;
         el.classList.toggle("fa-video");
@@ -275,6 +289,12 @@ class App {
             track.enabled = !track.enabled;
         });
     }
+    /**
+     * Mute local video ( self )
+     *
+     * @param {*} evt
+     * @memberof App
+     */
     muteAudio(evt) {
         let el = evt.target;
         el.classList.toggle("fa-microphone");
@@ -284,6 +304,12 @@ class App {
             track.enabled = !track.enabled;
         });
     }
+    /**
+     * Add a local media stream to the UI
+     *
+     * @param {MediaStream} mediaStream
+     * @memberof App
+     */
     addLocalVideo(mediaStream) {
         let video = document.createElement("video");
         video.autoplay = true;
@@ -292,6 +318,13 @@ class App {
         let container = document.querySelector(".local");
         container.append(video);
     }
+    /**
+     * Send chat message
+     *
+     * @param {string} sender
+     * @param {string} message
+     * @memberof App
+     */
     sendMessage(sender, message) {
         if (sender.length == 0)
             sender = "NoName";
@@ -301,9 +334,24 @@ class App {
         };
         this.factory.GetController("broker").Invoke("instantMessage", data);
     }
+    /**
+     *  Connect to the realtime server (websocket) and its controller
+     *
+     * @param {string} url
+     * @param {*} config
+     * @returns {Factory}
+     * @memberof App
+     */
     connectToServer(url, config) {
         return new thor_io_client_vnext_1.Factory(url, ["broker"]);
     }
+    /**
+     * Add remote video stream
+     *
+     * @param {string} id
+     * @param {MediaStream} mediaStream
+     * @memberof App
+     */
     addRemoteVideo(id, mediaStream) {
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
@@ -319,6 +367,13 @@ class App {
             this.fullScreenVideo.srcObject = e.target.srcObject;
         });
     }
+    /**
+     *  Add aparticipant to the "conference"
+     *
+     * @param {string} id
+     * @returns {AppParticipant}
+     * @memberof App
+     */
     tryAddParticipant(id) {
         if (this.participants.has(id)) {
             return this.participants.get(id);
@@ -326,7 +381,7 @@ class App {
         else {
             this.participants.set(id, new AppParticipant_1.AppParticipant(id));
             let p = this.participants.get(id);
-            p.onVideoAdded = (id, mediaStream) => {
+            p.onVideoTrackAdded = (id, mediaStream, mediaStreamTrack) => {
                 this.addRemoteVideo(id, mediaStream);
             };
             return p;
@@ -337,6 +392,9 @@ class App {
     }
 }
 exports.App = App;
+/*
+    Launch the application
+*/
 document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("https://") || location.href.includes("http://localhost")))
         location.href = location.href.replace("http://", "https://");
