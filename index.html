@@ -1,6 +1,14 @@
 <html>
 
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-160656421-1');
+    </script>
     <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -10,12 +18,13 @@
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/app.css">
+
 <body>
 
     <div id="remtote-audio-nodes" class="hide">
 
     </div>
- 
+
     <div class="our-brand">
         Kollokvium
     </div>
@@ -32,24 +41,26 @@
                     <h1 class="display-4 custom-heading">
                         <img src="img/logo.png" class="img-responsive" style="max-height:80px;filter:invert()">
                         Kollokvium</h1>
-                    <p class="lead my-5">A free multi-party video conference for you and your friends brought to you by thor-io</p>
+                    <p class="lead my-5">A free multi-party video conference for you and your friends brought to you by
+                        thor-io</p>
                     <div class="input-group mb-3 col-md-6 mx-auto">
 
-                        <div class="input-group-prepend" id="random-slug" data-container="body" data-toggle="popover"" data-placement="top" 
-                        data-content="Generate random room name....">
-                            <button class="btn btn-secondary bt-lg" title="Generate a random room name..." id="generate-slug">
+                        <div class="input-group-prepend" id="random-slug" data-container="body"
+                            data-toggle="popover"" data-placement=" top" data-content="Generate random room name....">
+                            <button class="btn btn-secondary bt-lg" title="Generate a random room name..."
+                                id="generate-slug">
                                 <i class="fas fa-dice fa-2x"></i>
                             </button>
                         </div>
 
-                        <input  list="slug-history" type="text" id="slug" placeholder="Enter any room name..." value=""
+                        <input list="slug-history" type="text" id="slug" placeholder="Enter any room name..." value=""
                             class="form-control form-control-lg" data-container="body" data-toggle="popover"
                             data-placement="top"
                             data-content="Ohoy! your room name is six chars minimum, it can be many things such as company name, meeting occasion or whatever you want.. Have a nice day!">
 
-                            <datalist id="slug-history">
-                                
-                            </datalist>
+                        <datalist id="slug-history">
+
+                        </datalist>
 
 
                         <div class="input-group-append">
@@ -105,9 +116,9 @@
 
 
         </div>
-        
+
         <div id="share-form">
-           
+
             <input type="file" class="file-selected" class="form-contol">
         </div>
 
@@ -119,18 +130,18 @@
                 <i class="fas fa-microhone fa-2x" id="mute-local-audio"></i>
             </div>
             <div class="mr-4 p-1 d-none d-lg-block">
-            <i class="fas fa-desktop fa-2x" id="share-screen" title="share your screen"></i>
+                <i class="fas fa-desktop fa-2x" id="share-screen" title="share your screen"></i>
             </div>
-            
+
             <div class="mr-4 p-1">
                 <i class="fas fa-box-open fa-2x d-none" id="share-file"></i>
             </div>
             <div class="mr-4 p-1 d-lg-block">
-                    
-                    <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
-                    <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
-                    </i>
-             
+
+                <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
+                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
+                </i>
+
             </div>
 
 
@@ -139,7 +150,7 @@
 
         <div class="local">
 
-        
+
         </div>
     </header>
 
@@ -165,7 +176,7 @@
                 </div>
             </div>
         </div>
-      
+
     </nav>
 
     </div>
