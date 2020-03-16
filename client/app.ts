@@ -350,7 +350,8 @@ export class App {
         });
 
 
-        $("#random-slug").popover("show");
+        if(location.hash.length ==0)
+            $("#random-slug").popover("show");
 
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
@@ -368,6 +369,8 @@ export class App {
         });
 
         startButton.addEventListener("click", () => {
+
+            $("#random-slug").popover("hide");
 
             document.querySelector("#share-file").classList.toggle("d-none");
             document.querySelector("#share-screen").classList.toggle("d-none");

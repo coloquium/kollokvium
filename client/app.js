@@ -117,7 +117,8 @@ class App {
             $("#slug").popover('show');
             $("#random-slug").popover("hide");
         });
-        $("#random-slug").popover("show");
+        if (location.hash.length == 0)
+            $("#random-slug").popover("show");
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
@@ -132,6 +133,7 @@ class App {
             chatNick.value = "";
         });
         startButton.addEventListener("click", () => {
+            $("#random-slug").popover("hide");
             document.querySelector("#share-file").classList.toggle("d-none");
             document.querySelector("#share-screen").classList.toggle("d-none");
             document.querySelector("#show-chat").classList.toggle("d-none");
