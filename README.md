@@ -5,9 +5,7 @@ This is an example of applications based on thor-io vnext and its abstraction la
 
 Colloquium (Latin colloquium) is a living, developing example / web application.
 
-A live exampled deployed at Heroku can be found here https://kollokvium.herokuapp.com/
-
-Post issues, questions, ideas or anything you may think of under issues in this repo.
+A live example is deployed at Heroku, you can find it here - here https://kollokvium.herokuapp.com/
 
 Regards
  Team Kollokvium
