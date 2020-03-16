@@ -79,6 +79,7 @@ class App {
         generateSlug.addEventListener("click", () => {
             slug.value = Math.random().toString(36).substring(2).toLocaleLowerCase();
             startButton.disabled = false;
+            $("#random-slug").popover("hide");
         });
         muteAudio.addEventListener("click", (e) => {
             this.muteAudio(e);
@@ -114,7 +115,9 @@ class App {
         });
         slug.addEventListener("click", () => {
             $("#slug").popover('show');
+            $("#random-slug").popover("hide");
         });
+        $("#random-slug").popover("show");
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
