@@ -134,7 +134,7 @@ class App {
         });
         startButton.addEventListener("click", () => {
             $("#random-slug").popover("hide");
-            document.querySelector("#share-file").classList.toggle("d-none");
+            document.querySelector("#share-file").classList.toggle("hide");
             document.querySelector("#share-screen").classList.toggle("d-none");
             document.querySelector("#show-chat").classList.toggle("d-none");
             document.querySelector(".our-brand").remove();
@@ -216,6 +216,10 @@ class App {
                         height: { min: 400, ideal: 720 }
                     }, audio: true,
                 }).then((mediaStream) => {
+                    $(".local").popover("show");
+                    setTimeout(() => {
+                        $(".local").popover("hide");
+                    }, 5000);
                     this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
                     this.addLocalVideo(mediaStream);

@@ -372,7 +372,7 @@ export class App {
 
             $("#random-slug").popover("hide");
 
-            document.querySelector("#share-file").classList.toggle("d-none");
+            document.querySelector("#share-file").classList.toggle("hide");
             document.querySelector("#share-screen").classList.toggle("d-none");
             document.querySelector("#show-chat").classList.toggle("d-none");
             document.querySelector(".our-brand").remove();
@@ -473,6 +473,15 @@ export class App {
                         height: { min: 400, ideal: 720 }
                     }, audio: true,
                 }).then((mediaStream: MediaStream) => {
+
+
+                    $(".local").popover("show");
+
+
+                    setTimeout(() => {
+                        $(".local").popover("hide");
+                    },5000);
+
                     this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
                     this.addLocalVideo(mediaStream);
@@ -487,16 +496,10 @@ export class App {
         return new App()
     }
 }
-
 /*
     Launch the application
 */
 document.addEventListener("DOMContentLoaded", () => {
-
     if(!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://","https://")
-    
-    App.getInstance();
-
-
-
+   App.getInstance();
 });

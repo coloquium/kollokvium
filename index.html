@@ -45,8 +45,9 @@
                         thor-io</p>
                     <div class="input-group mb-3 col-md-6 mx-auto">
 
-                        <div class="input-group-prepend" id="random-slug" data-container="body"
-                            data-toggle="popover" data-placement="bottom" data-trigger="none" data-content="Click this button to create a random-room name, unique just for you!.. Otherwise, enter any name in the text field!">
+                        <div class="input-group-prepend" id="random-slug" data-container="body" data-toggle="popover"
+                            data-placement="top" data-trigger="none"
+                            data-content="Click this button to create a random-room name, unique just for you!.. Otherwise, enter any name in the text field!">
                             <button class="btn btn-secondary bt-lg" title="Generate a random room name..."
                                 id="generate-slug">
                                 <i class="fas fa-dice fa-2x"></i>
@@ -122,36 +123,45 @@
             <input type="file" class="file-selected" class="form-contol">
         </div>
 
-        <dic class="controls d-inline-flex flex-row align-items-center">
-            <div class="mr-4 p-1">
-                <i class="fas fa-video fa-2x" id="mute-local-video"></i>
-            </div>
-            <div class="mr-4 p-1">
-                <i class="fas fa-microhone fa-2x" id="mute-local-audio"></i>
-            </div>
-            <div class="mr-4 p-1 d-none d-lg-block">
-                <i class="fas fa-desktop fa-2x" id="share-screen" title="share your screen"></i>
-            </div>
+            <div class="controls d-inline-flex flex-row align-items-center w-100" >
+                <div class="mr-1 p-1">
+                    <i class="fas fa-video fa-1x" id="mute-local-video"></i>
+                </div>
+                <div class="mr-1 p-1">
+                    <i class="fas fa-microhone fa-1x" id="mute-local-audio"></i>
+                </div>
+                <div class="mr-1 p-1">
+                    <i class="fas fa-desktop fa-1x" id="share-screen" title="share your screen"></i>
+                </div>
 
-            <div class="mr-4 p-1">
-                <i class="fas fa-box-open fa-2x d-none" id="share-file"></i>
-            </div>
-            <div class="mr-4 p-1 d-lg-block">
+                <div class="mr-1 p-1">
+                    <i class="fas fa-box-open hide " id="share-file"></i>
+                </div>
+                <div class="mr-1 p-1">
 
-                <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
-                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
-                </i>
+                    <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
+                    <i id="show-chat" class="fas fa-comment-alt fa-1x d-none">
+                    </i>
 
-            </div>
+                </div>
+
+                <div class="mr-4 p-1">
+                
+                    <div class="local" data-container="body" data-toggle="popover"
+                    data-placement="top" data-trigger="none"
+                    data-content="Okay, this is you..."">
+
+
+                    </div>
+                    </div>
+
+
+                </div>
+
+              
 
 
 
-        </dic>
-
-        <div class="local">
-
-
-        </div>
     </header>
 
 

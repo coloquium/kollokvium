@@ -52,8 +52,10 @@ header .overlay {
     width: 100%;
     z-index: 10;
     padding: 1rem;
-    background-color: #fff;
+    background-color: #000;
     opacity: 0.6;
+    color: #fff;
+
 }
 
 #remote-videos video {
@@ -68,9 +70,7 @@ header .overlay {
 }
 
 .local {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
+   
 
 }
 
@@ -79,8 +79,9 @@ header .overlay {
 }
 
 .local video {
-    max-height: 100px;
-    max-width: 180px;
+    float: left;
+    margin-right: 1rem;
+    max-width: 80px;
     border: 2px solid #fff;
     transform: rotateY(180deg);    
 }
