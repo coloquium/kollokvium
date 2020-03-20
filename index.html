@@ -29,7 +29,7 @@
         Kollokvium
     </div>
 
-    <header>
+    <main>
         <div class="overlay"></div>
         <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop" class="full" width="1920"
             height="1080" poster="video/discussing_features.jpg">
@@ -39,10 +39,9 @@
             <div class="d-flex h-100 text-center align-items-center">
                 <div class="w-100 text-white">
                     <h1 class="display-4 custom-heading">
-                        <img src="img/logo.png" class="img-responsive" style="max-height:80px;filter:invert()">
+                        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive" style="max-height:80px;filter:invert()">
                         Kollokvium</h1>
-                    <p class="lead my-5">A free multi-party video conference for you and your friends brought to you by
-                        thor-io</p>
+                    <p class="lead my-5">A free multi-party video conference for you and your friends, family and colleagues!</p>
                     <div class="input-group mb-3 col-md-6 mx-auto">
 
                         <div class="input-group-prepend" id="random-slug" data-container="body" data-toggle="popover"
@@ -123,12 +122,20 @@
             <input type="file" class="file-selected" class="form-contol">
         </div>
 
+
+
+
+       
+
             <div class="controls d-inline-flex flex-row align-items-center w-100" >
+                <div class="mr-1 p-1">
+                    <i class="fas fa-cog fa-1x" id="settings"></i>
+                </div>
                 <div class="mr-1 p-1">
                     <i class="fas fa-video fa-1x" id="mute-local-video"></i>
                 </div>
                 <div class="mr-1 p-1">
-                    <i class="fas fa-microhone fa-1x" id="mute-local-audio"></i>
+                    <i class="fas fa-microphone fa-1x" id="mute-local-audio"></i>
                 </div>
                 <div class="mr-1 p-1">
                     <i class="fas fa-desktop fa-1x" id="share-screen" title="share your screen"></i>
@@ -149,7 +156,7 @@
                 
                     <div class="local" data-container="body" data-toggle="popover"
                     data-placement="top" data-trigger="none"
-                    data-content="Okay, this is you..."">
+                    data-content="Okay, this is you!  Want to change video/audio input, use settings...(down to the left)"">
 
 
                     </div>
@@ -159,10 +166,57 @@
                 </div>
 
               
+                <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Kollokvium settings</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                         
 
+                            <div class="form-horizontal">
+                         
+                         
+                                <div class="form-group">
+                                    <label for="txt-nick">Nickname:</label>
+                                    <input type="email" class="form-control" id="txt-nick" placeholder="Nickname displayed in chat...">
+                                  </div>
+                            
+                            </div>
+                            <div class="from-group">
+                                <label for="sel-video">Video source</label>
+                                <select class="form-control" id="sel-video">
+                                  <option value="">Not set </option>
+                                  </select>
+                            </div>
 
+                            <div class="from-group">
+                                <label for="sel-audio">Audio source</label>
+                                
+                                <select class="form-control" id="sel-audio">
+                                    <option value="">Not set</option>
+                                  </select>
+                            </div>
+                                
 
-    </header>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </main>
+
+   
+
+ 
 
 
 

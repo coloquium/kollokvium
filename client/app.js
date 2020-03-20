@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const thor_io_client_vnext_1 = require("thor-io.client-vnext");
 const clipboard_1 = __importDefault(require("clipboard"));
 const AppParticipant_1 = require("./AppParticipant");
-const SlugHistory_1 = require("./SlugHistory");
 const ReadFile_1 = require("./ReadFile");
+const AppSettings_1 = require("./AppSettings");
 class App {
     /**
      * Creates an instance of App - Kollokvium
@@ -30,11 +30,11 @@ class App {
                 }
             ]
         };
+        this.appSettings = new AppSettings_1.AppSettings();
         if (!location.href.includes("https://"))
             this.peerId = null;
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map();
-        let slugHistory = new SlugHistory_1.SlugHistory();
         this.Slug = location.hash.replace("#", "");
         this.fullScreenVideo = document.querySelector(".full");
         this.shareContainer = document.querySelector("#share-container");
@@ -48,8 +48,51 @@ class App {
         let muteAudio = document.querySelector("#mute-local-audio");
         let muteVideo = document.querySelector("#mute-local-video");
         let startScreenShare = document.querySelector("#share-screen");
+        let settings = document.querySelector("#settings");
+        let saveSettings = document.querySelector("#save-settings");
         let unreadBadge = document.querySelector("#unread-messages");
         let generateSlug = document.querySelector("#generate-slug");
+        let nickname = document.querySelector("#txt-nick");
+        let videoDevice = document.querySelector("#sel-video");
+        let audioDevice = document.querySelector("#sel-audio");
+        nickname.value = this.appSettings.nickname;
+        this.getMediaDevices().then((devices) => {
+            let inputOnly = devices.filter(((d) => {
+                return d.kind.indexOf("input") > 0;
+            }));
+            inputOnly.forEach((d) => {
+                let option = document.createElement("option");
+                option.textContent = d.label;
+                option.setAttribute("value", d.deviceId);
+                if (d.kind == "videoinput") {
+                    document.querySelector("#sel-video").append(option);
+                }
+                else {
+                    document.querySelector("#sel-audio").append(option);
+                }
+            });
+            videoDevice.value = this.appSettings.videoDevice;
+            audioDevice.value = this.appSettings.audioDevice;
+            // get the media devices 
+        }).catch(console.error);
+        saveSettings.addEventListener("click", () => {
+            this.appSettings.nickname = nickname.value;
+            this.appSettings.audioDevice = audioDevice.value;
+            this.appSettings.videoDevice = videoDevice.value;
+            this.appSettings.saveSetting();
+            this.rtcClient.LocalStreams.forEach((m) => {
+                document.querySelector(".l-" + m.id).remove();
+            });
+            this.rtcClient.LocalStreams = new Array();
+            this.getLocalStream(this.appSettings.createConstraints(), (mediaStream) => {
+                this.localMediaStream = mediaStream;
+                this.rtcClient.AddLocalStream(mediaStream);
+                this.addLocalVideo(mediaStream);
+            });
+        });
+        settings.addEventListener("click", () => {
+            $("#settings-modal").modal("toggle");
+        });
         // jQuery hack for file share
         $("#share-file").popover({
             trigger: "manual",
@@ -71,7 +114,7 @@ class App {
                 });
             });
         });
-        slugHistory.getHistory().forEach((slug) => {
+        this.appSettings.slugHistory.getHistory().forEach((slug) => {
             const option = document.createElement("option");
             option.setAttribute("value", slug);
             document.querySelector("#slug-history").prepend(option);
@@ -89,6 +132,9 @@ class App {
         });
         startScreenShare.addEventListener("click", () => {
             this.shareScreen();
+        });
+        this.shareFile.addEventListener("click", () => {
+            $("#share-file").popover("toggle");
         });
         let clipBoard = new clipboard_1.default("#share-link", {
             text: (t) => {
@@ -127,8 +173,7 @@ class App {
                 startButton.disabled = true;
             }
         });
-        // set a random nick..
-        chatNick.value = Math.random().toString(36).substring(8);
+        chatNick.value = this.appSettings.nickname;
         chatNick.addEventListener("click", () => {
             chatNick.value = "";
         });
@@ -143,7 +188,7 @@ class App {
             document.querySelector(".remote").classList.remove("hide");
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
-            slugHistory.addToHistory(slug.value);
+            this.appSettings.slugHistory.addToHistory(slug.value);
             this.rtcClient.ChangeContext(slug.value);
         });
         // if local ws://localhost:1337/     
@@ -210,25 +255,26 @@ class App {
             };
             broker.OnOpen = (ci) => {
                 console.log("connected to broker, no get a local media stream");
-                navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { min: 640, ideal: 1280 },
-                        height: { min: 400, ideal: 720 }
-                    }, audio: true,
-                }).then((mediaStream) => {
-                    $(".local").popover("show");
-                    setTimeout(() => {
-                        $(".local").popover("hide");
-                    }, 5000);
+                // get local Media Stream
+                this.getLocalStream(this.appSettings.createConstraints(), (mediaStream) => {
                     this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
                     this.addLocalVideo(mediaStream);
-                }).catch(err => {
-                    console.error(err);
                 });
             };
             broker.Connect();
         };
+    }
+    getLocalStream(constraints, cb) {
+        navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
+            $(".local").popover("show");
+            setTimeout(() => {
+                $(".local").popover("hide");
+            }, 5000);
+            cb(mediaStream);
+        }).catch(err => {
+            console.error(err);
+        });
     }
     /**
      * Adds a fileshare message to chat, when someone shared a file...
@@ -323,6 +369,7 @@ class App {
         let video = document.createElement("video");
         video.autoplay = true;
         video.muted = true;
+        video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
         let container = document.querySelector(".local");
         container.append(video);
@@ -376,6 +423,14 @@ class App {
             this.fullScreenVideo.srcObject = e.target.srcObject;
         });
     }
+    getMediaDevices() {
+        return new Promise((resolve, reject) => {
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
+                resolve(devices);
+            }).catch(reject);
+        });
+    }
+    ;
     /**
      *  Add aparticipant to the "conference"
      *

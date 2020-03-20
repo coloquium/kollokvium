@@ -1,7 +1,7 @@
 body{
     font-family: 'Nanum Gothic', sans-serif;
 }
-header {
+main {
     position: relative;
     background-color: black;
     height: 100vh;
@@ -10,7 +10,7 @@ header {
     overflow: hidden;
 }
 
-header .full {
+main .full {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -25,13 +25,13 @@ header .full {
     transform: translateX(-50%) translateY(-50%);
 }
 
-header .container {
+main .container {
     position: relative;
     z-index: 2;
 }
 
 
-header .overlay {
+main .overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -69,10 +69,6 @@ header .overlay {
 
 }
 
-.local {
-   
-
-}
 
 .hide {
     display: none;
