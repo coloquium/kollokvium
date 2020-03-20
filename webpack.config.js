@@ -1,9 +1,8 @@
 module.exports = {
   mode:"production", 
   watch: false,
-  entry: {
-    
-    app :'./client/app.js'
+  entry: {    
+    kollovium :'./client/app.js'
   },
   
   output: {

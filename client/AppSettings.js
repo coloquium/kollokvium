@@ -24,7 +24,6 @@ class AppSettings {
         if (this.videoDevice.length > 0) {
             constraints.video["deviceId"] = this.videoDevice;
         }
-        console.log(constraints);
         return constraints;
     }
     constructor() {

@@ -84,12 +84,12 @@ main .overlay {
 
 .controls{
     position: absolute;
-    bottom: 1rem;
+    bottom: 0px;
+    float:left;
     z-index: 200;
-    left: 1rem;
     color: #fff;
-    width:180px;
-    height:100px;
+    background: rgba(0,0,0,0.7);;
+ 
     
 }
 

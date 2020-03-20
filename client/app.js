@@ -8,6 +8,7 @@ const clipboard_1 = __importDefault(require("clipboard"));
 const AppParticipant_1 = require("./AppParticipant");
 const ReadFile_1 = require("./ReadFile");
 const AppSettings_1 = require("./AppSettings");
+const AppDomain_1 = require("./AppDomain");
 class App {
     /**
      * Creates an instance of App - Kollokvium
@@ -30,7 +31,15 @@ class App {
                 }
             ]
         };
+        // Name your app and it's secrect ( prefix )
+        this.appDomain = new AppDomain_1.AppDomain("Kollokvium", "kollokvium");
+        document.querySelector("#appDomain").textContent = this.appDomain.domain;
+        document.querySelector("#appVersion").textContent = this.appDomain.version;
         this.appSettings = new AppSettings_1.AppSettings();
+        // Remove screenshare on tables / mobile hack..
+        if (typeof window.orientation !== 'undefined') {
+            document.querySelector(".only-desktop").classList.add("hide");
+        }
         if (!location.href.includes("https://"))
             this.peerId = null;
         this.numOfChatMessagesUnread = 0;
@@ -163,8 +172,12 @@ class App {
             $("#slug").popover('show');
             $("#random-slug").popover("hide");
         });
-        if (location.hash.length == 0)
+        if (location.hash.length == 0) {
             $("#random-slug").popover("show");
+        }
+        else {
+            startButton.textContent = "JOIN";
+        }
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
@@ -189,7 +202,7 @@ class App {
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
             this.appSettings.slugHistory.addToHistory(slug.value);
-            this.rtcClient.ChangeContext(slug.value);
+            this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
         });
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
@@ -227,11 +240,9 @@ class App {
             this.rtcClient.OnContextConnected = (ctx) => {
             };
             this.rtcClient.OnContextCreated = (ctx) => {
-                console.log(ctx);
             };
             this.rtcClient.OnContextChanged = (ctx) => {
                 this.rtcClient.ConnectContext();
-                console.log("looks like we are abut to join a context...", ctx);
             };
             this.rtcClient.OnContextDisconnected = (peer) => {
                 document.querySelector(".p" + peer.id).remove();
@@ -245,17 +256,16 @@ class App {
                 participant.addTrack(track, (el) => {
                     document.querySelector("#remtote-audio-nodes").append(el);
                 });
-                // fires when lost a stream 
                 participant.onVideoTrackLost = (id, stream, track) => {
-                    document.querySelector(".p" + id).remove();
+                    let p = document.querySelector(".p" + id);
+                    if (p)
+                        p.remove();
                 };
             };
             this.rtcClient.OnContextCreated = function (ctx) {
-                console.log("got a context from the broker", ctx);
+                // noop
             };
             broker.OnOpen = (ci) => {
-                console.log("connected to broker, no get a local media stream");
-                // get local Media Stream
                 this.getLocalStream(this.appSettings.createConstraints(), (mediaStream) => {
                     this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
@@ -265,6 +275,7 @@ class App {
             broker.Connect();
         };
     }
+    // Create a an AppDomain of kollokvium;
     getLocalStream(constraints, cb) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
             $(".local").popover("show");

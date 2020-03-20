@@ -6,12 +6,17 @@ import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './ReadFile';
 import { AppSettings } from './AppSettings';
+import { AppDomain } from './AppDomain';
 
 
 export class App {
-    getLocalStream(constraints:MediaStreamConstraints,cb:Function) {
-        
+    appDomain: AppDomain;
 
+    // Create a an AppDomain of kollokvium;
+
+  
+
+    getLocalStream(constraints:MediaStreamConstraints,cb:Function) {
 
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             $(".local").popover("show");
@@ -266,7 +271,19 @@ export class App {
      */
     constructor() {
 
+        // Name your app and it's secrect ( prefix )
+        this.appDomain = new AppDomain("Kollokvium","kollokvium");
+
+        document.querySelector("#appDomain").textContent = this.appDomain.domain;
+        document.querySelector("#appVersion").textContent = this.appDomain.version;
+
         this.appSettings = new AppSettings();
+
+        // Remove screenshare on tables / mobile hack..
+        if (typeof window.orientation !== 'undefined') { 
+            document.querySelector(".only-desktop").classList.add("hide");
+        }
+
 
 
         if (!location.href.includes("https://"))
@@ -451,9 +468,12 @@ export class App {
         });
 
 
-        if (location.hash.length == 0)
+        if (location.hash.length == 0){
             $("#random-slug").popover("show");
-
+        }else{
+            startButton.textContent = "JOIN";
+        }
+        
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
@@ -486,7 +506,7 @@ export class App {
 
             this.appSettings.slugHistory.addToHistory(slug.value);
 
-            this.rtcClient.ChangeContext(slug.value);
+            this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
         });
 
         // if local ws://localhost:1337/     
@@ -539,12 +559,11 @@ export class App {
             this.rtcClient.OnContextConnected = (ctx) => {
             };
             this.rtcClient.OnContextCreated = (ctx) => {
-                console.log(ctx);
-
+               
             };
             this.rtcClient.OnContextChanged = (ctx) => {
                 this.rtcClient.ConnectContext();
-                console.log("looks like we are abut to join a context...", ctx);
+
             }
             this.rtcClient.OnContextDisconnected = (peer) => {
                 document.querySelector(".p" + peer.id).remove();
@@ -558,20 +577,17 @@ export class App {
                 participant.addTrack(track, (el: HTMLAudioElement) => {
                     document.querySelector("#remtote-audio-nodes").append(el);
                 });
-                // fires when lost a stream 
+           
                 participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
-                    document.querySelector(".p" + id).remove();
+                    let p = document.querySelector(".p" + id);
+                    if(p) p.remove();
                 }
             }
             this.rtcClient.OnContextCreated = function (ctx: PeerConnection) {
-                console.log("got a context from the broker", ctx);
+                    // noop
             }
             broker.OnOpen = (ci: any) => {
-                console.log("connected to broker, no get a local media stream");
-
-
-                // get local Media Stream
-          
+        
                 this.getLocalStream(
                     this.appSettings.createConstraints(),
                                 (mediaStream:MediaStream) => {

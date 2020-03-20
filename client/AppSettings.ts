@@ -14,21 +14,18 @@ export class AppSettings {
         localStorage.setItem("settings", JSON.stringify(data));
     }
     createConstraints(): MediaStreamConstraints {
-        const constraints: MediaStreamConstraints ={
+        const constraints: MediaStreamConstraints = {
             video: {
                 width: { min: 640, ideal: 1280 },
                 height: { min: 400, ideal: 720 }
             }, audio: true,
-        };        
-        if(this.audioDevice.length > 0){
-                constraints.video["deviceId"] = this.audioDevice
+        };
+        if (this.audioDevice.length > 0) {
+            constraints.video["deviceId"] = this.audioDevice
         }
-        if(this.videoDevice.length > 0){
+        if (this.videoDevice.length > 0) {
             constraints.video["deviceId"] = this.videoDevice
         }
-
-        console.log(constraints);
-
 
         return constraints;
     }

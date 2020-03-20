@@ -1,6 +1,23 @@
-<html>
-
+<html lang="en-US">
 <head>
+    <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+ 
+    <link rel="apple-touch-icon" sizes="57x57" href="img/favicons/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="img/favicons/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="img/favicons/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="img/favicons/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="img/favicons/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="img/favicons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="img/favicons/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="img/favicons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="img/favicons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/favicons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="img/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="img/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="img/favicons/favicon-16x16.png">
+    <meta name="theme-color" content="#ffffff">
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -9,9 +26,6 @@
 
         gtag('config', 'UA-160656421-1');
     </script>
-    <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css"
         integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -25,23 +39,25 @@
 
     </div>
 
-    <div class="our-brand">
-        Kollokvium
+    <div class="our-brand" id="appVersion">
+        1.0.2
     </div>
 
     <main>
         <div class="overlay"></div>
         <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop" class="full" width="1920"
-            height="1080" poster="video/discussing_features.jpg">
-            <source src="video/discussing_features.mp4" type="video/mp4">
+            height="1080" poster="video/coverr-sunrise-1563948708950.jpg">
+            <source src="video/coverr-sunrise-1563948708950.mp4" type="video/mp4">
         </video>
         <div class="container h-100 join">
             <div class="d-flex h-100 text-center align-items-center">
                 <div class="w-100 text-white">
                     <h1 class="display-4 custom-heading">
-                        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive" style="max-height:80px;filter:invert()">
-                        Kollokvium</h1>
-                    <p class="lead my-5">A free multi-party video conference for you and your friends, family and colleagues!</p>
+                        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive"
+                            style="max-height:80px;filter:invert()">
+                        <span id="appDomain">Kollokvium</span></h1>
+                    <p class="lead my-5">A free multi-party video conference for you and your friends, family and
+                        colleagues!</p>
                     <div class="input-group mb-3 col-md-6 mx-auto">
 
                         <div class="input-group-prepend" id="random-slug" data-container="body" data-toggle="popover"
@@ -65,7 +81,7 @@
 
                         <div class="input-group-append">
                             <button id="joinconference" class="btn btn-primary bt-lg" type="button"
-                                disabled>JOIN</button>
+                                disabled>START</button>
                         </div>
                     </div>
 
@@ -125,98 +141,99 @@
 
 
 
-       
-
-            <div class="controls d-inline-flex flex-row align-items-center w-100" >
-                <div class="mr-1 p-1">
-                    <i class="fas fa-cog fa-1x" id="settings"></i>
-                </div>
-                <div class="mr-1 p-1">
-                    <i class="fas fa-video fa-1x" id="mute-local-video"></i>
-                </div>
-                <div class="mr-1 p-1">
-                    <i class="fas fa-microphone fa-1x" id="mute-local-audio"></i>
-                </div>
-                <div class="mr-1 p-1">
-                    <i class="fas fa-desktop fa-1x" id="share-screen" title="share your screen"></i>
-                </div>
-
-                <div class="mr-1 p-1">
-                    <i class="fas fa-box-open hide " id="share-file"></i>
-                </div>
-                <div class="mr-1 p-1">
-
-                    <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
-                    <i id="show-chat" class="fas fa-comment-alt fa-1x d-none">
-                    </i>
-
-                </div>
-
-                <div class="mr-4 p-1">
-                
-                    <div class="local" data-container="body" data-toggle="popover"
-                    data-placement="top" data-trigger="none"
-                    data-content="Okay, this is you!  Want to change video/audio input, use settings...(down to the left)"">
 
 
-                    </div>
-                    </div>
+        <div class="controls d-inline-flex flex-row align-items-center w-100">
+            <div class="p-2">
+                <i class="fas fa-cog fa-2x" id="settings"></i>
+            </div>
+            <div class="p-2">
+                <i class="fas fa-video fa-2x" id="mute-local-video"></i>
+            </div>
+            <div class="p-2">
+                <i class="fas fa-microphone fa-2x" id="mute-local-audio"></i>
+            </div>
+            <div class="p-2 only-desktop">
+                <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
+            </div>
+
+            <div class="p-2">
+                <i class="fas fa-file hide fa-2x " id="share-file"></i>
+            </div>
+            <div class="p-2">
+
+                <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
+                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
+                </i>
+
+            </div>
+
+            <div class="p-2">
+
+
+                <div class="local" data-container="body" data-toggle="popover" data-placement="top" data-trigger="none"
+                    data-content="Okay, this is you!  Want to change video/audio input, use settings...(down to the left)">
 
 
                 </div>
+            </div>
 
-              
-                <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title">Kollokvium settings</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+
+        </div>
+
+
+        <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Kollokvium settings</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                         
-
-                            <div class="form-horizontal">
-                         
-                         
-                                <div class="form-group">
-                                    <label for="txt-nick">Nickname:</label>
-                                    <input type="email" class="form-control" id="txt-nick" placeholder="Nickname displayed in chat...">
-                                  </div>
-                            
-                            </div>
-                            <div class="from-group">
-                                <label for="sel-video">Video source</label>
-                                <select class="form-control" id="sel-video">
-                                  <option value="">Not set </option>
-                                  </select>
-                            </div>
-
-                            <div class="from-group">
-                                <label for="sel-audio">Audio source</label>
-                                
-                                <select class="form-control" id="sel-audio">
-                                    <option value="">Not set</option>
-                                  </select>
-                            </div>
-                                
-
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                      </div>
+                        </button>
                     </div>
-                  </div>
+                    <div class="modal-body">
 
-                </main>
 
-   
+                        <div class="form-horizontal">
 
- 
+
+                            <div class="form-group">
+                                <label for="txt-nick">Nickname:</label>
+                                <input type="email" class="form-control" id="txt-nick"
+                                    placeholder="Nickname displayed in chat...">
+                            </div>
+
+                        </div>
+                        <div class="from-group">
+                            <label for="sel-video">Video source</label>
+                            <select class="form-control" id="sel-video">
+                                <option value="">Not set </option>
+                            </select>
+                        </div>
+
+                        <div class="from-group">
+                            <label for="sel-audio">Audio source</label>
+
+                            <select class="form-control" id="sel-audio">
+                                <option value="">Not set</option>
+                            </select>
+                        </div>
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+
+
 
 
 
@@ -254,7 +271,7 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/7.3.0/adapter.js"></script>
-    <script src="build/app-bundle.js"></script>
+    <script src="build/kollovium-bundle.js"></script>
 </body>
 
 </html>
