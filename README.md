@@ -15,7 +15,9 @@ Regards
 1. Clone this repo
 2. Run npm install 
 3. Run npm start to start local-server at http://localhost:1337 
-4. Modify and play
+4. Modify & compile
+5. Make sure you run weback , or put it on watch 
+
 
 
 
