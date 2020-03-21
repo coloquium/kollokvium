@@ -3,7 +3,8 @@ body{
 }
 main {
     position: relative;
-    background-color: black;
+    background-image: url(../img/bg_defult.png);    
+    background-size: cover;
     height: 100vh;
     min-height: 25rem;
     width: 100%;
@@ -42,6 +43,15 @@ main .overlay {
     z-index: 1;
 }
 
+.chat {
+    opacity: 0.95;
+    height: 70%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+
+}
 
 
 .remote {
@@ -49,23 +59,7 @@ main .overlay {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
     z-index: 10;
-    padding: 1rem;
-    background-color: #000;
-    opacity: 0.6;
-    color: #fff;
-
-}
-
-#remote-videos video {
-    float: left;
-   
-    border: 2px solid #fff;
-    margin-right: 1rem;
-    max-height: 80px;
-
-    object-fit: cover;
 
 }
 
@@ -134,4 +128,105 @@ main .overlay {
 
     position: absolute;
     z-index: 200;
+}
+
+.video-grid {
+    position: relative;
+    height: auto;
+}
+
+
+
+.video-grid ul {
+
+    list-style: none;
+            display: block;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+
+}
+
+.video-grid ul li {
+    margin: 0;
+    padding: 0;
+    perspective: 720px;
+    position: relative;
+    display: block;
+    overflow: hidden;
+  
+
+}
+
+.video-grid ul li video {
+    position: absolute;
+    left: 50%;
+    /* % of surrounding element */
+    top: 50%;
+    transform: translate(-50%, -50%);
+    /* % of current element */
+
+}
+
+
+li:first-child:nth-last-child(1) {
+    /* -or- li:only-child { */
+    width: 100%;
+}
+
+/* two items */
+li:first-child:nth-last-child(2),
+li:first-child:nth-last-child(2)~li {
+    width: 50%;
+    height: 100%;
+}
+
+/* three items */
+li:first-child:nth-last-child(3),
+li:first-child:nth-last-child(3)~li {
+    width: 50%;
+    height: 50%;
+}
+
+/* four items */
+li:first-child:nth-last-child(4),
+li:first-child:nth-last-child(4)~li {
+    width: 50%;
+    height: 50%;
+}
+
+li:first-child:nth-last-child(5),
+li:first-child:nth-last-child(5)~li {
+    width: 50%;
+    height: 33%;
+}
+
+li:first-child:nth-last-child(6) li:first-child:nth-last-child(6)~li {
+    width: 50%;
+    height: 33%;
+}
+
+li:first-child:nth-last-child(7),
+li:first-child:nth-last-child(7)~li {
+    width: 33%;
+    height: 33%
+}
+
+li:first-child:nth-last-child(8),
+li:first-child:nth-last-child(8)~li {
+    width: 33%;
+    height: 33%
+}
+
+li:first-child:nth-last-child(9),
+li:first-child:nth-last-child(9)~li {
+    width: 33%;
+    height: 33%
+}
+
+.fullscreen {
+    color: #fff;
+    position: absolute;
+    z-index: 1000;
+    margin: 1rem;
 }

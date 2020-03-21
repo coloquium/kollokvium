@@ -1,9 +1,10 @@
 <html lang="en-US">
+
 <head>
     <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
- 
+
     <link rel="apple-touch-icon" sizes="57x57" href="img/favicons/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="img/favicons/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="img/favicons/apple-icon-72x72.png">
@@ -40,15 +41,106 @@
     </div>
 
     <div class="our-brand" id="appVersion">
-        1.0.2
+        1.0.4
     </div>
 
+
+
+
     <main>
+
         <div class="overlay"></div>
-        <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop="loop" class="full" width="1920"
-            height="1080" poster="video/coverr-sunrise-1563948708950.jpg">
-            <source src="video/coverr-sunrise-1563948708950.mp4" type="video/mp4">
-        </video>
+
+        <div class="container-fluid chat d-none mt-3">
+               
+                
+                    <div class="card bg-light h-100">
+                        <div class="card-header">Chat
+
+                            <span style="float:right" id="close-chat">
+                                <span aria-hidden="true">&times;</span>
+                            </span>
+
+                        </div>
+                        <div class="card-body" style="overflow:auto">
+                            <p class="card-text" id="chatmessages">
+
+                            </p>
+                        </div>
+                        <div class="card-footer">
+
+                            <div class="form">
+                                <div class="form-row">
+                                    <div class="form-group col-md-2">
+                                        <input type="email" class="form-control" id="chat-nick" value="John Doe">
+                                    </div>
+                                    <div class="form-group col-md-10">
+                                        <input type="email" class="form-control" id="chat-message"
+                                            placeholder="What do you want to say?">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="container-fluid remote hide my-2" id="share-container">
+
+
+            <div class="alert alert-secondary">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="alert-heading"> No others here...</h4>
+                <p>
+
+                    <strong>You just need to share link, copy and share!</strong>
+                    <button class="mr-1 btn btn-primary mx-1 my bt-sm" id="share-link">Copy link</button>
+                </p>
+            </div>
+
+
+
+
+        </div>
+
+        <div class="video-grid h-100 w-100 d-none flex-wrap" id="video-grid">
+
+            <ul class="d-flex flex-wrap flex-row" id="remote-videos">
+
+
+
+
+
+
+                <!-- <li>
+                    <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop>
+                        <source src="video/coverr-joyful-girl--1565864884510.mp4" type="video/mp4">
+                    </video>
+                </li>
+
+                <li>
+                    <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop>
+                        <source src="video/coverr-sunrise-1563948708950.mp4" type="video/mp4">
+                    </video>
+                </li> -->
+
+
+
+
+            </ul>
+
+        </div>
+
+      
+
         <div class="container h-100 join">
             <div class="d-flex h-100 text-center align-items-center">
                 <div class="w-100 text-white">
@@ -88,59 +180,20 @@
                 </div>
             </div>
         </div>
-        <div class="container h-100 chat d-none">
-            <div class="d-flex h-100 text-left align-items-center">
-                <div class="w-100 text-dark">
-
-                    <div class="card bg-light d-flex h-50">
-                        <div class="card-header">Chat
-
-                            <span style="float:right" id="close-chat">
-                                <span aria-hidden="true">&times;</span>
-                            </span>
-
-                        </div>
-                        <div class="card-body" style="overflow:auto">
-                            <p class="card-text" id="chatmessages">
-
-                            </p>
-                        </div>
-                        <div class="card-footer">
-
-                            <div class="form">
-                                <div class="form-row">
-                                    <div class="form-group col-md-2">
-                                        <input type="email" class="form-control" id="chat-nick" value="John Doe">
-                                    </div>
-                                    <div class="form-group col-md-10">
-                                        <input type="email" class="form-control" id="chat-message"
-                                            placeholder="What do you want to say?">
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                </div>
-            </div>
-
-
-        </div>
+  
 
 
 
         </div>
 
-        <div id="share-form">
+
+
+
+
+        <div id="share-form" class="hide">
 
             <input type="file" class="file-selected" class="form-contol">
         </div>
-
-
-
-
 
 
         <div class="controls d-inline-flex flex-row align-items-center w-100">
@@ -236,29 +289,6 @@
 
 
 
-
-    <nav class="remote hide">
-        <div class="container-fluid" id="share-container">
-            <div class="row">
-                <div class="col-md-8 mx-auto">
-                    <h5> No others here...</h5>
-                    <p class="mt-1">
-                        Ok,Invite others by sharing link!
-                        <button class="btn btn-primary mx-1 my bt-sm" id="share-link">Copy link</button>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12" id="remote-videos">
-
-                </div>
-            </div>
-        </div>
-
-    </nav>
 
     </div>
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"

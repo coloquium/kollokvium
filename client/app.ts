@@ -11,6 +11,7 @@ import { AppDomain } from './AppDomain';
 
 export class App {
     appDomain: AppDomain;
+    videoGrid: HTMLElement;
 
     // Create a an AppDomain of kollokvium;
 
@@ -220,13 +221,43 @@ export class App {
             this.shareContainer.classList.add("hide");
         }
 
-        let video = document.createElement("video");
-        video.classList.add("rounded", "mx-auto", "d-block");
+        let item = document.createElement("li");
+        item.setAttribute("class", "p" + id);
 
+        let f = document.createElement("i");
+        //   <i class="fas fa-arrows-alt fa-2x fullscreen"></i>
+        f.classList.add("fas","fa-arrows-alt","fa-2x","fullscreen")
+
+
+        item.prepend(f);
+
+        let video = document.createElement("video");
+      
         video.srcObject = mediaStream;
-        video.setAttribute("class", "p" + id);
+
+        video.width = 1920;
+        video.height = 1080;
         video.autoplay = true;
-        document.querySelector("#remote-videos").append(video);
+
+        item.append(video);
+
+        
+        f.addEventListener("click",(e) =>  {          
+                let elem = video;
+              
+                if (!document.fullscreenElement) {
+                  elem.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                  });
+                } else {
+                  document.exitFullscreen();
+                }
+            });
+              
+        
+
+        document.querySelector("#remote-videos").append(item);
+
 
         video.addEventListener("click", (e: any) => {
             this.fullScreenVideo.play();
@@ -299,6 +330,8 @@ export class App {
         this.fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
         this.shareContainer = document.querySelector("#share-container");
         this.shareFile = document.querySelector("#share-file") as HTMLElement;
+
+        this.videoGrid = document.querySelector("#video-grid") as HTMLElement;
 
 
         let slug = document.querySelector("#slug") as HTMLInputElement;
@@ -491,6 +524,9 @@ export class App {
 
         startButton.addEventListener("click", () => {
 
+            this.videoGrid.classList.add("d-flex");
+
+
             $("#random-slug").popover("hide");
 
             document.querySelector("#share-file").classList.toggle("hide");
@@ -505,6 +541,10 @@ export class App {
             document.querySelector(".join").classList.add("d-none");
 
             this.appSettings.slugHistory.addToHistory(slug.value);
+
+            this.appSettings.saveSetting();
+
+            
 
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
         });

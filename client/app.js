@@ -48,6 +48,7 @@ class App {
         this.fullScreenVideo = document.querySelector(".full");
         this.shareContainer = document.querySelector("#share-container");
         this.shareFile = document.querySelector("#share-file");
+        this.videoGrid = document.querySelector("#video-grid");
         let slug = document.querySelector("#slug");
         let startButton = document.querySelector("#joinconference");
         let chatWindow = document.querySelector(".chat");
@@ -191,6 +192,7 @@ class App {
             chatNick.value = "";
         });
         startButton.addEventListener("click", () => {
+            this.videoGrid.classList.add("d-flex");
             $("#random-slug").popover("hide");
             document.querySelector("#share-file").classList.toggle("hide");
             document.querySelector("#share-screen").classList.toggle("d-none");
@@ -202,6 +204,7 @@ class App {
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
             this.appSettings.slugHistory.addToHistory(slug.value);
+            this.appSettings.saveSetting();
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
         });
         // if local ws://localhost:1337/     
@@ -423,12 +426,30 @@ class App {
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
         }
+        let item = document.createElement("li");
+        item.setAttribute("class", "p" + id);
+        let f = document.createElement("i");
+        //   <i class="fas fa-arrows-alt fa-2x fullscreen"></i>
+        f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen");
+        item.prepend(f);
         let video = document.createElement("video");
-        video.classList.add("rounded", "mx-auto", "d-block");
         video.srcObject = mediaStream;
-        video.setAttribute("class", "p" + id);
+        video.width = 1920;
+        video.height = 1080;
         video.autoplay = true;
-        document.querySelector("#remote-videos").append(video);
+        item.append(video);
+        f.addEventListener("click", (e) => {
+            let elem = video;
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            }
+            else {
+                document.exitFullscreen();
+            }
+        });
+        document.querySelector("#remote-videos").append(item);
         video.addEventListener("click", (e) => {
             this.fullScreenVideo.play();
             this.fullScreenVideo.srcObject = e.target.srcObject;
