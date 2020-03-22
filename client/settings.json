@@ -1,0 +1,6 @@
+{
+    "domain": "Kollokvium",
+    "contextPrefix": "kollokvium",
+    "serverUrl": "wss://kollokvium.herokuapp.com",
+    "version": "1.0.5"
+}

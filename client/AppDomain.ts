@@ -4,12 +4,24 @@
  * @export
  * @class AppDomain
  */
-export class AppDomain {
+
+ const appConfig = require("./settings.json");
+
+
+ export class AppDomain {
     getSlug(value: string): string {
      return `${this.contextPrefix}-${value}`;
     }
     version:string;
-    constructor(public domain: string, public contextPrefix: string) {
-        this.version = "1.0.5";
+    serverUrl: string;
+    domain:string;
+    contextPrefix:string;
+    constructor(){
+    
+        this.domain = appConfig.domain;
+        this.contextPrefix = appConfig.contextPrefix;
+        this.serverUrl = appConfig.serverUrl;
+        this.version = appConfig.version;
+       
     }
 }

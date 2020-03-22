@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const SlugHistory_1 = require("./SlugHistory");
-class AppSettings {
+class UserSettings {
     saveSetting() {
         const data = {
             slugHistory: this.slugHistory.history,
@@ -44,4 +44,4 @@ class AppSettings {
         }
     }
 }
-exports.AppSettings = AppSettings;
+exports.UserSettings = UserSettings;

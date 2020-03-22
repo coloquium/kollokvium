@@ -1,5 +1,5 @@
 import { SlugHistory } from './SlugHistory';
-export class AppSettings {
+export class UserSettings {
     slugHistory: SlugHistory;
     videoDevice: string;
     audioDevice: string;

@@ -5,7 +5,7 @@ import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './ReadFile';
-import { AppSettings } from './AppSettings';
+import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
 
 
@@ -38,7 +38,7 @@ export class App {
     peerId: any;
     numOfChatMessagesUnread: number;
 
-    appSettings: AppSettings;
+    userSettings: UserSettings;
 
 
     /**
@@ -298,13 +298,13 @@ export class App {
      */
     constructor() {
 
-        // Name your app and it's secrect ( prefix )
-        this.appDomain = new AppDomain("Kollokvium","kollokvium");
+        // see settings.json
+        this.appDomain = new AppDomain();
 
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
 
-        this.appSettings = new AppSettings();
+        this.userSettings = new UserSettings();
 
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') { 
@@ -352,7 +352,7 @@ export class App {
         let videoDevice = document.querySelector("#sel-video") as HTMLInputElement;
         let audioDevice = document.querySelector("#sel-audio") as HTMLInputElement;
 
-        nickname.value = this.appSettings.nickname;
+        nickname.value = this.userSettings.nickname;
           
     
 
@@ -376,19 +376,19 @@ export class App {
 
                 });
             
-                videoDevice.value = this.appSettings.videoDevice;
-                audioDevice.value = this.appSettings.audioDevice;
+                videoDevice.value = this.userSettings.videoDevice;
+                audioDevice.value = this.userSettings.audioDevice;
                 // get the media devices 
 
         }).catch(console.error);
 
         saveSettings.addEventListener("click", () => {
            
-            this.appSettings.nickname = nickname.value;
-            this.appSettings.audioDevice = audioDevice.value;
-            this.appSettings.videoDevice = videoDevice.value;
+            this.userSettings.nickname = nickname.value;
+            this.userSettings.audioDevice = audioDevice.value;
+            this.userSettings.videoDevice = videoDevice.value;
 
-            this.appSettings.saveSetting();
+            this.userSettings.saveSetting();
 
             this.rtcClient.LocalStreams.forEach( (m:MediaStream) => {
                 
@@ -396,7 +396,7 @@ export class App {
             });
             this.rtcClient.LocalStreams = new Array<MediaStream>();
 
-            this.getLocalStream(this.appSettings.createConstraints(),(mediaStream:MediaStream) => {
+            this.getLocalStream(this.userSettings.createConstraints(),(mediaStream:MediaStream) => {
                 this.localMediaStream = mediaStream;
                 this.rtcClient.AddLocalStream(mediaStream);
                 this.addLocalVideo(mediaStream);
@@ -433,7 +433,7 @@ export class App {
 
        
 
-        this.appSettings.slugHistory.getHistory().forEach((slug: string) => {
+        this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
             const option = document.createElement("option");
             option.setAttribute("value", slug);
             document.querySelector("#slug-history").prepend(option);
@@ -512,7 +512,7 @@ export class App {
         });
 
        
-        chatNick.value = this.appSettings.nickname;
+        chatNick.value = this.userSettings.nickname;
 
         chatNick.addEventListener("click", () => {
             chatNick.value = "";
@@ -536,9 +536,9 @@ export class App {
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
 
-            this.appSettings.slugHistory.addToHistory(slug.value);
+            this.userSettings.slugHistory.addToHistory(slug.value);
 
-            this.appSettings.saveSetting();
+            this.userSettings.saveSetting();
 
             
 
@@ -547,7 +547,7 @@ export class App {
 
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connectToServer("wss://kollokvium.herokuapp.com/", {})
+        this.factory = this.connectToServer(this.appDomain.serverUrl, {})
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
@@ -625,7 +625,7 @@ export class App {
             broker.OnOpen = (ci: any) => {
         
                 this.getLocalStream(
-                    this.appSettings.createConstraints(),
+                    this.userSettings.createConstraints(),
                                 (mediaStream:MediaStream) => {
                     this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);

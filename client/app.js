@@ -7,7 +7,7 @@ const thor_io_client_vnext_1 = require("thor-io.client-vnext");
 const clipboard_1 = __importDefault(require("clipboard"));
 const AppParticipant_1 = require("./AppParticipant");
 const ReadFile_1 = require("./ReadFile");
-const AppSettings_1 = require("./AppSettings");
+const UserSettings_1 = require("./UserSettings");
 const AppDomain_1 = require("./AppDomain");
 class App {
     /**
@@ -31,11 +31,11 @@ class App {
                 }
             ]
         };
-        // Name your app and it's secrect ( prefix )
-        this.appDomain = new AppDomain_1.AppDomain("Kollokvium", "kollokvium");
+        // see settings.json
+        this.appDomain = new AppDomain_1.AppDomain();
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
-        this.appSettings = new AppSettings_1.AppSettings();
+        this.userSettings = new UserSettings_1.UserSettings();
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
@@ -65,7 +65,7 @@ class App {
         let nickname = document.querySelector("#txt-nick");
         let videoDevice = document.querySelector("#sel-video");
         let audioDevice = document.querySelector("#sel-audio");
-        nickname.value = this.appSettings.nickname;
+        nickname.value = this.userSettings.nickname;
         this.getMediaDevices().then((devices) => {
             let inputOnly = devices.filter(((d) => {
                 return d.kind.indexOf("input") > 0;
@@ -81,20 +81,20 @@ class App {
                     document.querySelector("#sel-audio").append(option);
                 }
             });
-            videoDevice.value = this.appSettings.videoDevice;
-            audioDevice.value = this.appSettings.audioDevice;
+            videoDevice.value = this.userSettings.videoDevice;
+            audioDevice.value = this.userSettings.audioDevice;
             // get the media devices 
         }).catch(console.error);
         saveSettings.addEventListener("click", () => {
-            this.appSettings.nickname = nickname.value;
-            this.appSettings.audioDevice = audioDevice.value;
-            this.appSettings.videoDevice = videoDevice.value;
-            this.appSettings.saveSetting();
+            this.userSettings.nickname = nickname.value;
+            this.userSettings.audioDevice = audioDevice.value;
+            this.userSettings.videoDevice = videoDevice.value;
+            this.userSettings.saveSetting();
             this.rtcClient.LocalStreams.forEach((m) => {
                 document.querySelector(".l-" + m.id).remove();
             });
             this.rtcClient.LocalStreams = new Array();
-            this.getLocalStream(this.appSettings.createConstraints(), (mediaStream) => {
+            this.getLocalStream(this.userSettings.createConstraints(), (mediaStream) => {
                 this.localMediaStream = mediaStream;
                 this.rtcClient.AddLocalStream(mediaStream);
                 this.addLocalVideo(mediaStream);
@@ -124,7 +124,7 @@ class App {
                 });
             });
         });
-        this.appSettings.slugHistory.getHistory().forEach((slug) => {
+        this.userSettings.slugHistory.getHistory().forEach((slug) => {
             const option = document.createElement("option");
             option.setAttribute("value", slug);
             document.querySelector("#slug-history").prepend(option);
@@ -187,7 +187,7 @@ class App {
                 startButton.disabled = true;
             }
         });
-        chatNick.value = this.appSettings.nickname;
+        chatNick.value = this.userSettings.nickname;
         chatNick.addEventListener("click", () => {
             chatNick.value = "";
         });
@@ -203,13 +203,13 @@ class App {
             document.querySelector(".remote").classList.remove("hide");
             document.querySelector(".overlay").classList.add("d-none");
             document.querySelector(".join").classList.add("d-none");
-            this.appSettings.slugHistory.addToHistory(slug.value);
-            this.appSettings.saveSetting();
+            this.userSettings.slugHistory.addToHistory(slug.value);
+            this.userSettings.saveSetting();
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
         });
         // if local ws://localhost:1337/     
         //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connectToServer("wss://kollokvium.herokuapp.com/", {});
+        this.factory = this.connectToServer(this.appDomain.serverUrl, {});
         this.factory.OnClose = (reason) => {
             console.error(reason);
         };
@@ -269,7 +269,7 @@ class App {
                 // noop
             };
             broker.OnOpen = (ci) => {
-                this.getLocalStream(this.appSettings.createConstraints(), (mediaStream) => {
+                this.getLocalStream(this.userSettings.createConstraints(), (mediaStream) => {
                     this.localMediaStream = mediaStream;
                     this.rtcClient.AddLocalStream(mediaStream);
                     this.addLocalVideo(mediaStream);

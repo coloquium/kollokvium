@@ -1,19 +1,21 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 /**
  *  Class enebales customization of "Kollokvium" for personal / corperate usage
  *
  * @export
  * @class AppDomain
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+const appConfig = require("./settings.json");
 class AppDomain {
-    constructor(domain, contextPrefix) {
-        this.domain = domain;
-        this.contextPrefix = contextPrefix;
-        this.version = "1.0.5";
-    }
     getSlug(value) {
         return `${this.contextPrefix}-${value}`;
+    }
+    constructor() {
+        this.domain = appConfig.domain;
+        this.contextPrefix = appConfig.contextPrefix;
+        this.serverUrl = appConfig.serverUrl;
+        this.version = appConfig.version;
     }
 }
 exports.AppDomain = AppDomain;
