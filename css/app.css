@@ -68,12 +68,25 @@ main .overlay {
     display: none;
 }
 
+.local {
+    position: absolute;
+    bottom: 80px;
+    right: 1rem;
+}
+
 .local video {
+  
+    right: 0;
     float: left;
-    margin-right: 1rem;
-    max-width: 80px;
-    border: 2px solid #fff;
-    transform: rotateY(180deg);    
+    margin: 1rem;
+    max-height: 100px;
+    
+    border: 2px solid #fff; 
+
+}
+
+.local:first-child{
+   transform: rotateY(180deg);    
 }
 
 .controls{

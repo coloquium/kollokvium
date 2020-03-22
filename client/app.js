@@ -281,10 +281,6 @@ class App {
     // Create a an AppDomain of kollokvium;
     getLocalStream(constraints, cb) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
-            $(".local").popover("show");
-            setTimeout(() => {
-                $(".local").popover("hide");
-            }, 5000);
             cb(mediaStream);
         }).catch(err => {
             console.error(err);

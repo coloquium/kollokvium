@@ -14,16 +14,11 @@ export class App {
     videoGrid: HTMLElement;
 
     // Create a an AppDomain of kollokvium;
-
-  
+ 
 
     getLocalStream(constraints:MediaStreamConstraints,cb:Function) {
 
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
-            $(".local").popover("show");
-            setTimeout(() => {
-                $(".local").popover("hide");
-            }, 5000);
             
             cb(mediaStream);
 
@@ -228,6 +223,7 @@ export class App {
         //   <i class="fas fa-arrows-alt fa-2x fullscreen"></i>
         f.classList.add("fas","fa-arrows-alt","fa-2x","fullscreen")
 
+    
 
         item.prepend(f);
 

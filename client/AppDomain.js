@@ -10,7 +10,7 @@ class AppDomain {
     constructor(domain, contextPrefix) {
         this.domain = domain;
         this.contextPrefix = contextPrefix;
-        this.version = "1.0.3";
+        this.version = "1.0.5";
     }
     getSlug(value) {
         return `${this.contextPrefix}-${value}`;

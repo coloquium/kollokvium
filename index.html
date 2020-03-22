@@ -4,7 +4,6 @@
     <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <link rel="apple-touch-icon" sizes="57x57" href="img/favicons/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="img/favicons/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="img/favicons/apple-icon-72x72.png">
@@ -20,13 +19,13 @@
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicons/favicon-16x16.png">
     <meta name="theme-color" content="#ffffff">
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
-    <script>
+    <!-- <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-160656421-1');
-    </script>
+    </script> -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css"
         integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -114,27 +113,6 @@
         <div class="video-grid h-100 w-100 d-none flex-wrap" id="video-grid">
 
             <ul class="d-flex flex-wrap flex-row" id="remote-videos">
-
-
-
-
-
-
-                <!-- <li>
-                    <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop>
-                        <source src="video/coverr-joyful-girl--1565864884510.mp4" type="video/mp4">
-                    </video>
-                </li>
-
-                <li>
-                    <video playsinline="playsinline" autoplay="autoplay" muted="muted" loop>
-                        <source src="video/coverr-sunrise-1563948708950.mp4" type="video/mp4">
-                    </video>
-                </li> -->
-
-
-
-
             </ul>
 
         </div>
@@ -196,40 +174,37 @@
         </div>
 
 
-        <div class="controls d-inline-flex flex-row align-items-center w-100">
-            <div class="p-2">
-                <i class="fas fa-cog fa-2x" id="settings"></i>
+        <div class="local">
+
+
+        </div>
+
+        <div class="controls d-inline-flex flex-row align-items-center w-100 justify-content-center">
+            <div class="p-3">
+                <i class="fas fa-cog fa-3x" id="settings"></i>
             </div>
-            <div class="p-2">
-                <i class="fas fa-video fa-2x" id="mute-local-video"></i>
+            <div class="p-3">
+                <i class="fas fa-video fa-3x" id="mute-local-video"></i>
             </div>
-            <div class="p-2">
-                <i class="fas fa-microphone fa-2x" id="mute-local-audio"></i>
+            <div class="p-3">
+                <i class="fas fa-microphone fa-3x" id="mute-local-audio"></i>
             </div>
-            <div class="p-2 only-desktop">
-                <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
+            <div class="p-3 only-desktop">
+                <i class="fas fa-desktop fa-3x " id="share-screen" title="share your screen"></i>
             </div>
 
-            <div class="p-2">
-                <i class="fas fa-file hide fa-2x " id="share-file"></i>
+            <div class="p-3">
+                <i class="fas fa-file hide fa-3x " id="share-file"></i>
             </div>
-            <div class="p-2">
+            <div class="p-3">
 
                 <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
-                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
+                <i id="show-chat" class="fas fa-comment-alt fa-3x d-none">
                 </i>
 
             </div>
 
-            <div class="p-2">
-
-
-                <div class="local" data-container="body" data-toggle="popover" data-placement="top" data-trigger="none"
-                    data-content="Okay, this is you!  Want to change video/audio input, use settings...(down to the left)">
-
-
-                </div>
-            </div>
+          
 
 
         </div>

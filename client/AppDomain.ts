@@ -10,6 +10,6 @@ export class AppDomain {
     }
     version:string;
     constructor(public domain: string, public contextPrefix: string) {
-        this.version = "1.0.3";
+        this.version = "1.0.5";
     }
 }
