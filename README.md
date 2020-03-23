@@ -41,8 +41,7 @@ Clone/download the this repo, modify settings.json in found in the ./client fold
 
 ## Set up on host
  
-If you want to host "only" client, copy index.html, img,build and css folders into your site and/or folder.  To host application deploy all in your hosting enviorment 
-
+If you want to host "only" client, copy index.html, img,build and css folders into your site and/or folder.  To host application deploy all in your hosting enviorment. 
 
 
 ## Other

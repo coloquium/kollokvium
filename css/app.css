@@ -237,9 +237,36 @@ li:first-child:nth-last-child(9)~li {
     height: 33%
 }
 
-.fullscreen {
-    color: #fff;
+.video-tools {
     position: absolute;
     z-index: 1000;
-    margin: 1rem;
+
+    margin: .5rem;
+}
+
+.video-tools i {
+    margin-right: 10px;
+    z-index: 1000;
+
+    margin: .5rem;
+}
+
+.fullscreen {
+    color: #fff;
+
+}
+
+.record {
+    color: #ff0000;
+    ;
+}
+
+.flash {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
 }

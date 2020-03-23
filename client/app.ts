@@ -7,6 +7,7 @@ import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
+import { MediaStreamRecorder } from './Recorder/MediaStreamRecorder';
 
 
 export class App {
@@ -14,12 +15,12 @@ export class App {
     videoGrid: HTMLElement;
 
     // Create a an AppDomain of kollokvium;
- 
 
-    getLocalStream(constraints:MediaStreamConstraints,cb:Function) {
+
+    getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
 
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
-            
+
             cb(mediaStream);
 
         }).catch(err => {
@@ -40,6 +41,7 @@ export class App {
 
     userSettings: UserSettings;
 
+    recorder: MediaStreamRecorder;
 
     /**
      * Adds a fileshare message to chat, when someone shared a file...
@@ -136,7 +138,40 @@ export class App {
             track.enabled = !track.enabled;
 
         });
+    }
+    /**
+     * Record a remotestream
+     *
+     * @param {string} peerid
+     * @memberof App
+     */
+    recordStream(peerid:string){
+        if(!this.recorder) {
+            let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks()
+            this.recorder = new MediaStreamRecorder(tracks);
+            this.recorder.mediaStream.addTrack(
+                this.rtcClient.LocalStreams[0].getAudioTracks()[0]
+            );
+            
+            this.recorder.start(20);
+        }   else{
+            this.recorder.stop();
 
+            
+            let result = this.recorder.toBlob();
+            const download = document.createElement("a");
+            download.setAttribute("href", result);
+            download.textContent =  peerid;
+            download.setAttribute("download", `${peerid}.webm`);
+            
+            document.querySelector("#recorder-download").append(download);
+
+            $("#recorder-result").modal("show");
+
+            this.recorder = null;
+
+        }        
+    
     }
 
     /**
@@ -212,23 +247,31 @@ export class App {
      */
     addRemoteVideo(id: string, mediaStream: MediaStream) {
 
+
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
         }
+        let videoTools = document.createElement("div");
+
+        videoTools.classList.add("video-tools");
 
         let item = document.createElement("li");
         item.setAttribute("class", "p" + id);
 
         let f = document.createElement("i");
-        //   <i class="fas fa-arrows-alt fa-2x fullscreen"></i>
-        f.classList.add("fas","fa-arrows-alt","fa-2x","fullscreen")
+        f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen")
 
-    
+        let r = document.createElement("i");
+        r.classList.add("fas", "fa-circle", "fa-2x", "record")
+        r.dataset.peerid = id;
 
-        item.prepend(f);
+        videoTools.append(f);
+        videoTools.append(r);
+
+        item.prepend(videoTools);
 
         let video = document.createElement("video");
-      
+
         video.srcObject = mediaStream;
 
         video.width = 1920;
@@ -237,20 +280,33 @@ export class App {
 
         item.append(video);
 
-        
-        f.addEventListener("click",(e) =>  {          
-                let elem = video;
-              
-                if (!document.fullscreenElement) {
-                  elem.requestFullscreen().catch(err => {
+
+        // listener for fulscreen view of a participants video
+        f.addEventListener("click", (e) => {
+            let elem = video;
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
                     alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                  });
-                } else {
-                  document.exitFullscreen();
-                }
-            });
-              
-        
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        r.addEventListener("click",(e) => {
+           
+            let s = e.target as HTMLElement           
+            s.classList.toggle("flash");
+
+            this.recordStream(s.dataset.peerid);
+            
+           
+            
+        });
+
+        // beta only supports one participant..
+        if(this.participants.size > 1) r.classList.add("hide");
+
 
         document.querySelector("#remote-videos").append(item);
 
@@ -262,13 +318,13 @@ export class App {
     }
 
 
-    getMediaDevices():Promise<Array<MediaDeviceInfo>> {
-        return new Promise<Array<MediaDeviceInfo>>( (resolve:any,reject:any ) => {
+    getMediaDevices(): Promise<Array<MediaDeviceInfo>> {
+        return new Promise<Array<MediaDeviceInfo>>((resolve: any, reject: any) => {
             navigator.mediaDevices.enumerateDevices().then((devices: Array<MediaDeviceInfo>) => {
-                resolve(devices);    
+                resolve(devices);
             }).catch(reject);
         });
-      
+
 
     };
 
@@ -307,7 +363,7 @@ export class App {
         this.userSettings = new UserSettings();
 
         // Remove screenshare on tables / mobile hack..
-        if (typeof window.orientation !== 'undefined') { 
+        if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
         }
 
@@ -320,7 +376,7 @@ export class App {
 
         this.participants = new Map<string, AppParticipant>();
 
-      
+
         this.Slug = location.hash.replace("#", "");
 
         this.fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
@@ -353,56 +409,56 @@ export class App {
         let audioDevice = document.querySelector("#sel-audio") as HTMLInputElement;
 
         nickname.value = this.userSettings.nickname;
-          
-    
 
-    
-        this.getMediaDevices().then( (devices:Array<MediaDeviceInfo>) => {
 
-                let inputOnly = devices.filter( ((d:MediaDeviceInfo) => {
-                     return d.kind.indexOf("input") > 0
-                }));                
-                inputOnly.forEach ( (d:MediaDeviceInfo) => {
 
-                    let option = document.createElement("option");
-                    option.textContent = d.label;
-                    option.setAttribute("value",d.deviceId);
 
-                    if(d.kind == "videoinput"){
-                        document.querySelector("#sel-video").append(option);
-                    }else {
-                        document.querySelector("#sel-audio").append(option);
-                    }
+        this.getMediaDevices().then((devices: Array<MediaDeviceInfo>) => {
 
-                });
-            
-                videoDevice.value = this.userSettings.videoDevice;
-                audioDevice.value = this.userSettings.audioDevice;
-                // get the media devices 
+            let inputOnly = devices.filter(((d: MediaDeviceInfo) => {
+                return d.kind.indexOf("input") > 0
+            }));
+            inputOnly.forEach((d: MediaDeviceInfo) => {
+
+                let option = document.createElement("option");
+                option.textContent = d.label;
+                option.setAttribute("value", d.deviceId);
+
+                if (d.kind == "videoinput") {
+                    document.querySelector("#sel-video").append(option);
+                } else {
+                    document.querySelector("#sel-audio").append(option);
+                }
+
+            });
+
+            videoDevice.value = this.userSettings.videoDevice;
+            audioDevice.value = this.userSettings.audioDevice;
+            // get the media devices 
 
         }).catch(console.error);
 
         saveSettings.addEventListener("click", () => {
-           
+
             this.userSettings.nickname = nickname.value;
             this.userSettings.audioDevice = audioDevice.value;
             this.userSettings.videoDevice = videoDevice.value;
 
             this.userSettings.saveSetting();
 
-            this.rtcClient.LocalStreams.forEach( (m:MediaStream) => {
-                
+            this.rtcClient.LocalStreams.forEach((m: MediaStream) => {
+
                 document.querySelector(".l-" + m.id).remove();
             });
             this.rtcClient.LocalStreams = new Array<MediaStream>();
 
-            this.getLocalStream(this.userSettings.createConstraints(),(mediaStream:MediaStream) => {
+            this.getLocalStream(this.userSettings.createConstraints(), (mediaStream: MediaStream) => {
                 this.localMediaStream = mediaStream;
                 this.rtcClient.AddLocalStream(mediaStream);
                 this.addLocalVideo(mediaStream);
             });
 
-            
+
         });
 
         settings.addEventListener("click", () => {
@@ -431,7 +487,7 @@ export class App {
             });
         });
 
-       
+
 
         this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
             const option = document.createElement("option");
@@ -456,7 +512,7 @@ export class App {
             this.shareScreen();
         });
 
-        this.shareFile.addEventListener("click",() => {
+        this.shareFile.addEventListener("click", () => {
             $("#share-file").popover("toggle");
         });
 
@@ -497,12 +553,12 @@ export class App {
         });
 
 
-        if (location.hash.length == 0){
+        if (location.hash.length == 0) {
             $("#random-slug").popover("show");
-        }else{
+        } else {
             startButton.textContent = "JOIN";
         }
-        
+
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
@@ -511,7 +567,7 @@ export class App {
             }
         });
 
-       
+
         chatNick.value = this.userSettings.nickname;
 
         chatNick.addEventListener("click", () => {
@@ -540,7 +596,7 @@ export class App {
 
             this.userSettings.saveSetting();
 
-            
+
 
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
         });
@@ -595,7 +651,7 @@ export class App {
             this.rtcClient.OnContextConnected = (ctx) => {
             };
             this.rtcClient.OnContextCreated = (ctx) => {
-               
+
             };
             this.rtcClient.OnContextChanged = (ctx) => {
                 this.rtcClient.ConnectContext();
@@ -613,24 +669,24 @@ export class App {
                 participant.addTrack(track, (el: HTMLAudioElement) => {
                     document.querySelector("#remtote-audio-nodes").append(el);
                 });
-           
+
                 participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
                     let p = document.querySelector(".p" + id);
-                    if(p) p.remove();
+                    if (p) p.remove();
                 }
             }
             this.rtcClient.OnContextCreated = function (ctx: PeerConnection) {
-                    // noop
+                // noop
             }
             broker.OnOpen = (ci: any) => {
-        
+
                 this.getLocalStream(
                     this.userSettings.createConstraints(),
-                                (mediaStream:MediaStream) => {
-                    this.localMediaStream = mediaStream;
-                    this.rtcClient.AddLocalStream(mediaStream);
-                    this.addLocalVideo(mediaStream);
-                });
+                    (mediaStream: MediaStream) => {
+                        this.localMediaStream = mediaStream;
+                        this.rtcClient.AddLocalStream(mediaStream);
+                        this.addLocalVideo(mediaStream);
+                    });
 
 
 
@@ -648,7 +704,7 @@ export class App {
 document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
 
-   
+
 
 
 

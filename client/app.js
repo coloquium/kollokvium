@@ -9,6 +9,7 @@ const AppParticipant_1 = require("./AppParticipant");
 const ReadFile_1 = require("./ReadFile");
 const UserSettings_1 = require("./UserSettings");
 const AppDomain_1 = require("./AppDomain");
+const MediaStreamRecorder_1 = require("./Recorder/MediaStreamRecorder");
 class App {
     /**
      * Creates an instance of App - Kollokvium
@@ -370,6 +371,31 @@ class App {
         });
     }
     /**
+     * Record a remotestream
+     *
+     * @param {string} peerid
+     * @memberof App
+     */
+    recordStream(peerid) {
+        if (!this.recorder) {
+            let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks();
+            this.recorder = new MediaStreamRecorder_1.MediaStreamRecorder(tracks);
+            this.recorder.mediaStream.addTrack(this.rtcClient.LocalStreams[0].getAudioTracks()[0]);
+            this.recorder.start(20);
+        }
+        else {
+            this.recorder.stop();
+            let result = this.recorder.toBlob();
+            const download = document.createElement("a");
+            download.setAttribute("href", result);
+            download.textContent = peerid;
+            download.setAttribute("download", `${peerid}.webm`);
+            document.querySelector("#recorder-download").append(download);
+            $("#recorder-result").modal("show");
+            this.recorder = null;
+        }
+    }
+    /**
      * Add a local media stream to the UI
      *
      * @param {MediaStream} mediaStream
@@ -422,18 +448,25 @@ class App {
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
         }
+        let videoTools = document.createElement("div");
+        videoTools.classList.add("video-tools");
         let item = document.createElement("li");
         item.setAttribute("class", "p" + id);
         let f = document.createElement("i");
-        //   <i class="fas fa-arrows-alt fa-2x fullscreen"></i>
         f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen");
-        item.prepend(f);
+        let r = document.createElement("i");
+        r.classList.add("fas", "fa-circle", "fa-2x", "record");
+        r.dataset.peerid = id;
+        videoTools.append(f);
+        videoTools.append(r);
+        item.prepend(videoTools);
         let video = document.createElement("video");
         video.srcObject = mediaStream;
         video.width = 1920;
         video.height = 1080;
         video.autoplay = true;
         item.append(video);
+        // listener for fulscreen view of a participants video
         f.addEventListener("click", (e) => {
             let elem = video;
             if (!document.fullscreenElement) {
@@ -445,6 +478,14 @@ class App {
                 document.exitFullscreen();
             }
         });
+        r.addEventListener("click", (e) => {
+            let s = e.target;
+            s.classList.toggle("flash");
+            this.recordStream(s.dataset.peerid);
+        });
+        // beta only supports one participant..
+        if (this.participants.size > 1)
+            r.classList.add("hide");
         document.querySelector("#remote-videos").append(item);
         video.addEventListener("click", (e) => {
             this.fullScreenVideo.play();

@@ -21,13 +21,13 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
     
     <!-- remove GA ,if you customize, host by yourself -->
-    <script>
+    <!-- <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-160656421-1');
-    </script>
+    </script> -->
     <!-- remove GA, if you customize, host by yourself -->
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css"
@@ -212,6 +212,30 @@
 
 
         </div>
+
+
+        <div id="recorder-result" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+          
+           
+              <div class="modal-content">
+                <div class="modal-header">
+                
+                  <h4 class="modal-title">Recording ended...</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                  <p id="recorder-download"></p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+          
+            </div>
+          </div>
 
 
         <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
