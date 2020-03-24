@@ -7,7 +7,7 @@ import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
-import {MediaStreamBlender} from 'mediastreamblender'
+import { MediaStreamBlender } from 'mediastreamblender'
 
 
 export class App {
@@ -146,7 +146,7 @@ export class App {
      * @param {string} peerid
      * @memberof App
      */
-    recordStream(peerid:string){
+    recordStream(peerid: string) {
         // if(!this.mediaStreamBlender) {
         //     let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks()
 
@@ -155,18 +155,18 @@ export class App {
         //     this.mediaStreamBlender.mediaStream.addTrack(
         //         this.rtcClient.LocalStreams[0].getAudioTracks()[0]
         //     );
-            
+
         //     this.mediaStreamBlender.start(20);
         // }   else{
         //     this.mediaStreamBlender.stop();
 
-            
+
         //     let result = this.mediaStreamBlender.toBlob();
         //     const download = document.createElement("a");
         //     download.setAttribute("href", result);
         //     download.textContent =  peerid;
         //     download.setAttribute("download", `${peerid}.webm`);
-            
+
         //     document.querySelector("#recorder-download").append(download);
 
         //     $("#recorder-result").modal("show");
@@ -174,7 +174,7 @@ export class App {
         //     this.mediaStreamBlender = null;
 
         // }        
-    
+
     }
 
     /**
@@ -193,7 +193,7 @@ export class App {
         container.append(video);
 
         // and local stream to mixer / blender;
-         this.mediaStreamBlender.addTracks(mediaStream.id,mediaStream.getTracks(),true);     
+        this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
 
 
 
@@ -269,16 +269,16 @@ export class App {
         let f = document.createElement("i");
         f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen")
 
-      
+
 
         videoTools.append(f);
-     
+
         item.prepend(videoTools);
 
         let video = document.createElement("video");
 
         video.srcObject = mediaStream;
-     
+
         video.width = 1920;
         video.height = 1080;
         video.autoplay = true;
@@ -311,7 +311,7 @@ export class App {
         document.querySelector("#remote-videos").append(item);
 
         console.log("adding remote video to ui");
-        
+
     }
 
 
@@ -336,7 +336,7 @@ export class App {
             this.participants.set(id, new AppParticipant(id));
             let p = this.participants.get(id);
             p.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
-                this.mediaStreamBlender.addTracks(id,[mediaStreamTrack],false);
+                this.mediaStreamBlender.addTracks(id, [mediaStreamTrack], false);
                 this.addRemoteVideo(id, mediaStream);
             }
             return p;
@@ -355,39 +355,50 @@ export class App {
 
         // hook up listeners for MediaBlender
 
+
+        let watermark = document.querySelector("#watermark") as HTMLImageElement;
+
+        this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
+            // postprocess , add a watermark image to recorder.      
+            ctx.save();
+            ctx.filter = "invert()";
+            ctx.drawImage(watermark, 10, 10, 100, 100);
+            ctx.restore();
+        }
+
         this.mediaStreamBlender.onTrack = () => {
             console.log("track added to mediablender");
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
 
-            
+
         }
         this.mediaStreamBlender.onRecordingStart = () => {
             console.log("started recording session..");
-            this.sendMessage(this.userSettings.nickname,"I'm now recording the session.");
+            this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
         }
 
-        this.mediaStreamBlender.onRecordingEnded = (blobUrl:string) => {
+        this.mediaStreamBlender.onRecordingEnded = (blobUrl: string) => {
 
             let p = document.createElement("p");
 
             const download = document.createElement("a");
             download.setAttribute("href", blobUrl);
-            download.textContent =  "Your recording has ended, here is the file. ( click to download )";
+            download.textContent = "Your recording has ended, here is the file. ( click to download )";
             download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
-            
+
             p.append(download);
 
             document.querySelector("#recorder-download").append(p);
 
             $("#recorder-result").modal("show");
 
-        }; 
+        };
 
 
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
 
-     
+
         this.userSettings = new UserSettings();
 
         // Remove screenshare on tables / mobile hack..
@@ -414,7 +425,7 @@ export class App {
         this.videoGrid = document.querySelector("#video-grid") as HTMLElement;
 
 
-        this.audioNode = document.querySelector("#remtote-audio-nodes audio")as HTMLAudioElement;
+        this.audioNode = document.querySelector("#remtote-audio-nodes audio") as HTMLAudioElement;
 
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
@@ -711,8 +722,8 @@ export class App {
 
                 participant.addTrack(track, (el: HTMLAudioElement) => {
 
-                    this.mediaStreamBlender.addTracks(`audio-${connection.id}`,[track],false);
-                  
+                    this.mediaStreamBlender.addTracks(`audio-${connection.id}`, [track], false);
+
 
                 });
 

@@ -36,6 +36,14 @@ class App {
         this.appDomain = new AppDomain_1.AppDomain();
         this.mediaStreamBlender = new mediastreamblender_1.MediaStreamBlender();
         // hook up listeners for MediaBlender
+        let watermark = document.querySelector("#watermark");
+        this.mediaStreamBlender.onFrameRendered = (ctx) => {
+            // postprocess , add a watermark image to recorder.      
+            ctx.save();
+            ctx.filter = "invert()";
+            ctx.drawImage(watermark, 10, 10, 100, 100);
+            ctx.restore();
+        };
         this.mediaStreamBlender.onTrack = () => {
             console.log("track added to mediablender");
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
