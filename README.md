@@ -1,11 +1,11 @@
 # Kollokvium (colloquium)
 
 ## about
-This is an example of applications based on thor-io vnext and its abstraction layer WebRTC API. It gives you a multi-party video conference with room function's, screen & file sharing + a simpe chat.
+Kollokvium is an example web-based real time chat application that utilises the thor-io vnext libraries' WebRTC API functionality. 
 
-Colloquium (Latin colloquium) is a living, developing example / web application.
+It allows you to create and join chat rooms and is capable of web based video & audio streaming along with screen & file sharing and ofcourse, real time text chat. 
 
-A live example is deployed at Heroku, you can find it here - here https://kollokvium.herokuapp.com/
+It is an all in one solution that requires no installation, and is compatible with most modern browsers.
 
 
 ## feature list
