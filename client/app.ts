@@ -7,12 +7,13 @@ import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
-import { MediaStreamRecorder } from './Recorder/MediaStreamRecorder';
+import {MediaStreamBlender} from 'mediastreamblender'
 
 
 export class App {
     appDomain: AppDomain;
     videoGrid: HTMLElement;
+    audioNode: HTMLAudioElement;
 
     // Create a an AppDomain of kollokvium;
 
@@ -41,7 +42,7 @@ export class App {
 
     userSettings: UserSettings;
 
-    recorder: MediaStreamRecorder;
+    mediaStreamBlender: MediaStreamBlender;
 
     /**
      * Adds a fileshare message to chat, when someone shared a file...
@@ -146,31 +147,33 @@ export class App {
      * @memberof App
      */
     recordStream(peerid:string){
-        if(!this.recorder) {
-            let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks()
-            this.recorder = new MediaStreamRecorder(tracks);
-            this.recorder.mediaStream.addTrack(
-                this.rtcClient.LocalStreams[0].getAudioTracks()[0]
-            );
+        // if(!this.mediaStreamBlender) {
+        //     let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks()
+
+        //     this.mediaStreamBlender = new MediaStreamRecorder(tracks);
+
+        //     this.mediaStreamBlender.mediaStream.addTrack(
+        //         this.rtcClient.LocalStreams[0].getAudioTracks()[0]
+        //     );
             
-            this.recorder.start(20);
-        }   else{
-            this.recorder.stop();
+        //     this.mediaStreamBlender.start(20);
+        // }   else{
+        //     this.mediaStreamBlender.stop();
 
             
-            let result = this.recorder.toBlob();
-            const download = document.createElement("a");
-            download.setAttribute("href", result);
-            download.textContent =  peerid;
-            download.setAttribute("download", `${peerid}.webm`);
+        //     let result = this.mediaStreamBlender.toBlob();
+        //     const download = document.createElement("a");
+        //     download.setAttribute("href", result);
+        //     download.textContent =  peerid;
+        //     download.setAttribute("download", `${peerid}.webm`);
             
-            document.querySelector("#recorder-download").append(download);
+        //     document.querySelector("#recorder-download").append(download);
 
-            $("#recorder-result").modal("show");
+        //     $("#recorder-result").modal("show");
 
-            this.recorder = null;
+        //     this.mediaStreamBlender = null;
 
-        }        
+        // }        
     
     }
 
@@ -188,6 +191,11 @@ export class App {
         video.srcObject = mediaStream;
         let container = document.querySelector(".local") as HTMLElement;
         container.append(video);
+
+        // and local stream to mixer / blender;
+         this.mediaStreamBlender.addTracks(mediaStream.id,mediaStream.getTracks(),true);     
+
+
 
     }
 
@@ -261,19 +269,16 @@ export class App {
         let f = document.createElement("i");
         f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen")
 
-        let r = document.createElement("i");
-        r.classList.add("fas", "fa-circle", "fa-2x", "record")
-        r.dataset.peerid = id;
+      
 
         videoTools.append(f);
-        videoTools.append(r);
-
+     
         item.prepend(videoTools);
 
         let video = document.createElement("video");
 
         video.srcObject = mediaStream;
-
+     
         video.width = 1920;
         video.height = 1080;
         video.autoplay = true;
@@ -293,28 +298,20 @@ export class App {
             }
         });
 
-        r.addEventListener("click",(e) => {
-           
-            let s = e.target as HTMLElement           
-            s.classList.toggle("flash");
-
-            this.recordStream(s.dataset.peerid);
-            
-           
-            
-        });
+        // r.addEventListener("click",(e) => {
+        //     let s = e.target as HTMLElement           
+        //     s.classList.toggle("flash");
+        //     this.recordStream(s.dataset.peerid);
+        // });
 
         // beta only supports one participant..
-        if(this.participants.size > 1) r.classList.add("hide");
+        // if(this.participants.size > 1) r.classList.add("hide");
 
 
         document.querySelector("#remote-videos").append(item);
 
-
-        video.addEventListener("click", (e: any) => {
-            this.fullScreenVideo.play();
-            this.fullScreenVideo.srcObject = e.target.srcObject;
-        });
+        console.log("adding remote video to ui");
+        
     }
 
 
@@ -324,10 +321,7 @@ export class App {
                 resolve(devices);
             }).catch(reject);
         });
-
-
     };
-
     /**
      *  Add aparticipant to the "conference"
      *
@@ -342,12 +336,12 @@ export class App {
             this.participants.set(id, new AppParticipant(id));
             let p = this.participants.get(id);
             p.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
+                this.mediaStreamBlender.addTracks(id,[mediaStreamTrack],false);
                 this.addRemoteVideo(id, mediaStream);
             }
             return p;
         }
     }
-
     /**
      * Creates an instance of App - Kollokvium
      * @memberof App
@@ -357,9 +351,43 @@ export class App {
         // see settings.json
         this.appDomain = new AppDomain();
 
+        this.mediaStreamBlender = new MediaStreamBlender();
+
+        // hook up listeners for MediaBlender
+
+        this.mediaStreamBlender.onTrack = () => {
+            console.log("track added to mediablender");
+            this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
+
+            
+        }
+        this.mediaStreamBlender.onRecordingStart = () => {
+            console.log("started recording session..");
+            this.sendMessage(this.userSettings.nickname,"I'm now recording the session.");
+        }
+
+        this.mediaStreamBlender.onRecordingEnded = (blobUrl:string) => {
+
+            let p = document.createElement("p");
+
+            const download = document.createElement("a");
+            download.setAttribute("href", blobUrl);
+            download.textContent =  "Your recording has ended, here is the file. ( click to download )";
+            download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
+            
+            p.append(download);
+
+            document.querySelector("#recorder-download").append(p);
+
+            $("#recorder-result").modal("show");
+
+        }; 
+
+
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
 
+     
         this.userSettings = new UserSettings();
 
         // Remove screenshare on tables / mobile hack..
@@ -386,6 +414,8 @@ export class App {
         this.videoGrid = document.querySelector("#video-grid") as HTMLElement;
 
 
+        this.audioNode = document.querySelector("#remtote-audio-nodes audio")as HTMLAudioElement;
+
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         let chatWindow = document.querySelector(".chat") as HTMLElement;
@@ -408,8 +438,20 @@ export class App {
         let videoDevice = document.querySelector("#sel-video") as HTMLInputElement;
         let audioDevice = document.querySelector("#sel-audio") as HTMLInputElement;
 
+        let toogleRecord = document.querySelector(".record") as HTMLAudioElement;
+
+
+
         nickname.value = this.userSettings.nickname;
 
+
+        toogleRecord.addEventListener("click", () => {
+
+            toogleRecord.classList.toggle("flash");
+            this.mediaStreamBlender.render(60);
+            this.mediaStreamBlender.record();
+
+        });
 
 
 
@@ -578,6 +620,7 @@ export class App {
 
             this.videoGrid.classList.add("d-flex");
 
+            document.querySelector("#record").classList.remove("d-none");
 
             $("#random-slug").popover("hide");
 
@@ -662,17 +705,24 @@ export class App {
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 document.querySelector(".remote").classList.remove("hide");
-                // addRemoteVideo(peer.stream, peer.id);
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
+
                 participant.addTrack(track, (el: HTMLAudioElement) => {
-                    document.querySelector("#remtote-audio-nodes").append(el);
+
+                    this.mediaStreamBlender.addTracks(`audio-${connection.id}`,[track],false);
+                  
+
                 });
+
 
                 participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
                     let p = document.querySelector(".p" + id);
                     if (p) p.remove();
+
+                    // todo:  Remove from blender..
+
                 }
             }
             this.rtcClient.OnContextCreated = function (ctx: PeerConnection) {

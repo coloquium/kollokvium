@@ -2,7 +2,7 @@ module.exports = {
   mode:"production", 
   watch: false,
   entry: {    
-    kollovium :'./client/app.js'
+    kollovium :'./client/app.js',
   },
   
   output: {

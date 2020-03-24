@@ -9,7 +9,7 @@ const AppParticipant_1 = require("./AppParticipant");
 const ReadFile_1 = require("./ReadFile");
 const UserSettings_1 = require("./UserSettings");
 const AppDomain_1 = require("./AppDomain");
-const MediaStreamRecorder_1 = require("./Recorder/MediaStreamRecorder");
+const mediastreamblender_1 = require("mediastreamblender");
 class App {
     /**
      * Creates an instance of App - Kollokvium
@@ -34,6 +34,26 @@ class App {
         };
         // see settings.json
         this.appDomain = new AppDomain_1.AppDomain();
+        this.mediaStreamBlender = new mediastreamblender_1.MediaStreamBlender();
+        // hook up listeners for MediaBlender
+        this.mediaStreamBlender.onTrack = () => {
+            console.log("track added to mediablender");
+            this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
+        };
+        this.mediaStreamBlender.onRecordingStart = () => {
+            console.log("started recording session..");
+            this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
+        };
+        this.mediaStreamBlender.onRecordingEnded = (blobUrl) => {
+            let p = document.createElement("p");
+            const download = document.createElement("a");
+            download.setAttribute("href", blobUrl);
+            download.textContent = "Your recording has ended, here is the file. ( click to download )";
+            download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
+            p.append(download);
+            document.querySelector("#recorder-download").append(p);
+            $("#recorder-result").modal("show");
+        };
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
         this.userSettings = new UserSettings_1.UserSettings();
@@ -50,6 +70,7 @@ class App {
         this.shareContainer = document.querySelector("#share-container");
         this.shareFile = document.querySelector("#share-file");
         this.videoGrid = document.querySelector("#video-grid");
+        this.audioNode = document.querySelector("#remtote-audio-nodes audio");
         let slug = document.querySelector("#slug");
         let startButton = document.querySelector("#joinconference");
         let chatWindow = document.querySelector(".chat");
@@ -66,7 +87,13 @@ class App {
         let nickname = document.querySelector("#txt-nick");
         let videoDevice = document.querySelector("#sel-video");
         let audioDevice = document.querySelector("#sel-audio");
+        let toogleRecord = document.querySelector(".record");
         nickname.value = this.userSettings.nickname;
+        toogleRecord.addEventListener("click", () => {
+            toogleRecord.classList.toggle("flash");
+            this.mediaStreamBlender.render(60);
+            this.mediaStreamBlender.record();
+        });
         this.getMediaDevices().then((devices) => {
             let inputOnly = devices.filter(((d) => {
                 return d.kind.indexOf("input") > 0;
@@ -194,6 +221,7 @@ class App {
         });
         startButton.addEventListener("click", () => {
             this.videoGrid.classList.add("d-flex");
+            document.querySelector("#record").classList.remove("d-none");
             $("#random-slug").popover("hide");
             document.querySelector("#share-file").classList.toggle("hide");
             document.querySelector("#share-screen").classList.toggle("d-none");
@@ -253,17 +281,17 @@ class App {
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 document.querySelector(".remote").classList.remove("hide");
-                // addRemoteVideo(peer.stream, peer.id);
             };
             this.rtcClient.OnRemoteTrack = (track, connection) => {
                 let participant = this.tryAddParticipant(connection.id);
                 participant.addTrack(track, (el) => {
-                    document.querySelector("#remtote-audio-nodes").append(el);
+                    this.mediaStreamBlender.addTracks(`audio-${connection.id}`, [track], false);
                 });
                 participant.onVideoTrackLost = (id, stream, track) => {
                     let p = document.querySelector(".p" + id);
                     if (p)
                         p.remove();
+                    // todo:  Remove from blender..
                 };
             };
             this.rtcClient.OnContextCreated = function (ctx) {
@@ -377,23 +405,24 @@ class App {
      * @memberof App
      */
     recordStream(peerid) {
-        if (!this.recorder) {
-            let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks();
-            this.recorder = new MediaStreamRecorder_1.MediaStreamRecorder(tracks);
-            this.recorder.mediaStream.addTrack(this.rtcClient.LocalStreams[0].getAudioTracks()[0]);
-            this.recorder.start(20);
-        }
-        else {
-            this.recorder.stop();
-            let result = this.recorder.toBlob();
-            const download = document.createElement("a");
-            download.setAttribute("href", result);
-            download.textContent = peerid;
-            download.setAttribute("download", `${peerid}.webm`);
-            document.querySelector("#recorder-download").append(download);
-            $("#recorder-result").modal("show");
-            this.recorder = null;
-        }
+        // if(!this.mediaStreamBlender) {
+        //     let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks()
+        //     this.mediaStreamBlender = new MediaStreamRecorder(tracks);
+        //     this.mediaStreamBlender.mediaStream.addTrack(
+        //         this.rtcClient.LocalStreams[0].getAudioTracks()[0]
+        //     );
+        //     this.mediaStreamBlender.start(20);
+        // }   else{
+        //     this.mediaStreamBlender.stop();
+        //     let result = this.mediaStreamBlender.toBlob();
+        //     const download = document.createElement("a");
+        //     download.setAttribute("href", result);
+        //     download.textContent =  peerid;
+        //     download.setAttribute("download", `${peerid}.webm`);
+        //     document.querySelector("#recorder-download").append(download);
+        //     $("#recorder-result").modal("show");
+        //     this.mediaStreamBlender = null;
+        // }        
     }
     /**
      * Add a local media stream to the UI
@@ -409,6 +438,8 @@ class App {
         video.srcObject = mediaStream;
         let container = document.querySelector(".local");
         container.append(video);
+        // and local stream to mixer / blender;
+        this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
     }
     /**
      * Send chat message
@@ -454,11 +485,7 @@ class App {
         item.setAttribute("class", "p" + id);
         let f = document.createElement("i");
         f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen");
-        let r = document.createElement("i");
-        r.classList.add("fas", "fa-circle", "fa-2x", "record");
-        r.dataset.peerid = id;
         videoTools.append(f);
-        videoTools.append(r);
         item.prepend(videoTools);
         let video = document.createElement("video");
         video.srcObject = mediaStream;
@@ -478,19 +505,15 @@ class App {
                 document.exitFullscreen();
             }
         });
-        r.addEventListener("click", (e) => {
-            let s = e.target;
-            s.classList.toggle("flash");
-            this.recordStream(s.dataset.peerid);
-        });
+        // r.addEventListener("click",(e) => {
+        //     let s = e.target as HTMLElement           
+        //     s.classList.toggle("flash");
+        //     this.recordStream(s.dataset.peerid);
+        // });
         // beta only supports one participant..
-        if (this.participants.size > 1)
-            r.classList.add("hide");
+        // if(this.participants.size > 1) r.classList.add("hide");
         document.querySelector("#remote-videos").append(item);
-        video.addEventListener("click", (e) => {
-            this.fullScreenVideo.play();
-            this.fullScreenVideo.srcObject = e.target.srcObject;
-        });
+        console.log("adding remote video to ui");
     }
     getMediaDevices() {
         return new Promise((resolve, reject) => {
@@ -515,6 +538,7 @@ class App {
             this.participants.set(id, new AppParticipant_1.AppParticipant(id));
             let p = this.participants.get(id);
             p.onVideoTrackAdded = (id, mediaStream, mediaStreamTrack) => {
+                this.mediaStreamBlender.addTracks(id, [mediaStreamTrack], false);
                 this.addRemoteVideo(id, mediaStream);
             };
             return p;

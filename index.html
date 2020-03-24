@@ -40,7 +40,7 @@
 <body>
 
     <div id="remtote-audio-nodes" class="hide">
-
+        <audio></audio>
     </div>
 
     <div class="our-brand" id="appVersion">
@@ -185,25 +185,33 @@
 
         <div class="controls d-inline-flex flex-row align-items-center w-100 justify-content-center">
             <div class="p-3">
-                <i class="fas fa-cog fa-3x" id="settings"></i>
+                <i class="fas fa-cog fa-2x" id="settings"></i>
             </div>
             <div class="p-3">
-                <i class="fas fa-video fa-3x" id="mute-local-video"></i>
+                <i class="fas fa-video fa-2x" id="mute-local-video"></i>
             </div>
             <div class="p-3">
-                <i class="fas fa-microphone fa-3x" id="mute-local-audio"></i>
+                <i class="fas fa-microphone fa-2x" id="mute-local-audio"></i>
+            </div>
+          
+            <div class="p-3 d-none" id="record">
+            
+                <i class="fas fa-circle fa-2x record">
+
+                </i>
             </div>
             <div class="p-3 only-desktop">
-                <i class="fas fa-desktop fa-3x " id="share-screen" title="share your screen"></i>
+                <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
             </div>
 
+           
             <div class="p-3">
-                <i class="fas fa-file hide fa-3x " id="share-file"></i>
+                <i class="fas fa-file hide fa-2x " id="share-file"></i>
             </div>
             <div class="p-3">
 
                 <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
-                <i id="show-chat" class="fas fa-comment-alt fa-3x d-none">
+                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
                 </i>
 
             </div>
