@@ -17,6 +17,7 @@ A live example is deployed at Heroku, you can find it here - here https://kollok
 5. Random room generator or user defined
 6. No login and registration required
 7. Customizable,  See blow
+8. Multiple stream recording ( record the meeting )
 
 ## install 
 
