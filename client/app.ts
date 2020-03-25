@@ -4,10 +4,11 @@ import ClipboardJS from 'clipboard';
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
-import { ReadFile } from './ReadFile';
+import { ReadFile } from './Helpers/ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
 import { MediaStreamBlender } from 'mediastreamblender'
+import { DetectResolutions } from './Helpers/DetectResolutions';
 
 
 export class App {
@@ -15,8 +16,23 @@ export class App {
     videoGrid: HTMLElement;
     audioNode: HTMLAudioElement;
 
-    // Create a an AppDomain of kollokvium;
+    testCameraResolutions(){
+        let parent = document.querySelector("#sel-video-res");
+        parent.innerHTML = "";
+        let deviceId = (document.querySelector("#sel-video") as HTMLInputElement).value;
+    
+        DetectResolutions.testResolutions(deviceId == "" ? undefined : deviceId, (result) => {
 
+                let option = document.createElement("option");
+                option.textContent = `${result.label} ${result.width} x ${result.height} ${result.ratio}`;
+                option.value = result.label;
+                parent.append(option);
+
+        });
+        parent.removeAttribute("disabled");
+    }
+
+    // Create a an AppDomain of kollokvium;
 
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
 
@@ -54,7 +70,7 @@ export class App {
     fileReceived(fileinfo: any, arrayBuffer: ArrayBuffer) {
 
         const p = document.createElement("p");
-        p.textContent = "Hye,here is shared file... ";
+        p.textContent = "Hey,here is shared file, click to download.. ";
 
         const blob = new Blob([arrayBuffer], {
             type: fileinfo.mimeType
@@ -73,6 +89,8 @@ export class App {
 
 
     }
+
+    
     /**
      * Send a file to all in conference
      *
@@ -269,8 +287,6 @@ export class App {
         let f = document.createElement("i");
         f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen")
 
-
-
         videoTools.append(f);
 
         item.prepend(videoTools);
@@ -298,20 +314,12 @@ export class App {
             }
         });
 
-        // r.addEventListener("click",(e) => {
-        //     let s = e.target as HTMLElement           
-        //     s.classList.toggle("flash");
-        //     this.recordStream(s.dataset.peerid);
-        // });
-
-        // beta only supports one participant..
-        // if(this.participants.size > 1) r.classList.add("hide");
+      
 
 
         document.querySelector("#remote-videos").append(item);
 
-        console.log("adding remote video to ui");
-
+      
     }
 
 
@@ -355,7 +363,6 @@ export class App {
 
         // hook up listeners for MediaBlender
 
-
         let watermark = document.querySelector("#watermark") as HTMLImageElement;
 
         this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
@@ -367,13 +374,13 @@ export class App {
         }
 
         this.mediaStreamBlender.onTrack = () => {
-            console.log("track added to mediablender");
+        
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
 
 
         }
         this.mediaStreamBlender.onRecordingStart = () => {
-            console.log("started recording session..");
+      
             this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
         }
 
@@ -448,9 +455,14 @@ export class App {
         let nickname = document.querySelector("#txt-nick") as HTMLInputElement;
         let videoDevice = document.querySelector("#sel-video") as HTMLInputElement;
         let audioDevice = document.querySelector("#sel-audio") as HTMLInputElement;
+        let videoResolution = document.querySelector("#sel-video-res") as HTMLInputElement;
+        // just set the value to saved key, as user needs to scan..
+
+        document.querySelector("#sel-video-res option").textContent =  "Using dynamic resolution"; 
 
         let toogleRecord = document.querySelector(".record") as HTMLAudioElement;
 
+        let testResolutions = document.querySelector("#test-resolutions") as HTMLButtonElement;
 
 
         nickname.value = this.userSettings.nickname;
@@ -464,6 +476,10 @@ export class App {
 
         });
 
+        testResolutions.addEventListener("click",() => {
+            this.testCameraResolutions();
+        })
+
 
 
         this.getMediaDevices().then((devices: Array<MediaDeviceInfo>) => {
@@ -471,19 +487,32 @@ export class App {
             let inputOnly = devices.filter(((d: MediaDeviceInfo) => {
                 return d.kind.indexOf("input") > 0
             }));
-            inputOnly.forEach((d: MediaDeviceInfo) => {
+            inputOnly.forEach((d: MediaDeviceInfo,index:number) => {
 
                 let option = document.createElement("option");
-                option.textContent = d.label;
-                option.setAttribute("value", d.deviceId);
+                option.textContent = d.label || `Device #${index} (name unknown)`;
+                option.value =  d.deviceId;
 
                 if (d.kind == "videoinput") {
+                    if(option.value == this.userSettings.videoDevice) option.selected = true;
                     document.querySelector("#sel-video").append(option);
                 } else {
+                    if(option.value == this.userSettings.audioDevice) option.selected = true;
                     document.querySelector("#sel-audio").append(option);
                 }
 
             });
+
+             devices.filter(((d: MediaDeviceInfo) => {
+                return d.kind.indexOf("output") > 0
+            })).forEach( ( (d:MediaDeviceInfo) => {
+                let option = document.createElement("option");                
+                option.textContent = d.label || d.kind;
+                option.setAttribute("value", d.deviceId);
+                document.querySelector("#sel-audio-out").append(option);
+            }));      
+
+
 
             videoDevice.value = this.userSettings.videoDevice;
             audioDevice.value = this.userSettings.audioDevice;
@@ -496,20 +525,20 @@ export class App {
             this.userSettings.nickname = nickname.value;
             this.userSettings.audioDevice = audioDevice.value;
             this.userSettings.videoDevice = videoDevice.value;
+            this.userSettings.videoResolution = videoResolution.value;
 
             this.userSettings.saveSetting();
 
-            this.rtcClient.LocalStreams.forEach((m: MediaStream) => {
+            let constraints = this.userSettings.createConstraints(this.userSettings.videoResolution) ;
 
-                document.querySelector(".l-" + m.id).remove();
-            });
-            this.rtcClient.LocalStreams = new Array<MediaStream>();
 
-            this.getLocalStream(this.userSettings.createConstraints(), (mediaStream: MediaStream) => {
-                this.localMediaStream = mediaStream;
-                this.rtcClient.AddLocalStream(mediaStream);
-                this.addLocalVideo(mediaStream);
+            this.localMediaStream.getVideoTracks().forEach ( (track:MediaStreamTrack) => {
+                    track.applyConstraints(constraints["video"] as MediaTrackConstraints).then( () => {
+                    }).catch( () => {
+                        console.log("error");
+                    });
             });
+            
 
 
         });
@@ -518,7 +547,13 @@ export class App {
             $("#settings-modal").modal("toggle");
         })
 
-        // jQuery hack for file share
+        // jQuery hacks for file share etc
+
+        $('.modal').on('shown.bs.modal', function () {
+                $(".popover").popover("hide");
+          });
+
+
         $("#share-file").popover({
             trigger: "manual",
             sanitize: false,
@@ -576,7 +611,6 @@ export class App {
                 return location.origin + "/#" + slug.value;
             }
         });
-
 
         if (this.Slug.length >= 6) {
             slug.value = this.Slug;
@@ -741,8 +775,9 @@ export class App {
             }
             broker.OnOpen = (ci: any) => {
 
+                //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
-                    this.userSettings.createConstraints(),
+                    UserSettings.defaultConstraints,
                     (mediaStream: MediaStream) => {
                         this.localMediaStream = mediaStream;
                         this.rtcClient.AddLocalStream(mediaStream);
@@ -769,5 +804,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    App.getInstance();
+    let app = App.getInstance();
+
+    window["app"] = app;
+
 });

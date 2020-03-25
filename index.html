@@ -30,8 +30,8 @@
     </script>
     <!-- remove GA, if you customize, host by yourself -->
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css"
-        integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/3aa27899ac.js" crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800&display=swap" rel="stylesheet">
@@ -101,11 +101,11 @@
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="alert-heading"> No others here...</h4>
+                <h4 class="alert-heading">No others here right now</h4>
                 <p>
-
-                    <strong>You just need to share link, copy and share!</strong>
+                    <strong>You just need to share link,copy and share!</strong>
                     <button class="mr-1 btn btn-primary mx-1 my bt-sm" id="share-link">Copy link</button>
+                   
                 </p>
             </div>
 
@@ -257,35 +257,68 @@
                     </div>
                     <div class="modal-body">
 
-
-                        <div class="form-horizontal">
-
+                   
+                    
 
                             <div class="form-group">
-                                <label for="txt-nick">Nickname:</label>
+                                <label for="txt-nick">Nickname</label>
                                 <input type="email" class="form-control" id="txt-nick"
                                     placeholder="Nickname displayed in chat...">
                             </div>
 
-                        </div>
-                        <div class="from-group">
-                            <label for="sel-video">Video source</label>
+
+
+                       
+
+                        
+
+                        <div class="form-group">
+                            <label for="sel-video">Video input</label>
                             <select class="form-control" id="sel-video">
                                 <option value="">Not set </option>
                             </select>
                         </div>
 
-                        <div class="from-group">
-                            <label for="sel-audio">Audio source</label>
+                                                
+
+                        <div class="form-group">
+                            <label for="sel-audio">Audio input</label>
 
                             <select class="form-control" id="sel-audio">
                                 <option value="">Not set</option>
                             </select>
                         </div>
 
+                        <div class="form-group d-none">
+                            <label for="sel-audio-out">Audio output</label>
 
+                            <select class="form-control" id="sel-audio-out">
+                                <option value="">Not set</option>
+                            </select>
+                        </div>
+
+                        <hr>
+                        <div class="form-group">
+                            <label for="sel-video-res">Camera resolution</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                  <button class="btn btn-outline-primary" type="button" id="test-resolutions">Scan</button>
+                                </div>
+                                <select class="form-control" id="sel-video-res" disabled>
+                                    <option value="">Not set</option>
+                                </select>
+                              </div>
+
+                              <small class="form-text text-danger">
+                                Camera resolution will not be saved. will only be applied to current session.
+                              </small>
+                           
+                        </div>
+                  
+                     
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-link pull-left" id="clear-settings" disabled>Clear settings</button>
                         <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
