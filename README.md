@@ -9,7 +9,6 @@ It is an all in one solution that requires no installation, and is compatible wi
 
 You can try it at this link https://kollokvium.herokuapp.com/
 
-
 ## feature list
 
 1. 1-n participants
@@ -20,6 +19,17 @@ You can try it at this link https://kollokvium.herokuapp.com/
 6. No login and registration required
 7. Multiple stream recording ( record the meeting )
 8. Customizable
+
+## in-progress
+
+The following features are right now being developed by the Kollokvium team.
+
+1. Broadcast - Possibility to host a 'broadcast/webcast" using p2p chains (1-n many)
+2. Add pre-recorded local media streams such as (video,audio) to conference/call
+3. Chromecast integration
+4. Smartphone & Tablet UI working properly
+
+We count on having this three first features up and running no later than end of march 2020.
 
 ## install 
 
@@ -45,7 +55,6 @@ Clone/download the this repo, modify settings.json in found in the ./client fold
 ## Set up on host
  
 If you want to host "only" client, copy index.html, img,build and css folders into your site and/or folder.  To host application deploy all in your hosting enviorment. 
-
 
 ## other
 
