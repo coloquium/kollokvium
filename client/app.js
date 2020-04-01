@@ -1,10 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const thor_io_client_vnext_1 = require("thor-io.client-vnext");
-const clipboard_1 = __importDefault(require("clipboard"));
 const AppParticipant_1 = require("./AppParticipant");
 const ReadFile_1 = require("./Helpers/ReadFile");
 const UserSettings_1 = require("./UserSettings");
@@ -60,6 +56,10 @@ class App {
             p.append(download);
             document.querySelector("#recorder-download").append(p);
             $("#recorder-result").modal("show");
+        };
+        this.mediaStreamBlender.onTrackEnded = () => {
+            this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
+            this.mediaStreamBlender.refreshCanvas();
         };
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
@@ -202,11 +202,10 @@ class App {
         this.shareFile.addEventListener("click", () => {
             $("#share-file").popover("toggle");
         });
-        let clipBoard = new clipboard_1.default("#share-link", {
-            text: (t) => {
-                t.textContent = "Done!";
-                return location.origin + "/#" + slug.value;
-            }
+        document.querySelector("button#share-link").addEventListener("click", (e) => {
+            navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then(() => {
+                e.target.textContent = "Done!";
+            });
         });
         if (this.Slug.length >= 6) {
             slug.value = this.Slug;
@@ -252,7 +251,7 @@ class App {
             document.querySelector("#record").classList.remove("d-none");
             $("#random-slug").popover("hide");
             document.querySelector("#share-file").classList.toggle("hide");
-            document.querySelector("#share-screen").classList.toggle("d-none");
+            // document.querySelector("#share-screen").classList.toggle("d-none");
             document.querySelector("#show-chat").classList.toggle("d-none");
             document.querySelector(".our-brand").remove();
             $("#slug").popover('hide');

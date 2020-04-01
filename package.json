@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.0.6",
+  "version": "1.1.3",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -11,15 +11,10 @@
   "license": "MIT",
   "dependencies": {
     "@types/bootstrap": "^4.3.1",
-    "@types/clipboard": "^2.0.1",
     "@types/jquery": "^3.3.33",
-    "clipboard": "^2.0.6",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
-    "i": "^0.3.6",
-    "install": "^0.13.0",
     "mediastreamblender": "^1.0.0-beta.4",
-    "npm": "^6.14.3",
     "thor-io.client-vnext": "^2.0.2-beta.2",
     "thor-io.vnext": "^2.0.3-beta.4",
     "webrtc-adapter": "^7.5.1"

@@ -105,10 +105,9 @@ main .overlay {
     position: absolute;
     z-index: 100;
     /* right: 0; */
-    bottom: 60;
+    bottom: 40;
     margin-left: 20px;
 }
-
 
 
 .controls i {

@@ -1,6 +1,5 @@
-import { Factory, WebRTC, BinaryMessage, Message, Utils } from 'thor-io.client-vnext'
 import adapter from 'webrtc-adapter';
-import ClipboardJS from 'clipboard';
+import { Factory, WebRTC, BinaryMessage, Message, Utils } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
@@ -401,6 +400,10 @@ export class App {
 
         };
 
+        this.mediaStreamBlender.onTrackEnded = ()=> {
+            this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
+            this.mediaStreamBlender.refreshCanvas();
+        }
 
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
@@ -604,13 +607,12 @@ export class App {
             $("#share-file").popover("toggle");
         });
 
-
-        let clipBoard = new ClipboardJS("#share-link", {
-            text: (t) => {
-                t.textContent = "Done!"
-                return location.origin + "/#" + slug.value;
-            }
+        document.querySelector("button#share-link").addEventListener("click", (e:any) => {
+            navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then( () => {
+                e.target.textContent = "Done!"
+            });
         });
+
 
         if (this.Slug.length >= 6) {
             slug.value = this.Slug;
@@ -630,22 +632,17 @@ export class App {
             unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
             unreadBadge.textContent = "0";
-
         });
 
         slug.addEventListener("click", () => {
             $("#slug").popover('show');
             $("#random-slug").popover("hide");
-
         });
-
-
         if (location.hash.length == 0) {
             $("#random-slug").popover("show");
         } else {
             startButton.textContent = "JOIN";
         }
-
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 startButton.disabled = false;
@@ -670,7 +667,7 @@ export class App {
             $("#random-slug").popover("hide");
 
             document.querySelector("#share-file").classList.toggle("hide");
-            document.querySelector("#share-screen").classList.toggle("d-none");
+            // document.querySelector("#share-screen").classList.toggle("d-none");
             document.querySelector("#show-chat").classList.toggle("d-none");
             document.querySelector(".our-brand").remove();
             $("#slug").popover('hide');
@@ -799,13 +796,5 @@ export class App {
 */
 document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
-
-
-
-
-
-    let app = App.getInstance();
-
-    window["app"] = app;
-
+     App.getInstance()
 });
