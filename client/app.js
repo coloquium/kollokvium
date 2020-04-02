@@ -77,7 +77,7 @@ class App {
         this.shareContainer = document.querySelector("#share-container");
         this.shareFile = document.querySelector("#share-file");
         this.videoGrid = document.querySelector("#video-grid");
-        this.audioNode = document.querySelector("#remtote-audio-nodes audio");
+        this.audioNode = document.querySelector("#remtote-audio-node audio");
         let slug = document.querySelector("#slug");
         let startButton = document.querySelector("#joinconference");
         let chatWindow = document.querySelector(".chat");
@@ -86,6 +86,7 @@ class App {
         let chatMessages = document.querySelector("#chatmessages");
         let muteAudio = document.querySelector("#mute-local-audio");
         let muteVideo = document.querySelector("#mute-local-video");
+        let muteSpeakers = document.querySelector("#mute-speakers");
         let startScreenShare = document.querySelector("#share-screen");
         let settings = document.querySelector("#settings");
         let saveSettings = document.querySelector("#save-settings");
@@ -102,7 +103,7 @@ class App {
         nickname.value = this.userSettings.nickname;
         toogleRecord.addEventListener("click", () => {
             toogleRecord.classList.toggle("flash");
-            this.mediaStreamBlender.render(60);
+            this.mediaStreamBlender.render(25);
             this.mediaStreamBlender.record();
         });
         testResolutions.addEventListener("click", () => {
@@ -180,6 +181,31 @@ class App {
                 });
             });
         });
+        document.querySelector("#create-dungeon").addEventListener("click", () => {
+            $("#modal-dungeon").modal("toggle");
+            let container = document.querySelector(".dungeon-thumbs");
+            container.innerHTML = "";
+            // get a new list of participants , and show thumbs
+            this.participants.forEach((p) => {
+                p.captureImage().then((i) => {
+                    let canvas = document.createElement("canvas");
+                    canvas.height = i.height;
+                    canvas.width = i.width;
+                    let ctx = canvas.getContext("2d");
+                    ctx.drawImage(i, 0, 0, i.width, i.height);
+                    canvas.dataset.peerId = p.id;
+                    canvas.addEventListener("click", () => {
+                        canvas.classList.toggle("dungeon-paricipant");
+                    });
+                    container.append(canvas);
+                });
+            });
+        });
+        document.querySelector("button#invite-dungeon").addEventListener("click", () => {
+            document.querySelectorAll(".dungeon-paricipant").forEach((el) => {
+                console.log(`invite ${el.dataset.peerId} to dungeon`);
+            });
+        });
         this.userSettings.slugHistory.getHistory().forEach((slug) => {
             const option = document.createElement("option");
             option.setAttribute("value", slug);
@@ -189,6 +215,11 @@ class App {
             slug.value = Math.random().toString(36).substring(2).toLocaleLowerCase();
             startButton.disabled = false;
             $("#random-slug").popover("hide");
+        });
+        muteSpeakers.addEventListener("click", () => {
+            muteSpeakers.classList.toggle("fa-volume-mute");
+            muteSpeakers.classList.toggle("fa-volume-up");
+            this.audioNode.muted = !this.audioNode.muted;
         });
         muteAudio.addEventListener("click", (e) => {
             this.muteAudio(e);
@@ -248,6 +279,7 @@ class App {
         });
         startButton.addEventListener("click", () => {
             this.videoGrid.classList.add("d-flex");
+            document.querySelector(".top-bar").classList.remove("d-none");
             document.querySelector("#record").classList.remove("d-none");
             $("#random-slug").popover("hide");
             document.querySelector("#share-file").classList.toggle("hide");
@@ -439,32 +471,6 @@ class App {
         });
     }
     /**
-     * Record a remotestream
-     *
-     * @param {string} peerid
-     * @memberof App
-     */
-    recordStream(peerid) {
-        // if(!this.mediaStreamBlender) {
-        //     let tracks = this.rtcClient.Peers.get(peerid).stream.getTracks()
-        //     this.mediaStreamBlender = new MediaStreamRecorder(tracks);
-        //     this.mediaStreamBlender.mediaStream.addTrack(
-        //         this.rtcClient.LocalStreams[0].getAudioTracks()[0]
-        //     );
-        //     this.mediaStreamBlender.start(20);
-        // }   else{
-        //     this.mediaStreamBlender.stop();
-        //     let result = this.mediaStreamBlender.toBlob();
-        //     const download = document.createElement("a");
-        //     download.setAttribute("href", result);
-        //     download.textContent =  peerid;
-        //     download.setAttribute("download", `${peerid}.webm`);
-        //     document.querySelector("#recorder-download").append(download);
-        //     $("#recorder-result").modal("show");
-        //     this.mediaStreamBlender = null;
-        // }        
-    }
-    /**
      * Add a local media stream to the UI
      *
      * @param {MediaStream} mediaStream
@@ -587,6 +593,5 @@ exports.App = App;
 document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("https://") || location.href.includes("http://localhost")))
         location.href = location.href.replace("http://", "https://");
-    let app = App.getInstance();
-    window["app"] = app;
+    App.getInstance();
 });

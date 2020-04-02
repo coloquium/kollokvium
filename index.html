@@ -19,15 +19,15 @@
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicons/favicon-16x16.png">
     <meta name="theme-color" content="#ffffff">
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
-    
+
     <!-- remove GA ,if you customize, host by yourself -->
-    <script>
+    <!-- <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-160656421-1');
-    </script>
+    </script> -->
     <!-- remove GA, if you customize, host by yourself -->
 
     <script src="https://kit.fontawesome.com/3aa27899ac.js" crossorigin="anonymous"></script>
@@ -38,15 +38,49 @@
     <link rel="stylesheet" href="css/app.css">
 
 <body>
-
-    <div id="remtote-audio-nodes" class="hide">
+    <div id="remtote-audio-node" class="hide">
         <audio></audio>
     </div>
 
-    <div class="our-brand" id="appVersion">
-        1.0.4
+
+    <div class="dungeons">
+        <div class="dungeon-header">     
+            dungeon      
+            <span aria-hidden="true">&times;</span>        
+    </div>
+        <div class="dungeon">
+            
+            <ul>
+                <li>
+                    <img src="https://placehold.it/320x320">
+                </li>
+                <li>
+                    <img src="https://placehold.it/320x320">
+                </li>
+                <li>
+                    <img src="https://placehold.it/320x320">
+                </li>
+                <li>
+                    <img src="https://placehold.it/320x320">
+                </li>
+            </ul>
+
+        </div>
+
+
     </div>
 
+    <div class="our-brand" id="appVersion">
+        ...
+    </div>
+
+    <div class="top-bar">
+
+        <i class="fas fa-volume-up fa-2x" title="mute all audio" id="mute-speakers"></i>
+        
+        <i class="fas fa-dungeon fa-2x flash" id="create-dungeon"></i>
+        <span id="dungeon-messages" class="badge badge-danger style="float:right">0</span>
+    </div>
 
 
 
@@ -55,41 +89,41 @@
         <div class="overlay"></div>
 
         <div class="container-fluid chat d-none mt-3">
-               
-                
-                    <div class="card bg-light h-100">
-                        <div class="card-header">Chat
 
-                            <span style="float:right" id="close-chat">
-                                <span aria-hidden="true">&times;</span>
-                            </span>
 
-                        </div>
-                        <div class="card-body" style="overflow:auto">
-                            <p class="card-text" id="chatmessages">
+            <div class="card bg-light h-100">
+                <div class="card-header">Chat
 
-                            </p>
-                        </div>
-                        <div class="card-footer">
+                    <span style="float:right" id="close-chat">
+                        <span aria-hidden="true">&times;</span>
+                    </span>
 
-                            <div class="form">
-                                <div class="form-row">
-                                    <div class="form-group col-md-2">
-                                        <input type="email" class="form-control" id="chat-nick" value="John Doe">
-                                    </div>
-                                    <div class="form-group col-md-10">
-                                        <input type="email" class="form-control" id="chat-message"
-                                            placeholder="What do you want to say?">
-                                    </div>
-                                </div>
+                </div>
+                <div class="card-body" style="overflow:auto">
+                    <p class="card-text" id="chatmessages">
+
+                    </p>
+                </div>
+                <div class="card-footer">
+
+                    <div class="form">
+                        <div class="form-row">
+                            <div class="form-group col-md-2">
+                                <input type="email" class="form-control" id="chat-nick" value="John Doe">
                             </div>
-
+                            <div class="form-group col-md-10">
+                                <input type="email" class="form-control" id="chat-message"
+                                    placeholder="What do you want to say?">
+                            </div>
                         </div>
                     </div>
 
-
                 </div>
             </div>
+
+
+        </div>
+        </div>
 
 
         </div>
@@ -105,7 +139,7 @@
                 <p>
                     <strong>You just need to share link,copy and share!</strong>
                     <button class="mr-1 btn btn-primary mx-1 my bt-sm" id="share-link">Copy link</button>
-                   
+
                 </p>
             </div>
 
@@ -121,7 +155,7 @@
 
         </div>
 
-      
+
 
         <div class="container h-100 join">
             <div class="d-flex h-100 text-center align-items-center">
@@ -162,14 +196,8 @@
                 </div>
             </div>
         </div>
-  
-
-
 
         </div>
-
-
-
 
 
         <div id="share-form" class="hide">
@@ -193,9 +221,9 @@
             <div class="p-3">
                 <i class="fas fa-microphone fa-2x" id="mute-local-audio"></i>
             </div>
-          
+
             <div class="p-3 d-none" id="record">
-            
+
                 <i class="fas fa-circle fa-2x record">
 
                 </i>
@@ -204,7 +232,7 @@
                 <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
             </div>
 
-           
+
             <div class="p-3">
                 <i class="fas fa-file hide fa-2x " id="share-file"></i>
             </div>
@@ -216,34 +244,58 @@
 
             </div>
 
-          
+
 
 
         </div>
 
 
+        <div class="modal" tabindex="-1" role="dialog" id="modal-dungeon">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create a dungeon</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Click the participants you want to invite to a <strong>dungeon<strong></p>
+                        <div class="dungeon-thumbs">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="invite-dungeon">Invite selected</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <div id="recorder-result" class="modal fade" role="dialog">
             <div class="modal-dialog">
-          
-           
-              <div class="modal-content">
-                <div class="modal-header">
-                
-                  <h4 class="modal-title">Recording ended...</h4>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+
+
+                <div class="modal-content">
+                    <div class="modal-header">
+
+                        <h4 class="modal-title">Recording ended...</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="recorder-download"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                  <p id="recorder-download"></p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-              </div>
-          
+
             </div>
-          </div>
+        </div>
 
 
         <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
@@ -257,20 +309,20 @@
                     </div>
                     <div class="modal-body">
 
-                   
-                    
-
-                            <div class="form-group">
-                                <label for="txt-nick">Nickname</label>
-                                <input type="email" class="form-control" id="txt-nick"
-                                    placeholder="Nickname displayed in chat...">
-                            </div>
 
 
 
-                       
+                        <div class="form-group">
+                            <label for="txt-nick">Nickname</label>
+                            <input type="email" class="form-control" id="txt-nick"
+                                placeholder="Nickname displayed in chat...">
+                        </div>
 
-                        
+
+
+
+
+
 
                         <div class="form-group">
                             <label for="sel-video">Video input</label>
@@ -279,7 +331,7 @@
                             </select>
                         </div>
 
-                                                
+
 
                         <div class="form-group">
                             <label for="sel-audio">Audio input</label>
@@ -302,23 +354,25 @@
                             <label for="sel-video-res">Camera resolution</label>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
-                                  <button class="btn btn-outline-primary" type="button" id="test-resolutions">Scan</button>
+                                    <button class="btn btn-outline-primary" type="button"
+                                        id="test-resolutions">Scan</button>
                                 </div>
                                 <select class="form-control" id="sel-video-res" disabled>
                                     <option value="">Not set</option>
                                 </select>
-                              </div>
+                            </div>
 
-                              <small class="form-text text-danger">
+                            <small class="form-text text-danger">
                                 Camera resolution will not be saved. will only be applied to current session.
-                              </small>
-                           
+                            </small>
+
                         </div>
-                  
-                     
+
+
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-link pull-left" id="clear-settings" disabled>Clear settings</button>
+                        <button type="button" class="btn btn-link pull-left" id="clear-settings" disabled>Clear
+                            settings</button>
                         <button type="button" class="btn btn-primary" id="save-settings">Save changes</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>

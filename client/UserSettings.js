@@ -65,8 +65,8 @@ class UserSettings {
 }
 UserSettings.defaultConstraints = {
     video: {
-        width: { min: 640, ideal: 1920 },
-        height: { min: 400, ideal: 1080 }
+        width: { min: 640, ideal: 1280 },
+        height: { min: 400, ideal: 720 }
     }, audio: true,
 };
 exports.UserSettings = UserSettings;

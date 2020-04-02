@@ -1,10 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const image_capture_1 = require("image-capture");
 class AppParticipant {
     constructor(id) {
         this.id = id;
         this.videoTracks = new Array();
         this.audioTracks = new Array();
+    }
+    captureImage() {
+        let track = this.videoTracks[0];
+        const img = document.createElement('img');
+        let imageCapture = new image_capture_1.ImageCapture(track);
+        return new Promise((resolve, reject) => {
+            imageCapture.grabFrame()
+                .then(blob => {
+                resolve(blob);
+            })
+                .catch(reject);
+        });
     }
     addVideoTrack(t) {
         this.videoTracks.push(t);

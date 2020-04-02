@@ -129,11 +129,25 @@ main .overlay {
 
 .our-brand{
     position: absolute;
-    top:1rem;
+    top:0.5rem;
     right:1rem;
     padding: 1rem;
     z-index: 100;
     color: #fff;
+}
+
+.top-bar{
+    position: absolute;
+    top:0rem;
+    width: 100% !important;
+    padding: 1em;
+    z-index: 8;
+    background: rgba(0,0,0,0.7);
+}
+
+.top-bar i {
+    color:#fff;
+    margin-right: 16px;
 }
 
 #file-form{
@@ -257,7 +271,7 @@ li:first-child:nth-last-child(9)~li {
 
 .record {
     color: #ff0000;
-    ;
+    
 }
 
 .flash {
@@ -268,4 +282,70 @@ li:first-child:nth-last-child(9)~li {
     50% {
         opacity: 0;
     }
+}
+
+#dungeon-messages{
+    position: relative;
+    top:-20px;
+    left: -20px;
+}
+
+.dungeon-thumbs canvas{
+    max-width: 120px;
+    filter: grayscale();
+}
+
+.dungeon-paricipant{
+    border:1px solid #ff0000;
+    filter: none;
+} 
+
+.dungeons{
+    position: absolute;
+    z-index: 9;
+    width: 400px;
+    height: auto;
+   background: rgba(0,0,0,0.2);
+    opacity: 0.9;
+    top: 90px;
+    left:1rem;
+    padding: 1rem;
+
+}
+
+.dungeons-focus{
+    background: red
+} 
+
+.dungeon-header{
+    height: 2rem;
+    width: 100% !important;
+}
+
+.dungeon-header span {
+    float: right;
+}
+
+.dungeon{
+    width: 100%;
+    color:#fff;
+
+}
+
+.dungeon ul{
+    list-style: none outside none;
+    margin: 0;
+    padding: 0;
+}
+
+.dungeon li{
+    float: left;
+    width: 33%;
+    height:100px;
+    overflow:hidden;
+    padding: 2px;
+}
+.dungeon img{    
+    width:100%;
+    height: auto;
 }
