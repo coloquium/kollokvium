@@ -296,7 +296,7 @@ li:first-child:nth-last-child(9)~li {
 }
 
 .dungeon-paricipant{
-    border:1px solid #ff0000;
+    border:2px solid #ff0000;
     filter: none;
 } 
 
@@ -348,4 +348,12 @@ li:first-child:nth-last-child(9)~li {
 .dungeon img{    
     width:100%;
     height: auto;
+}
+
+
+.toasters {
+    position: absolute;
+    top:80px;
+    right: 10px;
+    z-index: 10000
 }

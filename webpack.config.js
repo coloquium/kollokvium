@@ -1,5 +1,5 @@
 module.exports = {
-  mode:"production", 
+  mode:"development", 
   watch: false,
   entry: {    
     kollovium :'./client/app.js',

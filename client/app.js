@@ -7,6 +7,7 @@ const UserSettings_1 = require("./UserSettings");
 const AppDomain_1 = require("./AppDomain");
 const mediastreamblender_1 = require("mediastreamblender");
 const DetectResolutions_1 = require("./Helpers/DetectResolutions");
+const AppComponentToaster_1 = require("./Components/AppComponentToaster");
 class App {
     /**
      * Creates an instance of App - Kollokvium
@@ -68,8 +69,8 @@ class App {
         if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
         }
-        if (!location.href.includes("https://"))
-            this.peerId = null;
+        // if (!location.href.includes("https://"))
+        this.peerId = null;
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map();
         this.Slug = location.hash.replace("#", "");
@@ -202,8 +203,10 @@ class App {
             });
         });
         document.querySelector("button#invite-dungeon").addEventListener("click", () => {
+            document.querySelector(".dungeons").classList.remove("d-none");
             document.querySelectorAll(".dungeon-paricipant").forEach((el) => {
                 console.log(`invite ${el.dataset.peerId} to dungeon`);
+                this.factory.GetController("broker").Invoke("inviteDungeon", el.dataset.peerId);
             });
         });
         this.userSettings.slugHistory.getHistory().forEach((slug) => {
@@ -305,6 +308,17 @@ class App {
             this.rtcClient = new thor_io_client_vnext_1.WebRTC(broker, this.rtcConfig);
             broker.On("fileShare", (fileinfo, arrayBuffer) => {
                 this.fileReceived(fileinfo, arrayBuffer);
+            });
+            broker.On("inviteDungeon", (d) => {
+                let toast = AppComponentToaster_1.AppComponentToaster.dungeonToaster("Dungeon call", "Someone in the meeting created a dungeon...");
+                let node = toast.children[0];
+                node.dataset.peerId = d.peerId;
+                toast.querySelector(".btn-primary").addEventListener("click", (el) => {
+                    console.log("accepted a dungeon", d);
+                });
+                document.querySelector(".toasters").prepend(toast);
+                $(".toast").toast("show");
+                //console.log("d",d)
             });
             // hook up chat functions...
             broker.On("instantMessage", (im) => {
@@ -535,8 +549,8 @@ class App {
         item.prepend(videoTools);
         let video = document.createElement("video");
         video.srcObject = mediaStream;
-        video.width = 1920;
-        video.height = 1080;
+        video.width = 1280;
+        video.height = 720;
         video.autoplay = true;
         item.append(video);
         // listener for fulscreen view of a participants video

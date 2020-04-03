@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+console.clear();
 let express = require("express");
 let app = express();
 const thor_io_vnext_1 = require("thor-io.vnext");

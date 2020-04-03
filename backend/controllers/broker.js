@@ -13,15 +13,43 @@ const thor_io_vnext_1 = require("thor-io.vnext");
 // Controller will be know as "broker", and not seald ( seald = true, is background sevices),
 // controller (broker) will pass a heartbeat to client each 2 seconds to keep alive. 
 let Broker = class Broker extends thor_io_vnext_1.BrokerController {
+    /**
+     *Creates an instance of Broker.
+     * @param {Connection} connection
+     * @memberof Broker
+     */
     constructor(connection) {
         super(connection);
     }
+    /**
+     *
+     *
+     * @param {*} fileInfo
+     * @param {*} topic
+     * @param {*} controller
+     * @param {*} blob
+     * @memberof Broker
+     */
     fileShare(fileInfo, topic, controller, blob) {
         let expression = (pre) => {
             return pre.Peer.context >= this.Peer.context;
         };
         this.invokeTo(expression, { text: "File shared (see '" + fileInfo.name + "')", from: 'Kollokvium' }, "instantMessage", this.alias);
         this.invokeTo(expression, fileInfo, "fileShare", this.alias, blob);
+    }
+    /**
+     *
+     *
+     * @param {string} peerId
+     * @memberof Broker
+     */
+    inviteDungeon(peerId) {
+        this.invokeTo((pre) => {
+            return pre.Peer.peerId == peerId;
+        }, {
+            peerId: this.Peer.peerId,
+            context: this.Peer.context
+        }, "inviteDungeon");
     }
 };
 __decorate([
@@ -30,6 +58,12 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object, Object]),
     __metadata("design:returntype", void 0)
 ], Broker.prototype, "fileShare", null);
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "inviteDungeon", null);
 Broker = __decorate([
     thor_io_vnext_1.ControllerProperties("broker", false, 2 * 1000),
     __metadata("design:paramtypes", [thor_io_vnext_1.Connection])

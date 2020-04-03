@@ -8,6 +8,8 @@ import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
 import { MediaStreamBlender } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
+import { AppComponentToaster } from './Components/AppComponentToaster';
+
 
 
 export class App {
@@ -15,17 +17,17 @@ export class App {
     videoGrid: HTMLElement;
     audioNode: HTMLAudioElement;
 
-    testCameraResolutions(){
+    testCameraResolutions() {
         let parent = document.querySelector("#sel-video-res");
         parent.innerHTML = "";
         let deviceId = (document.querySelector("#sel-video") as HTMLInputElement).value;
-    
+
         DetectResolutions.testResolutions(deviceId == "" ? undefined : deviceId, (result) => {
 
-                let option = document.createElement("option");
-                option.textContent = `${result.label} ${result.width} x ${result.height} ${result.ratio}`;
-                option.value = result.label;
-                parent.append(option);
+            let option = document.createElement("option");
+            option.textContent = `${result.label} ${result.width} x ${result.height} ${result.ratio}`;
+            option.value = result.label;
+            parent.append(option);
 
         });
         parent.removeAttribute("disabled");
@@ -89,7 +91,7 @@ export class App {
 
     }
 
-    
+
     /**
      * Send a file to all in conference
      *
@@ -157,7 +159,7 @@ export class App {
 
         });
     }
- 
+
 
     /**
      * Add a local media stream to the UI
@@ -278,15 +280,21 @@ export class App {
             }
         });
 
-      
+
 
 
         document.querySelector("#remote-videos").append(item);
 
-      
+
     }
 
 
+    /**
+     * Get this clients media devices
+     *
+     * @returns {Promise<Array<MediaDeviceInfo>>}
+     * @memberof App
+     */
     getMediaDevices(): Promise<Array<MediaDeviceInfo>> {
         return new Promise<Array<MediaDeviceInfo>>((resolve: any, reject: any) => {
             navigator.mediaDevices.enumerateDevices().then((devices: Array<MediaDeviceInfo>) => {
@@ -314,6 +322,10 @@ export class App {
             return p;
         }
     }
+
+
+
+
     /**
      * Creates an instance of App - Kollokvium
      * @memberof App
@@ -327,6 +339,10 @@ export class App {
 
         // hook up listeners for MediaBlender
 
+
+
+
+
         let watermark = document.querySelector("#watermark") as HTMLImageElement;
 
         this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
@@ -338,13 +354,13 @@ export class App {
         }
 
         this.mediaStreamBlender.onTrack = () => {
-        
+
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
 
 
         }
         this.mediaStreamBlender.onRecordingStart = () => {
-      
+
             this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
         }
 
@@ -365,7 +381,7 @@ export class App {
 
         };
 
-        this.mediaStreamBlender.onTrackEnded = ()=> {
+        this.mediaStreamBlender.onTrackEnded = () => {
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
             this.mediaStreamBlender.refreshCanvas();
         }
@@ -383,9 +399,9 @@ export class App {
 
 
 
-        if (!location.href.includes("https://"))
+        // if (!location.href.includes("https://"))
 
-            this.peerId = null;
+        this.peerId = null;
         this.numOfChatMessagesUnread = 0;
 
         this.participants = new Map<string, AppParticipant>();
@@ -402,7 +418,7 @@ export class App {
 
         this.audioNode = document.querySelector("#remtote-audio-node audio") as HTMLAudioElement;
 
-        
+
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         let chatWindow = document.querySelector(".chat") as HTMLElement;
@@ -430,7 +446,7 @@ export class App {
         let videoResolution = document.querySelector("#sel-video-res") as HTMLInputElement;
         // just set the value to saved key, as user needs to scan..
 
-        document.querySelector("#sel-video-res option").textContent =  "Using dynamic resolution"; 
+        document.querySelector("#sel-video-res option").textContent = "Using dynamic resolution";
 
         let toogleRecord = document.querySelector(".record") as HTMLAudioElement;
 
@@ -447,7 +463,7 @@ export class App {
 
         });
 
-        testResolutions.addEventListener("click",() => {
+        testResolutions.addEventListener("click", () => {
             this.testCameraResolutions();
         })
 
@@ -458,30 +474,30 @@ export class App {
             let inputOnly = devices.filter(((d: MediaDeviceInfo) => {
                 return d.kind.indexOf("input") > 0
             }));
-            inputOnly.forEach((d: MediaDeviceInfo,index:number) => {
+            inputOnly.forEach((d: MediaDeviceInfo, index: number) => {
 
                 let option = document.createElement("option");
                 option.textContent = d.label || `Device #${index} (name unknown)`;
-                option.value =  d.deviceId;
+                option.value = d.deviceId;
 
                 if (d.kind == "videoinput") {
-                    if(option.value == this.userSettings.videoDevice) option.selected = true;
+                    if (option.value == this.userSettings.videoDevice) option.selected = true;
                     document.querySelector("#sel-video").append(option);
                 } else {
-                    if(option.value == this.userSettings.audioDevice) option.selected = true;
+                    if (option.value == this.userSettings.audioDevice) option.selected = true;
                     document.querySelector("#sel-audio").append(option);
                 }
 
             });
 
-             devices.filter(((d: MediaDeviceInfo) => {
+            devices.filter(((d: MediaDeviceInfo) => {
                 return d.kind.indexOf("output") > 0
-            })).forEach( ( (d:MediaDeviceInfo) => {
-                let option = document.createElement("option");                
+            })).forEach(((d: MediaDeviceInfo) => {
+                let option = document.createElement("option");
                 option.textContent = d.label || d.kind;
                 option.setAttribute("value", d.deviceId);
                 document.querySelector("#sel-audio-out").append(option);
-            }));      
+            }));
 
 
 
@@ -500,16 +516,16 @@ export class App {
 
             this.userSettings.saveSetting();
 
-            let constraints = this.userSettings.createConstraints(this.userSettings.videoResolution) ;
+            let constraints = this.userSettings.createConstraints(this.userSettings.videoResolution);
 
 
-            this.localMediaStream.getVideoTracks().forEach ( (track:MediaStreamTrack) => {
-                    track.applyConstraints(constraints["video"] as MediaTrackConstraints).then( () => {
-                    }).catch( () => {
-                        console.log("error");
-                    });
+            this.localMediaStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
+                track.applyConstraints(constraints["video"] as MediaTrackConstraints).then(() => {
+                }).catch(() => {
+                    console.log("error");
+                });
             });
-            
+
 
 
         });
@@ -521,8 +537,8 @@ export class App {
         // jQuery hacks for file share etc
 
         $('.modal').on('shown.bs.modal', function () {
-                $(".popover").popover("hide");
-          });
+            $(".popover").popover("hide");
+        });
 
 
         $("#share-file").popover({
@@ -548,29 +564,34 @@ export class App {
 
 
 
-        document.querySelector("#create-dungeon").addEventListener("click",() => {
+        document.querySelector("#create-dungeon").addEventListener("click", () => {
             $("#modal-dungeon").modal("toggle");
-            let container =  document.querySelector(".dungeon-thumbs");
+            let container = document.querySelector(".dungeon-thumbs");
             container.innerHTML = "";
             // get a new list of participants , and show thumbs
-            this.participants.forEach ( (p:AppParticipant ) => {               
-                    p.captureImage().then( (i:ImageBitmap) => {
-                        let canvas = document.createElement("canvas");
-                        canvas.height = i.height; canvas.width = i.width;
-                        let ctx = canvas.getContext("2d");
-                        ctx.drawImage(i,0,0,i.width,i.height);                        
-                        canvas.dataset.peerId =p.id;
-                        canvas.addEventListener("click",() => {
-                            canvas.classList.toggle("dungeon-paricipant");
-                        });
-                        container.append(canvas);
-                    })   
-            });                 
+            this.participants.forEach((p: AppParticipant) => {
+                p.captureImage().then((i: ImageBitmap) => {
+                    let canvas = document.createElement("canvas");
+                    canvas.height = i.height; canvas.width = i.width;
+                    let ctx = canvas.getContext("2d");
+                    ctx.drawImage(i, 0, 0, i.width, i.height);
+                    canvas.dataset.peerId = p.id;
+                    canvas.addEventListener("click", () => {
+                        canvas.classList.toggle("dungeon-paricipant");
+                    });
+                    container.append(canvas);
+                })
+            });
         });
 
-        document.querySelector("button#invite-dungeon").addEventListener("click",() => {
-             document.querySelectorAll(".dungeon-paricipant").forEach ( (el:HTMLElement) => {
+        document.querySelector("button#invite-dungeon").addEventListener("click", () => {
+            document.querySelector(".dungeons").classList.remove("d-none");
+            document.querySelectorAll(".dungeon-paricipant").forEach((el: HTMLElement) => {
                 console.log(`invite ${el.dataset.peerId} to dungeon`);
+
+                this.factory.GetController("broker").Invoke("inviteDungeon", el.dataset.peerId);
+
+
             });
         });
 
@@ -588,11 +609,11 @@ export class App {
         });
 
 
-        muteSpeakers.addEventListener("click",() => {
+        muteSpeakers.addEventListener("click", () => {
 
             muteSpeakers.classList.toggle("fa-volume-mute");
             muteSpeakers.classList.toggle("fa-volume-up");
-            
+
             this.audioNode.muted = !this.audioNode.muted;
 
         });
@@ -612,8 +633,8 @@ export class App {
             $("#share-file").popover("toggle");
         });
 
-        document.querySelector("button#share-link").addEventListener("click", (e:any) => {
-            navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then( () => {
+        document.querySelector("button#share-link").addEventListener("click", (e: any) => {
+            navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then(() => {
                 e.target.textContent = "Done!"
             });
         });
@@ -707,6 +728,28 @@ export class App {
 
             broker.On("fileShare", (fileinfo: any, arrayBuffer: ArrayBuffer) => {
                 this.fileReceived(fileinfo, arrayBuffer)
+            });
+
+
+            broker.On("inviteDungeon", (d: any) => {
+
+                let toast = AppComponentToaster.dungeonToaster(
+                    "Dungeon call", "Someone in the meeting created a dungeon...");
+
+                let node = toast.children[0] as HTMLElement;
+                node.dataset.peerId = d.peerId;
+
+                toast.querySelector(".btn-primary").addEventListener("click", (el: any) => {
+                    console.log("accepted a dungeon", d);
+
+                    // confirm to sender...
+
+
+
+                });
+                document.querySelector(".toasters").prepend(toast);
+                $(".toast").toast("show");
+
             });
 
             // hook up chat functions...
@@ -804,5 +847,5 @@ export class App {
 */
 document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
-     App.getInstance()
+    App.getInstance()
 });

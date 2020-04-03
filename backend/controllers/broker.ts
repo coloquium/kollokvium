@@ -10,10 +10,24 @@ import {
 // Controller will be know as "broker", and not seald ( seald = true, is background sevices),
 // controller (broker) will pass a heartbeat to client each 2 seconds to keep alive. 
 @ControllerProperties("broker", false, 2*1000)
-export class Broker extends  BrokerController {
+export class Broker extends BrokerController {
+    /**
+     *Creates an instance of Broker.
+     * @param {Connection} connection
+     * @memberof Broker
+     */
     constructor(connection: Connection) {
         super(connection);
     }
+    /**
+     *
+     *
+     * @param {*} fileInfo
+     * @param {*} topic
+     * @param {*} controller
+     * @param {*} blob
+     * @memberof Broker
+     */
     @CanInvoke(true)
     fileShare(fileInfo: any, topic: any, controller: any, blob: any) {
         let expression = (pre: BrokerController) => {
@@ -21,5 +35,22 @@ export class Broker extends  BrokerController {
         };
         this.invokeTo(expression,{text:"File shared (see '" + fileInfo.name + "')",from:'Kollokvium'}, "instantMessage", this.alias);   
         this.invokeTo(expression,fileInfo, "fileShare", this.alias, blob);
+    }
+    /**
+     *
+     *
+     * @param {string} peerId
+     * @memberof Broker
+     */
+    @CanInvoke(true)
+    inviteDungeon(peerId:string){
+        this.invokeTo((pre: BrokerController) => {
+            return pre.Peer.peerId == peerId; 
+        },{
+            peerId: this.Peer.peerId,
+            context:this.Peer.context
+
+        },"inviteDungeon");
+    
     }
 }
