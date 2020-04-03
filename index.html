@@ -42,43 +42,18 @@
 
 
     <div class="toasters">
-    
-         
     </div>
-
-
 
     <div id="remtote-audio-node" class="hide">
         <audio></audio>
     </div>
 
 
- 
+
 
 
     <div class="dungeons d-none">
-        <div class="dungeon-header">     
-            dungeon      
-            <span aria-hidden="true">&times;</span>        
-    </div>
-        <div class="dungeon">
-            
-            <ul>
-                <li>
-                    <img src="https://placehold.it/320x320">
-                </li>
-                <li>
-                    <img src="https://placehold.it/320x320">
-                </li>
-                <li>
-                    <img src="https://placehold.it/320x320">
-                </li>
-                <li>
-                    <img src="https://placehold.it/320x320">
-                </li>
-            </ul>
-
-        </div>
+     
 
 
     </div>
@@ -90,9 +65,15 @@
     <div class="top-bar">
 
         <i class="fas fa-volume-up fa-2x" title="mute all audio" id="mute-speakers"></i>
-        
-        <i class="fas fa-dungeon fa-2x flash" id="create-dungeon"></i>
-        <span id="dungeon-messages" class="badge badge-danger style="float:right">0</span>
+
+       
+
+        <!-- <i class="fas fa-share-alt fa-2x" id="share-slug" data-container="body" data-toggle="popover"
+        data-placement="bottom" data-trigger="click" data-content="Yor room link is now in the clipboard"></i> -->
+
+        <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
+
+        <!-- <span id="dungeon-messages" class="badge badge-danger style=" float:right">beta</span> -->
     </div>
 
 
@@ -121,11 +102,8 @@
 
                     <div class="form">
                         <div class="form-row">
-                            <div class="form-group col-md-2">
-                                <input type="email" class="form-control" id="chat-nick" value="John Doe">
-                            </div>
                             <div class="form-group col-md-10">
-                                <input type="email" class="form-control" id="chat-message"
+                                <input type="text" class="form-control" id="chat-message"
                                     placeholder="What do you want to say?">
                             </div>
                         </div>
@@ -138,7 +116,7 @@
         </div>
         </div>
 
-
+        
         </div>
 
         <div class="container-fluid remote hide my-2" id="share-container">

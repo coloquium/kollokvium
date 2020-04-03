@@ -9,6 +9,7 @@ import { AppDomain } from './AppDomain';
 import { MediaStreamBlender } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
 import { AppComponentToaster } from './Components/AppComponentToaster';
+import { DungeonComponent } from './Components/DungeonComponent';
 
 
 
@@ -16,6 +17,7 @@ export class App {
     appDomain: AppDomain;
     videoGrid: HTMLElement;
     audioNode: HTMLAudioElement;
+    dungeons: Map<string, DungeonComponent>;
 
     testCameraResolutions() {
         let parent = document.querySelector("#sel-video-res");
@@ -213,7 +215,8 @@ export class App {
             text: message,
             from: sender
         }
-        this.factory.GetController("broker").Invoke("instantMessage",
+
+        this.factory.GetController("broker").Invoke("chatMessage",
             data
         );
     }
@@ -281,13 +284,45 @@ export class App {
         });
 
 
-
-
         document.querySelector("#remote-videos").append(item);
 
 
     }
 
+    addDungeon(key: string) {
+        let d = new DungeonComponent(key);
+        this.dungeons.set(key, d);
+        d.render(document.querySelector(".dungeons"));
+
+        document.querySelector("#dungeon-" + key + " i").addEventListener("click", () => {
+            d.destroy((peers: Array<string>) => {
+                peers.forEach((peerId: string) => {
+                    this.factory.GetController("broker").Invoke("leaveDungeon", {
+                        key: d.id,
+                        peerId: peerId
+                    });
+                });
+                this.dungeons.delete(key);
+                document.querySelector("#dungeon-" + key).remove();
+            });
+
+
+        });
+
+        document.querySelector("#dungeon-" + key).addEventListener("click", () => {
+            document.querySelector(".video-grid").classList.add("blur");
+
+            this.audioNode.muted = true;
+
+            document.querySelector(".dungeons-header").classList.add("flash");
+
+
+        });
+        if (document.querySelector(".dungeons").classList.contains("d-none")) {
+            document.querySelector(".dungeons").classList.remove("d-none");
+        }
+
+    }
 
     /**
      * Get this clients media devices
@@ -324,6 +359,9 @@ export class App {
     }
 
 
+    dungeonFocues() {
+
+    }
 
 
     /**
@@ -338,9 +376,6 @@ export class App {
         this.mediaStreamBlender = new MediaStreamBlender();
 
         // hook up listeners for MediaBlender
-
-
-
 
 
         let watermark = document.querySelector("#watermark") as HTMLImageElement;
@@ -397,15 +432,13 @@ export class App {
             document.querySelector(".only-desktop").classList.add("hide");
         }
 
-
-
         // if (!location.href.includes("https://"))
 
         this.peerId = null;
         this.numOfChatMessagesUnread = 0;
 
         this.participants = new Map<string, AppParticipant>();
-
+        this.dungeons = new Map<string, DungeonComponent>();
 
         this.Slug = location.hash.replace("#", "");
 
@@ -419,11 +452,14 @@ export class App {
         this.audioNode = document.querySelector("#remtote-audio-node audio") as HTMLAudioElement;
 
 
+
+
+
+
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         let chatWindow = document.querySelector(".chat") as HTMLElement;
         let chatMessage = document.querySelector("#chat-message") as HTMLInputElement;
-        let chatNick = document.querySelector("#chat-nick") as HTMLInputElement;
         let chatMessages = document.querySelector("#chatmessages") as HTMLElement;
 
         let muteAudio = document.querySelector("#mute-local-audio") as HTMLElement;
@@ -441,6 +477,7 @@ export class App {
         let generateSlug = document.querySelector("#generate-slug") as HTMLHtmlElement
 
         let nickname = document.querySelector("#txt-nick") as HTMLInputElement;
+
         let videoDevice = document.querySelector("#sel-video") as HTMLInputElement;
         let audioDevice = document.querySelector("#sel-audio") as HTMLInputElement;
         let videoResolution = document.querySelector("#sel-video-res") as HTMLInputElement;
@@ -454,6 +491,17 @@ export class App {
 
 
         nickname.value = this.userSettings.nickname;
+
+
+        this.videoGrid.addEventListener("click", () => {
+            this.videoGrid.classList.remove("blur");
+
+
+
+            this.audioNode.muted = !this.audioNode.muted;
+
+
+        });
 
 
         toogleRecord.addEventListener("click", () => {
@@ -586,13 +634,20 @@ export class App {
 
         document.querySelector("button#invite-dungeon").addEventListener("click", () => {
             document.querySelector(".dungeons").classList.remove("d-none");
+            $("#modal-dungeon").modal("toggle");
+            let peers = new Array<string>();
             document.querySelectorAll(".dungeon-paricipant").forEach((el: HTMLElement) => {
-                console.log(`invite ${el.dataset.peerId} to dungeon`);
-
-                this.factory.GetController("broker").Invoke("inviteDungeon", el.dataset.peerId);
-
+                peers.push(el.dataset.peerId);
 
             });
+            const key = Math.random().toString(36).substring(6);
+            this.addDungeon(key);
+            this.factory.GetController("broker").Invoke("inviteDungeon", {
+                peerIds: peers,
+                key: key,
+                context: this.rtcClient.Context
+            });
+
         });
 
 
@@ -678,17 +733,24 @@ export class App {
         });
 
 
-        chatNick.value = this.userSettings.nickname;
-
-        chatNick.addEventListener("click", () => {
-            chatNick.value = "";
+        nickname.addEventListener("change", () => {
+            this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
         });
+
+
+        // chatNick.value = this.userSettings.nickname;
+
+        // chatNick.addEventListener("click", () => {
+        //     chatNick.value = "";
+        // });
 
         startButton.addEventListener("click", () => {
 
             this.videoGrid.classList.add("d-flex");
 
+            
 
+            document.querySelector(".fa-dungeon").classList.toggle("hide");
             document.querySelector(".top-bar").classList.remove("d-none");
 
             document.querySelector("#record").classList.remove("d-none");
@@ -730,31 +792,66 @@ export class App {
                 this.fileReceived(fileinfo, arrayBuffer)
             });
 
+            // hook up dungeon functions
 
-            broker.On("inviteDungeon", (d: any) => {
+
+            broker.On("leaveDungeon", (data: any) => {
+
+                console.log("leaveDungeon", data);
+                this.dungeons.get(data.key).removeParticipant(data.peerId);
+
+
+            });
+
+            broker.On("inviteDungeon", (invite: any) => {
 
                 let toast = AppComponentToaster.dungeonToaster(
-                    "Dungeon call", "Someone in the meeting created a dungeon...");
+                    "Dungeon invite", "Someone in the meeting created a dungeon...");
 
                 let node = toast.children[0] as HTMLElement;
-                node.dataset.peerId = d.peerId;
+                node.dataset.peerId = invite.peerId;
 
                 toast.querySelector(".btn-primary").addEventListener("click", (el: any) => {
-                    console.log("accepted a dungeon", d);
+                    this.factory.GetController("broker").Invoke("acceptDungeon", invite);
+                    this.addDungeon(invite.key);
 
-                    // confirm to sender...
+                    node.remove();
 
+                    try {
 
-
+                        this.dungeons.get(invite.key).addDungeonParticipant(this.participants.get(invite.creator));
+                    } catch (e) {
+                        console.log(e);
+                    }
                 });
+
+                toast.querySelector(".btn-danger").addEventListener("click", (el: any) => {
+                    this.factory.GetController("broker").Invoke("declineDungeon", invite);
+                    node.remove();
+                });
+
+
                 document.querySelector(".toasters").prepend(toast);
                 $(".toast").toast("show");
 
             });
 
+            broker.On("acceptDungeon", (data) => {
+                let d = this.dungeons.get(data.key);
+                try {
+                    d.addDungeonParticipant(this.participants.get(data.peerId));
+                } catch (e) {
+                    console.log(e);
+                }
+
+                console.log(data, d);
+            });
+
+
+
             // hook up chat functions...
 
-            broker.On("instantMessage", (im: any) => {
+            broker.On("chatMessage", (im: any) => {
 
                 this.numOfChatMessagesUnread++;
                 let message = document.createElement("p");
@@ -775,9 +872,9 @@ export class App {
 
             });
 
-            chatMessage.addEventListener("keyup", (e) => {
+            chatMessage.addEventListener("keydown", (e) => {
                 if (e.keyCode == 13) {
-                    this.sendMessage(chatNick.value, chatMessage.value)
+                    this.sendMessage(this.userSettings.nickname, chatMessage.value)
                     chatMessage.value = "";
                 }
             });
@@ -795,9 +892,10 @@ export class App {
             }
             this.rtcClient.OnContextDisconnected = (peer) => {
                 document.querySelector(".p" + peer.id).remove();
+                this.participants.delete(peer.id);
             };
             this.rtcClient.OnContextConnected = (peer) => {
-                document.querySelector(".remote").classList.remove("hide");
+                document.querySelector(".remote").classList.add("hide");
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
@@ -823,6 +921,8 @@ export class App {
             }
             broker.OnOpen = (ci: any) => {
 
+                this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
+
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
                     UserSettings.defaultConstraints,
@@ -847,5 +947,6 @@ export class App {
 */
 document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
-    App.getInstance()
+     App.getInstance();
+    
 });

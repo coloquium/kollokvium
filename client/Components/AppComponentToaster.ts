@@ -12,8 +12,7 @@ export class AppComponentToaster extends AppComponent {
         <div role="alert" aria-live="assertive" aria-atomic="true" class="toast" data-autohide="false">
         <div class="toast-header">
             <i class="fas fa-info-circle"></i>&nbsp;
-              <strong class="mr-auto">${caption}</strong>
-         
+              <strong class="mr-auto">${caption}</strong>         
           <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>

@@ -3,7 +3,7 @@ body{
 }
 main {
     position: relative;
-    background-image: url(../img/bg_defult.png);    
+    background-image: url(../video/coverr-sunrise-1563948708950.jpg);    
     background-size: cover;
     height: 100vh;
     min-height: 25rem;
@@ -163,6 +163,7 @@ main .overlay {
 
 
 
+
 .video-grid ul {
 
     list-style: none;
@@ -185,6 +186,11 @@ main .overlay {
 }
 
 .video-grid ul li video {
+
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+
     position: absolute;
     left: 50%;
     /* % of surrounding element */
@@ -253,8 +259,8 @@ li:first-child:nth-last-child(9)~li {
 .video-tools {
     position: absolute;
     z-index: 1000;
-
-    margin: .5rem;
+    margin-top:80px;
+    margin-left: 20px;
 }
 
 .video-tools i {
@@ -278,6 +284,10 @@ li:first-child:nth-last-child(9)~li {
     animation: blinker 1s linear infinite;
 }
 
+.blur{
+    filter: blur(20px);
+}
+
 @keyframes blinker {
     50% {
         opacity: 0;
@@ -292,7 +302,7 @@ li:first-child:nth-last-child(9)~li {
 
 .dungeon-thumbs canvas{
     max-width: 120px;
-    filter: grayscale();
+   
 }
 
 .dungeon-paricipant{
@@ -305,11 +315,12 @@ li:first-child:nth-last-child(9)~li {
     z-index: 9;
     width: 400px;
     height: auto;
-   background: rgba(0,0,0,0.2);
-    opacity: 0.9;
-    top: 90px;
-    left:1rem;
+    opacity: 0.7;
+    background: #000;
+    top: 130px;
+    left: 1rem;
     padding: 1rem;
+
 
 }
 
@@ -322,7 +333,7 @@ li:first-child:nth-last-child(9)~li {
     width: 100% !important;
 }
 
-.dungeon-header span {
+.dungeon-header i {
     float: right;
 }
 

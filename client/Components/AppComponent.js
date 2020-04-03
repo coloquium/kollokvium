@@ -8,5 +8,7 @@ class AppComponent {
             b.appendChild(i);
         return b;
     }
+    constructor() {
+    }
 }
 exports.AppComponent = AppComponent;

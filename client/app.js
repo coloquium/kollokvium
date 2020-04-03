@@ -8,6 +8,7 @@ const AppDomain_1 = require("./AppDomain");
 const mediastreamblender_1 = require("mediastreamblender");
 const DetectResolutions_1 = require("./Helpers/DetectResolutions");
 const AppComponentToaster_1 = require("./Components/AppComponentToaster");
+const DungeonComponent_1 = require("./Components/DungeonComponent");
 class App {
     /**
      * Creates an instance of App - Kollokvium
@@ -73,6 +74,7 @@ class App {
         this.peerId = null;
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map();
+        this.dungeons = new Map();
         this.Slug = location.hash.replace("#", "");
         this.fullScreenVideo = document.querySelector(".full");
         this.shareContainer = document.querySelector("#share-container");
@@ -83,7 +85,6 @@ class App {
         let startButton = document.querySelector("#joinconference");
         let chatWindow = document.querySelector(".chat");
         let chatMessage = document.querySelector("#chat-message");
-        let chatNick = document.querySelector("#chat-nick");
         let chatMessages = document.querySelector("#chatmessages");
         let muteAudio = document.querySelector("#mute-local-audio");
         let muteVideo = document.querySelector("#mute-local-video");
@@ -102,6 +103,10 @@ class App {
         let toogleRecord = document.querySelector(".record");
         let testResolutions = document.querySelector("#test-resolutions");
         nickname.value = this.userSettings.nickname;
+        this.videoGrid.addEventListener("click", () => {
+            this.videoGrid.classList.remove("blur");
+            this.audioNode.muted = !this.audioNode.muted;
+        });
         toogleRecord.addEventListener("click", () => {
             toogleRecord.classList.toggle("flash");
             this.mediaStreamBlender.render(25);
@@ -204,9 +209,17 @@ class App {
         });
         document.querySelector("button#invite-dungeon").addEventListener("click", () => {
             document.querySelector(".dungeons").classList.remove("d-none");
+            $("#modal-dungeon").modal("toggle");
+            let peers = new Array();
             document.querySelectorAll(".dungeon-paricipant").forEach((el) => {
-                console.log(`invite ${el.dataset.peerId} to dungeon`);
-                this.factory.GetController("broker").Invoke("inviteDungeon", el.dataset.peerId);
+                peers.push(el.dataset.peerId);
+            });
+            const key = Math.random().toString(36).substring(6);
+            this.addDungeon(key);
+            this.factory.GetController("broker").Invoke("inviteDungeon", {
+                peerIds: peers,
+                key: key,
+                context: this.rtcClient.Context
             });
         });
         this.userSettings.slugHistory.getHistory().forEach((slug) => {
@@ -276,12 +289,16 @@ class App {
                 startButton.disabled = true;
             }
         });
-        chatNick.value = this.userSettings.nickname;
-        chatNick.addEventListener("click", () => {
-            chatNick.value = "";
+        nickname.addEventListener("change", () => {
+            this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
         });
+        // chatNick.value = this.userSettings.nickname;
+        // chatNick.addEventListener("click", () => {
+        //     chatNick.value = "";
+        // });
         startButton.addEventListener("click", () => {
             this.videoGrid.classList.add("d-flex");
+            document.querySelector(".fa-dungeon").classList.toggle("hide");
             document.querySelector(".top-bar").classList.remove("d-none");
             document.querySelector("#record").classList.remove("d-none");
             $("#random-slug").popover("hide");
@@ -309,19 +326,45 @@ class App {
             broker.On("fileShare", (fileinfo, arrayBuffer) => {
                 this.fileReceived(fileinfo, arrayBuffer);
             });
-            broker.On("inviteDungeon", (d) => {
-                let toast = AppComponentToaster_1.AppComponentToaster.dungeonToaster("Dungeon call", "Someone in the meeting created a dungeon...");
+            // hook up dungeon functions
+            broker.On("leaveDungeon", (data) => {
+                console.log("leaveDungeon", data);
+                this.dungeons.get(data.key).removeParticipant(data.peerId);
+            });
+            broker.On("inviteDungeon", (invite) => {
+                let toast = AppComponentToaster_1.AppComponentToaster.dungeonToaster("Dungeon invite", "Someone in the meeting created a dungeon...");
                 let node = toast.children[0];
-                node.dataset.peerId = d.peerId;
+                node.dataset.peerId = invite.peerId;
                 toast.querySelector(".btn-primary").addEventListener("click", (el) => {
-                    console.log("accepted a dungeon", d);
+                    this.factory.GetController("broker").Invoke("acceptDungeon", invite);
+                    this.addDungeon(invite.key);
+                    node.remove();
+                    try {
+                        this.dungeons.get(invite.key).addDungeonParticipant(this.participants.get(invite.creator));
+                    }
+                    catch (e) {
+                        console.log(e);
+                    }
+                });
+                toast.querySelector(".btn-danger").addEventListener("click", (el) => {
+                    this.factory.GetController("broker").Invoke("declineDungeon", invite);
+                    node.remove();
                 });
                 document.querySelector(".toasters").prepend(toast);
                 $(".toast").toast("show");
-                //console.log("d",d)
+            });
+            broker.On("acceptDungeon", (data) => {
+                let d = this.dungeons.get(data.key);
+                try {
+                    d.addDungeonParticipant(this.participants.get(data.peerId));
+                }
+                catch (e) {
+                    console.log(e);
+                }
+                console.log(data, d);
             });
             // hook up chat functions...
-            broker.On("instantMessage", (im) => {
+            broker.On("chatMessage", (im) => {
                 this.numOfChatMessagesUnread++;
                 let message = document.createElement("p");
                 message.textContent = im.text;
@@ -334,9 +377,9 @@ class App {
                     unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
                 }
             });
-            chatMessage.addEventListener("keyup", (e) => {
+            chatMessage.addEventListener("keydown", (e) => {
                 if (e.keyCode == 13) {
-                    this.sendMessage(chatNick.value, chatMessage.value);
+                    this.sendMessage(this.userSettings.nickname, chatMessage.value);
                     chatMessage.value = "";
                 }
             });
@@ -351,9 +394,10 @@ class App {
             };
             this.rtcClient.OnContextDisconnected = (peer) => {
                 document.querySelector(".p" + peer.id).remove();
+                this.participants.delete(peer.id);
             };
             this.rtcClient.OnContextConnected = (peer) => {
-                document.querySelector(".remote").classList.remove("hide");
+                document.querySelector(".remote").classList.add("hide");
             };
             this.rtcClient.OnRemoteTrack = (track, connection) => {
                 let participant = this.tryAddParticipant(connection.id);
@@ -371,6 +415,7 @@ class App {
                 // noop
             };
             broker.OnOpen = (ci) => {
+                this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(UserSettings_1.UserSettings.defaultConstraints, (mediaStream) => {
                     this.localMediaStream = mediaStream;
@@ -515,7 +560,7 @@ class App {
             text: message,
             from: sender
         };
-        this.factory.GetController("broker").Invoke("instantMessage", data);
+        this.factory.GetController("broker").Invoke("chatMessage", data);
     }
     /**
      *  Connect to the realtime server (websocket) and its controller
@@ -567,6 +612,37 @@ class App {
         });
         document.querySelector("#remote-videos").append(item);
     }
+    addDungeon(key) {
+        let d = new DungeonComponent_1.DungeonComponent(key);
+        this.dungeons.set(key, d);
+        d.render(document.querySelector(".dungeons"));
+        document.querySelector("#dungeon-" + key + " i").addEventListener("click", () => {
+            d.destroy((peers) => {
+                peers.forEach((peerId) => {
+                    this.factory.GetController("broker").Invoke("leaveDungeon", {
+                        key: d.id,
+                        peerId: peerId
+                    });
+                });
+                this.dungeons.delete(key);
+                document.querySelector("#dungeon-" + key).remove();
+            });
+        });
+        document.querySelector("#dungeon-" + key).addEventListener("click", () => {
+            document.querySelector(".video-grid").classList.add("blur");
+            this.audioNode.muted = true;
+            document.querySelector(".dungeons-header").classList.add("flash");
+        });
+        if (document.querySelector(".dungeons").classList.contains("d-none")) {
+            document.querySelector(".dungeons").classList.remove("d-none");
+        }
+    }
+    /**
+     * Get this clients media devices
+     *
+     * @returns {Promise<Array<MediaDeviceInfo>>}
+     * @memberof App
+     */
     getMediaDevices() {
         return new Promise((resolve, reject) => {
             navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -595,6 +671,8 @@ class App {
             };
             return p;
         }
+    }
+    dungeonFocues() {
     }
     static getInstance() {
         return new App();
