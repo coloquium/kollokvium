@@ -4,9 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "build": "webpack",
-    "prestart": "build",
-    "start": "node server.js",
+    "build": "concurrently --kill-others \"npm run build-client\" \"npm run build-server\"",
+    "build-client": "webpack --config webpack.config.js",
+    "build-server": "webpack --config webpack.server.js",
+    "start": "node dist\\server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -27,6 +28,7 @@
     "webrtc-adapter": "^7.5.1"
   },
   "devDependencies": {
+    "concurrently": "5.1.0",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",
     "webpack": "4.42.1",
