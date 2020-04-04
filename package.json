@@ -4,6 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "build": "webpack",
+    "prestart": "build",
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,5 +25,11 @@
     "thor-io.client-vnext": "^2.0.2-beta.2",
     "thor-io.vnext": "^2.0.3-beta.4",
     "webrtc-adapter": "^7.5.1"
+  },
+  "devDependencies": {
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "4.42.1",
+    "webpack-cli": "3.3.11"
   }
 }
