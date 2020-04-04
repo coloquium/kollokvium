@@ -427,6 +427,12 @@ export class App {
 
         this.userSettings = new UserSettings();
 
+        //Handle modal quick start early, if its been dismissed hide straight away
+        if (this.userSettings.showQuickStart)
+            document.querySelector("#quick-start-container").style.display = "block";
+        else
+            document.querySelector("#quick-start-container").style.display = "none";
+
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
@@ -482,6 +488,9 @@ export class App {
         let audioDevice = document.querySelector("#sel-audio") as HTMLInputElement;
         let videoResolution = document.querySelector("#sel-video-res") as HTMLInputElement;
         // just set the value to saved key, as user needs to scan..
+
+        let closeQuickstartButton = document.querySelector("#close-quick-start") as HTMLInputElement;
+        let helpButton = document.querySelector("#help") as HTMLInputElement;
 
         document.querySelector("#sel-video-res option").textContent = "Using dynamic resolution";
 
@@ -687,6 +696,18 @@ export class App {
         this.shareFile.addEventListener("click", () => {
             $("#share-file").popover("toggle");
         });
+
+        closeQuickstartButton.addEventListener("click", () => {
+            document.querySelector("#quick-start-container").style.display = "none";
+            this.userSettings.showQuickStart = false;
+            this.userSettings.saveSetting();
+        })
+        
+        helpButton.addEventListener("click", () => {
+            document.querySelector("#quick-start-container").style.display = "block";
+            this.userSettings.showQuickStart = true;
+            this.userSettings.saveSetting();
+        })
 
         document.querySelector("button#share-link").addEventListener("click", (e: any) => {
             navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then(() => {

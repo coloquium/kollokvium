@@ -66,6 +66,11 @@ class App {
         document.querySelector("#appDomain").textContent = this.appDomain.domain;
         document.querySelector("#appVersion").textContent = this.appDomain.version;
         this.userSettings = new UserSettings_1.UserSettings();
+        //Handle modal quick start early, if its been dismissed hide straight away
+        if (this.userSettings.showQuickStart)
+            document.querySelector("#quick-start-container").style.display = "block";
+        else
+            document.querySelector("#quick-start-container").style.display = "none";
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
@@ -99,6 +104,8 @@ class App {
         let audioDevice = document.querySelector("#sel-audio");
         let videoResolution = document.querySelector("#sel-video-res");
         // just set the value to saved key, as user needs to scan..
+        let closeQuickstartButton = document.querySelector("#close-quick-start");
+        let helpButton = document.querySelector("#help");
         document.querySelector("#sel-video-res option").textContent = "Using dynamic resolution";
         let toogleRecord = document.querySelector(".record");
         let testResolutions = document.querySelector("#test-resolutions");
@@ -248,6 +255,16 @@ class App {
         });
         this.shareFile.addEventListener("click", () => {
             $("#share-file").popover("toggle");
+        });
+        closeQuickstartButton.addEventListener("click", () => {
+            document.querySelector("#quick-start-container").style.display = "none";
+            this.userSettings.showQuickStart = false;
+            this.userSettings.saveSetting();
+        });
+        helpButton.addEventListener("click", () => {
+            document.querySelector("#quick-start-container").style.display = "block";
+            this.userSettings.showQuickStart = true;
+            this.userSettings.saveSetting();
         });
         document.querySelector("button#share-link").addEventListener("click", (e) => {
             navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then(() => {

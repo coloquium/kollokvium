@@ -368,3 +368,26 @@ li:first-child:nth-last-child(9)~li {
     right: 10px;
     z-index: 10000
 }
+
+.modal-box {
+    position: absolute !important;
+    left: 50%;
+    top:50%;
+    transform: translate(-50%, -50%);
+    background-color:transparent;
+    z-index: 99999;
+    padding:50px;
+
+}
+
+#quickstart {
+    /* width:80%;
+    height:60%; */
+}
+/* 
+#help {
+    position: absolute;
+    top:20px;
+    left:20px;
+    z-index:9;
+} */

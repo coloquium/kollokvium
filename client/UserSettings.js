@@ -13,6 +13,7 @@ class UserSettings {
             this.videoResolution = settings.videoResolution;
             this.nickname = settings.nickname;
             this.slugHistory.history = settings.slugHistory;
+            this.showQuickStart = settings.showQuickStart;
         }
         else {
             this.slugHistory.history = new Array();
@@ -20,6 +21,7 @@ class UserSettings {
             this.audioDevice = "";
             this.videoDevice = "";
             this.videoResolution = "";
+            this.showQuickStart = true;
         }
     }
     saveSetting() {
@@ -28,7 +30,8 @@ class UserSettings {
             videoDevice: this.videoDevice,
             audioDevice: this.audioDevice,
             videoResolution: this.videoResolution,
-            nickname: this.nickname
+            nickname: this.nickname,
+            showQuickStart: this.showQuickStart,
         };
         localStorage.setItem("settings", JSON.stringify(data));
     }

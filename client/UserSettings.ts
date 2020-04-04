@@ -14,6 +14,7 @@ export class UserSettings {
     videoDevice: string;
     audioDevice: string;
     videoResolution: string;
+    showQuickStart: boolean;
 
     nickname: string;
     saveSetting() {
@@ -22,7 +23,8 @@ export class UserSettings {
             videoDevice: this.videoDevice,
             audioDevice: this.audioDevice,
             videoResolution: this.videoResolution,
-            nickname: this.nickname
+            nickname: this.nickname,
+            showQuickStart: this.showQuickStart,
         };
         localStorage.setItem("settings", JSON.stringify(data));
     }
@@ -71,12 +73,14 @@ export class UserSettings {
             this.videoResolution = settings.videoResolution;
             this.nickname = settings.nickname;
             this.slugHistory.history = settings.slugHistory;
+            this.showQuickStart = settings.showQuickStart;
         }
         else {
             this.slugHistory.history = new Array<string>();
             this.nickname = Math.random().toString(36).substring(8);
             this.audioDevice = ""; this.videoDevice = "";
             this.videoResolution = "";
+            this.showQuickStart = true;
         }
     }
 }
