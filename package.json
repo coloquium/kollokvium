@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "build": "concurrently --kill-others \"npm run build-client\" \"npm run build-server\"",
+    "build": "concurrently \"npm run build-client\" \"npm run build-server\"",
     "build-client": "webpack --config webpack.config.js",
     "build-server": "webpack --config webpack.server.js",
     "start": "node dist\\server.js",
