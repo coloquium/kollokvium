@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/ce1444af-95e2-4920-bcee-07b5be1af55c/resourceGroups/rg-kollokvium/providers/Microsoft.Web/sites/kollokvium",
+    "appService.deploySubpath": ""
+}
