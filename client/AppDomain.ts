@@ -20,7 +20,7 @@
     
         this.domain = appConfig.domain;
         this.contextPrefix = appConfig.contextPrefix;
-        this.serverUrl = appConfig.serverUrl;
+        this.serverUrl = appConfig.serverUrl || "wss://" + window.location.hostname;
         this.version = appConfig.version;
        
     }

@@ -7,17 +7,29 @@ It allows you to create and join chat rooms and is capable of web based video & 
 
 It is an all in one solution that requires no installation, and is compatible with most modern browsers.
 
+You can try it at this link https://kollokvium.herokuapp.com/
 
 ## feature list
 
 1. 1-n participants
-2. Instanet messages (chat )
+2. Instant Messages (chat)
 3. File share ( files sent to chat window)
-4. Screen sharing ( deskop )
+4. Screen sharing ( deskop)
 5. Random room generator or user defined
 6. No login and registration required
-7. Customizable,  See blow
-8. Multiple stream recording ( record the meeting )
+7. Multiple stream recording ( record the meeting )
+8. Customizable
+
+## in-progress
+
+The following features are right now being developed by the Kollokvium team.
+
+1. Broadcast - Possibility to host a 'broadcast/webcast" using p2p chains (1-n many)
+2. Add pre-recorded local media streams such as (video,audio) to conference/call
+3. Chromecast integration
+4. Smartphone & Tablet UI working properly
+
+We count on having this three first features up and running no later than end of march 2020.
 
 ## install 
 
@@ -27,7 +39,7 @@ It is an all in one solution that requires no installation, and is compatible wi
 4. Modify & compile
 5. Make sure you run weback , or put it on watch 
 
-## Quick customization guide.
+## quick customization guide.
 
 Clone/download the this repo, modify settings.json in found in the ./client folder, compile and run webpack.
 
@@ -44,8 +56,7 @@ Clone/download the this repo, modify settings.json in found in the ./client fold
  
 If you want to host "only" client, copy index.html, img,build and css folders into your site and/or folder.  To host application deploy all in your hosting enviorment. 
 
-
-## Other
+## other
 
 Goodluck, and if you find issues, have ides post them here 
 https://github.com/MagnusThor/kollokvium/issues

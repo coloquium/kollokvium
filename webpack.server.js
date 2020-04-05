@@ -1,10 +1,11 @@
 var path = require('path');
 
 module.exports = {
-  mode:"production", 
+  mode: "production",
+  target: "node",
   watch: false,
   entry: {    
-    kollkovium : path.join(__dirname, 'client', 'app.ts'),
+    server : path.join(__dirname, 'server.ts'),
   },
   module: {
     rules: [
@@ -23,7 +24,6 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   output: {
-    path: path.resolve(__dirname, 'build'),
-    filename: '[name]-bundle.js'
+    filename: '[name].js'
   },
 }
