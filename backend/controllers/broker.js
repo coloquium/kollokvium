@@ -12,9 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const thor_io_vnext_1 = require("thor-io.vnext");
 const ChatMessageModel_1 = require("../Models/ChatMessageModel");
 const DungeonModel_1 = require("../Models/DungeonModel");
+const ExtendedPeerConnection_1 = require("../Models/ExtendedPeerConnection");
 // Controller will be know as "broker", and not seald ( seald = true, is background sevices),
 // controller (broker) will pass a heartbeat to client each 5 seconds to keep alive. 
-let Broker = class Broker extends thor_io_vnext_1.BrokerController {
+let Broker = class Broker extends thor_io_vnext_1.ControllerBase {
     /**
      *Creates an instance of Broker.
      * @param {Connection} connection
@@ -22,16 +23,72 @@ let Broker = class Broker extends thor_io_vnext_1.BrokerController {
      */
     constructor(connection) {
         super(connection);
+        this.Connections = new Array();
     }
-    /**
-     *
-     *
-     * @param {*} fileInfo
-     * @param {*} topic
-     * @param {*} controller
-     * @param {*} blob
-     * @memberof Broker
-     */
+    lockContext() {
+        this.Peer.locked = !this.Peer.locked;
+        this.getExtendedPeerConnections(this.Peer).forEach((c) => {
+            c.Peer.locked = this.Peer.locked;
+        });
+        let expression = (pre) => {
+            return pre.Peer.context == this.Peer.context;
+        };
+        this.invokeTo(expression, this.Peer, "lockContext", this.alias);
+    }
+    isRoomLocked(slug) {
+        /**
+          *
+          *
+          * @param {string} peerId
+          * @memberof Broker
+          */
+        let match = this.findOn(this.alias, (pre) => {
+            return pre.Peer.context === slug && pre.Peer.locked === true;
+        });
+        this.invoke({ "state": match.length > 0 ? true : false }, "isRoomLocked");
+    }
+    onopen() {
+        this.Peer = new ExtendedPeerConnection_1.ExtendedPeerConnection(thor_io_vnext_1.ControllerBase.newGuid(), this.connection.id);
+        this.invoke(this.Peer, "contextCreated", this.alias);
+    }
+    changeContext(change) {
+        let match = this.getExtendedPeerConnections(this.Peer).find((c) => {
+            c.Peer.locked == false && c.Peer.context == change.context;
+        });
+        if (!match) {
+            this.Peer.context = change.context;
+            this.invoke(this.Peer, "contextChanged", this.alias);
+        }
+        else {
+            this.invoke(this.Peer, "contextChangedFailure", this.alias);
+        }
+    }
+    contextSignal(signal) {
+        let expression = (pre) => {
+            return pre.connection.id === signal.recipient;
+        };
+        this.invokeTo(expression, signal, "contextSignal", this.alias);
+    }
+    connectContext() {
+        /**
+         *
+         *
+         * @param {Broker} p
+         * @returns
+         */
+        if (!this.Peer.locked) {
+            let connections = this.getExtendedPeerConnections(this.Peer).map((p) => {
+                return p.Peer;
+            });
+            this.invoke(connections, "connectTo", this.alias);
+        }
+    }
+    getExtendedPeerConnections(peerConnetion) {
+        let match = this.findOn(this.alias, (pre) => {
+            return pre.Peer.context === this.Peer.context && pre.Peer.peerId !== peerConnetion.peerId;
+        });
+        return match;
+    }
     fileShare(fileInfo, topic, controller, blob) {
         let expression = (pre) => {
             return pre.Peer.context >= this.Peer.context;
@@ -42,14 +99,6 @@ let Broker = class Broker extends thor_io_vnext_1.BrokerController {
     setNickname(name) {
         this.nickName = name;
     }
-    /**
-     * Send chat messages
-     *
-     * @param {*} data
-     * @param {string} topic
-     * @param {string} controller
-     * @memberof Broker
-     */
     chatMessage(data, topic, controller) {
         let expression;
         let mentions = data.text.match(/\B@[a-z0-9_-]+/gi);
@@ -71,7 +120,6 @@ let Broker = class Broker extends thor_io_vnext_1.BrokerController {
         this.invokeTo(expression, data, "chatMessage");
     }
     leaveDungeon(data) {
-        console.log("leaveDungeon", data);
         this.invokeTo((pre) => {
             return pre.Peer.peerId == data.peerId;
         }, {
@@ -79,12 +127,6 @@ let Broker = class Broker extends thor_io_vnext_1.BrokerController {
             peerId: this.Peer.peerId
         }, "leaveDungeon");
     }
-    /**
-     *
-     *
-     * @param {string} peerId
-     * @memberof Broker
-     */
     inviteDungeon(dungeon) {
         dungeon.creator = this.Peer.peerId;
         dungeon.peerIds.forEach((peerId) => {
@@ -93,12 +135,6 @@ let Broker = class Broker extends thor_io_vnext_1.BrokerController {
             }, dungeon, "inviteDungeon");
         });
     }
-    /**
-     *
-     *
-     * @param {string} peerId
-     * @memberof Broker
-     */
     declineDungeon(dungeon) {
         dungeon.peerIds.forEach((peerId) => {
             this.invokeTo((pre) => {
@@ -144,6 +180,36 @@ let Broker = class Broker extends thor_io_vnext_1.BrokerController {
         }, "acceptDungeon");
     }
 };
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "lockContext", null);
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "isRoomLocked", null);
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [ExtendedPeerConnection_1.ExtendedPeerConnection]),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "changeContext", null);
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [thor_io_vnext_1.Signal]),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "contextSignal", null);
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "connectContext", null);
 __decorate([
     thor_io_vnext_1.CanInvoke(true),
     __metadata("design:type", Function),

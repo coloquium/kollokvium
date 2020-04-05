@@ -93,12 +93,21 @@ main .overlay {
     position: absolute;
     bottom: 0px;
     float:left;
-    z-index: 200;
+    z-index: 1200;
     color: #fff;
     background: rgba(0,0,0,0.7);;
  
     
 }
+.controls i{
+    cursor: hand;
+    
+}
+.controls i:hover{
+    color: #fff;
+    
+}
+
 
 .controls span.badge {
     float: right;
@@ -380,14 +389,3 @@ li:first-child:nth-last-child(9)~li {
 
 }
 
-#quickstart {
-    /* width:80%;
-    height:60%; */
-}
-/* 
-#help {
-    position: absolute;
-    top:20px;
-    left:20px;
-    z-index:9;
-} */

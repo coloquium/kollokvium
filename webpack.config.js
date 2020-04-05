@@ -2,7 +2,7 @@ module.exports = {
   mode:"development", 
   watch: false,
   entry: {    
-    kollovium :'./client/app.js',
+    kollokvium :'./client/app.js',
   },
   
   output: {

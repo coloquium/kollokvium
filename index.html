@@ -37,6 +37,8 @@
     <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/app.css">
 
+</head>
+
 <body>
 
 
@@ -53,7 +55,7 @@
 
 
     <div class="dungeons d-none">
-     
+
 
 
     </div>
@@ -64,22 +66,46 @@
 
     <div class="top-bar">
 
+
+
         <i id="help" class="fa fa-question-circle fa-2x" style="cursor:pointer;" aria-hidden="true"></i>
         <i class="fas fa-volume-up fa-2x" title="mute all audio" id="mute-speakers" style="cursor:pointer;"></i>
-       
+
 
         <!-- <i class="fas fa-share-alt fa-2x" id="share-slug" data-container="body" data-toggle="popover"
         data-placement="bottom" data-trigger="click" data-content="Yor room link is now in the clipboard"></i> -->
 
-        <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
+        <div class="hide">
+            <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
+        </div>
+
+
+        <i class="fas fa-lock-open fa-2x hide" id="context-lock"></i>
 
         <!-- <span id="dungeon-messages" class="badge badge-danger style=" float:right">beta</span> -->
     </div>
 
-    
 
-    <div id="quick-start-container" class="container-fluid modal-box" style="display:none;">
-            <div id="quickstart" class="card">
+
+    <div class="modal" tabindex="-1" role="dialog" id="quick-start-container">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> Quick start guide</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+
+                </div>
+                <div class="modal-body">
+                    <p>TBD</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--
+    <div id="quick-start-container" class="container-fluid modal-box hide">
+             <div id="quickstart" class="card">
                 <div class="card-header">
                     Quick start guide
                 </div>
@@ -133,9 +159,11 @@
                     </p>
                     <button class="btn btn-primary float-right" id="close-quick-start"><i class="fas fa-window-close"></i> Close</button>
                 </div>
-            </div>
+            </div> 
     
         </div>
+
+        -->
 
     <main>
 
@@ -175,7 +203,7 @@
         </div>
         </div>
 
-        
+
         </div>
 
         <div class="container-fluid remote hide my-2" id="share-container">
@@ -449,7 +477,7 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/7.3.0/adapter.js"></script>
-    <script src="build/kollovium-bundle.js"></script>
+    <script src="build/kollokvium-bundle.js"></script>
 </body>
 
 </html>

@@ -2,21 +2,28 @@ import {
     ControllerProperties,
     CanInvoke,
     CanSet,
-    BrokerController,
-    Connection
+    Connection,
+    ControllerBase,
+    Signal,
 } from 'thor-io.vnext'
 import { ChatMessageModel } from '../Models/ChatMessageModel';
 import { DungeonModel } from '../Models/DungeonModel';
-
+import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
 
 
 // Controller will be know as "broker", and not seald ( seald = true, is background sevices),
 // controller (broker) will pass a heartbeat to client each 5 seconds to keep alive. 
 @ControllerProperties("broker", false, 5 * 1000)
-export class Broker extends BrokerController {
+
+export class Broker extends ControllerBase {
 
 
-    nickName: string
+    public Peer: ExtendedPeerConnection;
+    public localPeerId: string;
+
+
+    nickName: string;
+    Connections: Array<ExtendedPeerConnection>;
 
     /**
      *Creates an instance of Broker.
@@ -25,16 +32,106 @@ export class Broker extends BrokerController {
      */
     constructor(connection: Connection) {
         super(connection);
+        this.Connections = new Array<ExtendedPeerConnection>();
     }
-    /**
+
+    @CanInvoke(true)
+    lockContext() {
+
+        this.Peer.locked = !this.Peer.locked;
+        this.getExtendedPeerConnections(this.Peer).forEach((c: Broker) => {
+            c.Peer.locked = this.Peer.locked;
+        });
+        let expression = (pre: Broker) => {
+            return pre.Peer.context == this.Peer.context;
+        };
+        this.invokeTo(expression, this.Peer, "lockContext", this.alias);
+
+
+
+    }
+
+    @CanInvoke(true)
+    isRoomLocked(slug: string) {
+
+   /**
      *
      *
-     * @param {*} fileInfo
-     * @param {*} topic
-     * @param {*} controller
-     * @param {*} blob
+     * @param {string} peerId
      * @memberof Broker
      */
+        let match = this.findOn(this.alias, (pre: Broker) => {
+            return pre.Peer.context === slug && pre.Peer.locked === true;
+        });
+
+
+
+
+
+        this.invoke({ "state": match.length > 0 ? true : false }, "isRoomLocked");
+
+
+
+    }
+
+
+    onopen() {
+        this.Peer = new ExtendedPeerConnection(ControllerBase.newGuid(), this.connection.id);
+        this.invoke(this.Peer, "contextCreated", this.alias);
+    }
+    @CanInvoke(true)
+    changeContext(change: ExtendedPeerConnection) {
+
+        let match = this.getExtendedPeerConnections(this.Peer).find((c: Broker) => {
+            c.Peer.locked == false && c.Peer.context == change.context;
+        });
+
+        if (!match) {
+            this.Peer.context = change.context;
+            this.invoke(this.Peer, "contextChanged", this.alias);
+        } else {
+            this.invoke(this.Peer, "contextChangedFailure", this.alias);
+        }
+
+
+
+    }
+
+  
+    @CanInvoke(true)
+    contextSignal(signal: Signal) {
+    
+        let expression = (pre: Broker) => {
+            return pre.connection.id === signal.recipient;
+        };
+        this.invokeTo(expression, signal, "contextSignal", this.alias);
+    }
+ 
+    @CanInvoke(true)
+    connectContext() {
+        /**
+         *
+         *
+         * @param {Broker} p
+         * @returns
+         */
+        if (!this.Peer.locked) {
+            let connections = this.getExtendedPeerConnections(this.Peer).map((p: Broker) => {
+                return p.Peer;
+            });
+            this.invoke(connections, "connectTo", this.alias);
+        }
+    }
+   
+    getExtendedPeerConnections(peerConnetion: ExtendedPeerConnection): Array<ControllerBase> {
+    
+        let match = this.findOn(this.alias, (pre: Broker) => {
+            return pre.Peer.context === this.Peer.context && pre.Peer.peerId !== peerConnetion.peerId;
+        });
+        return match;
+    }
+
+  
     @CanInvoke(true)
     fileShare(fileInfo: any, topic: any, controller: any, blob: any) {
         let expression = (pre: Broker) => {
@@ -50,14 +147,6 @@ export class Broker extends BrokerController {
         this.nickName = name;
     }
 
-    /**
-     * Send chat messages 
-     *
-     * @param {*} data
-     * @param {string} topic
-     * @param {string} controller
-     * @memberof Broker
-     */
     @CanInvoke(true)
     chatMessage(data: ChatMessageModel, topic: string, controller: string) {
         let expression;
@@ -85,44 +174,34 @@ export class Broker extends BrokerController {
 
     @CanInvoke(true)
     leaveDungeon(data: any) {
-   
-        console.log("leaveDungeon",data);
-        this.invokeTo((pre: BrokerController) => {
+
+
+        this.invokeTo((pre: Broker) => {
             return pre.Peer.peerId == data.peerId;
         }, {
-            key:data.key,
+            key: data.key,
             peerId: this.Peer.peerId
         }, "leaveDungeon");
 
     }
 
 
-    /**
-     *
-     *
-     * @param {string} peerId
-     * @memberof Broker
-     */
+    
     @CanInvoke(true)
     inviteDungeon(dungeon: DungeonModel) {
         dungeon.creator = this.Peer.peerId;
         dungeon.peerIds.forEach((peerId: string) => {
-            this.invokeTo((pre: BrokerController) => {
+            this.invokeTo((pre: Broker) => {
                 return pre.Peer.peerId == peerId;
             }, dungeon, "inviteDungeon");
         });
     }
-    /**
-     *
-     *
-     * @param {string} peerId
-     * @memberof Broker
-     */
+ 
     @CanInvoke(true)
     declineDungeon(dungeon: DungeonModel) {
-   
+
         dungeon.peerIds.forEach((peerId: string) => {
-            this.invokeTo((pre: BrokerController) => {
+            this.invokeTo((pre: Broker) => {
                 return pre.Peer.peerId == peerId;
             }, {
                 key: dungeon.key,
@@ -131,9 +210,9 @@ export class Broker extends BrokerController {
             }, "declineDungeon");
         });
 
-          // notify creator as well i declined
+        // notify creator as well i declined
 
-          this.invokeTo((pre: BrokerController) => {
+        this.invokeTo((pre: Broker) => {
             return pre.Peer.peerId == dungeon.creator;
         }, {
             key: dungeon.key,
@@ -153,7 +232,7 @@ export class Broker extends BrokerController {
     acceptDungeon(dungeon: DungeonModel) {
 
         dungeon.peerIds.forEach((peerId: string) => {
-            this.invokeTo((pre: BrokerController) => {
+            this.invokeTo((pre: Broker) => {
                 return pre.Peer.peerId == peerId && pre.Peer.peerId !== this.Peer.peerId;
             }, {
                 key: dungeon.key,
@@ -164,7 +243,7 @@ export class Broker extends BrokerController {
 
         // notify creator as well i accepted
 
-        this.invokeTo((pre: BrokerController) => {
+        this.invokeTo((pre: Broker) => {
             return pre.Peer.peerId == dungeon.creator;
         }, {
             key: dungeon.key,

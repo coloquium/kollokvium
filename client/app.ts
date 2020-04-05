@@ -18,6 +18,7 @@ export class App {
     videoGrid: HTMLElement;
     audioNode: HTMLAudioElement;
     dungeons: Map<string, DungeonComponent>;
+    lockContext: HTMLElement;
 
     testCameraResolutions() {
         let parent = document.querySelector("#sel-video-res");
@@ -428,11 +429,10 @@ export class App {
         this.userSettings = new UserSettings();
 
         //Handle modal quick start early, if its been dismissed hide straight away
-        if (this.userSettings.showQuickStart)
-            document.querySelector("#quick-start-container").style.display = "block";
-        else
-            document.querySelector("#quick-start-container").style.display = "none";
-
+      //  if (this.userSettings.showQuickStart)
+       // (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
+    
+        
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
@@ -459,9 +459,10 @@ export class App {
 
 
 
+        this.lockContext = document.querySelector("#context-lock") as HTMLElement;
 
 
-
+    
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         let chatWindow = document.querySelector(".chat") as HTMLElement;
@@ -524,6 +525,11 @@ export class App {
             this.testCameraResolutions();
         })
 
+        this.lockContext.addEventListener("click", () => {
+       
+            this.factory.GetController("broker").Invoke("lockContext",{});
+        });
+
 
 
         this.getMediaDevices().then((devices: Array<MediaDeviceInfo>) => {
@@ -566,6 +572,8 @@ export class App {
 
         saveSettings.addEventListener("click", () => {
 
+
+
             this.userSettings.nickname = nickname.value;
             this.userSettings.audioDevice = audioDevice.value;
             this.userSettings.videoDevice = videoDevice.value;
@@ -588,6 +596,7 @@ export class App {
         });
 
         settings.addEventListener("click", () => {
+            console.log("!");
             $("#settings-modal").modal("toggle");
         })
 
@@ -697,14 +706,15 @@ export class App {
             $("#share-file").popover("toggle");
         });
 
-        closeQuickstartButton.addEventListener("click", () => {
-            document.querySelector("#quick-start-container").style.display = "none";
-            this.userSettings.showQuickStart = false;
-            this.userSettings.saveSetting();
-        })
+        // closeQuickstartButton.addEventListener("click", () => {
+        //     (document.querySelector("#quick-start-container") as HTMLElement).classList.add("hide");
+        //     this.userSettings.showQuickStart = false;
+        //     this.userSettings.saveSetting();
+        // })
         
         helpButton.addEventListener("click", () => {
-            document.querySelector("#quick-start-container").style.display = "block";
+            $("#quick-start-container").modal("show");
+            (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         })
@@ -742,12 +752,13 @@ export class App {
         });
         if (location.hash.length == 0) {
             $("#random-slug").popover("show");
-        } else {
+        } else {startButton
             startButton.textContent = "JOIN";
         }
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
-                startButton.disabled = false;
+                this.factory.GetController("broker").Invoke("isRoomLocked",this.appDomain.getSlug(slug.value));
+
             } else {
                 startButton.disabled = true;
             }
@@ -768,6 +779,8 @@ export class App {
         startButton.addEventListener("click", () => {
 
             this.videoGrid.classList.add("d-flex");
+
+            this.lockContext.classList.remove("hide");
 
             
 
@@ -796,6 +809,8 @@ export class App {
 
 
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
+
+
         });
 
         // if local ws://localhost:1337/     
@@ -813,7 +828,26 @@ export class App {
                 this.fileReceived(fileinfo, arrayBuffer)
             });
 
+            broker.On("lockContext",() => {
+                
+                this.lockContext.classList.toggle("fa-lock-open");
+                this.lockContext.classList.toggle("fa-lock");
+            } );
+
             // hook up dungeon functions
+
+
+            broker.On("isRoomLocked", (data: any) => {
+
+
+                    startButton.disabled = data.state;
+                    if(data.state){
+                        slug.classList.add("is-invalid");
+                    }else{
+                        slug.classList.remove("is-invalid");
+                    }
+
+            });
 
 
             broker.On("leaveDungeon", (data: any) => {
@@ -941,6 +975,11 @@ export class App {
                 // noop
             }
             broker.OnOpen = (ci: any) => {
+
+
+                if(slug.value.length >=6 ) {
+                    this.factory.GetController("broker").Invoke("isRoomLocked",this.appDomain.getSlug(slug.value));
+                }
 
                 this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
 

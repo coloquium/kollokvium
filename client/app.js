@@ -67,10 +67,8 @@ class App {
         document.querySelector("#appVersion").textContent = this.appDomain.version;
         this.userSettings = new UserSettings_1.UserSettings();
         //Handle modal quick start early, if its been dismissed hide straight away
-        if (this.userSettings.showQuickStart)
-            document.querySelector("#quick-start-container").style.display = "block";
-        else
-            document.querySelector("#quick-start-container").style.display = "none";
+        //  if (this.userSettings.showQuickStart)
+        // (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
@@ -86,6 +84,7 @@ class App {
         this.shareFile = document.querySelector("#share-file");
         this.videoGrid = document.querySelector("#video-grid");
         this.audioNode = document.querySelector("#remtote-audio-node audio");
+        this.lockContext = document.querySelector("#context-lock");
         let slug = document.querySelector("#slug");
         let startButton = document.querySelector("#joinconference");
         let chatWindow = document.querySelector(".chat");
@@ -121,6 +120,9 @@ class App {
         });
         testResolutions.addEventListener("click", () => {
             this.testCameraResolutions();
+        });
+        this.lockContext.addEventListener("click", () => {
+            this.factory.GetController("broker").Invoke("lockContext", {});
         });
         this.getMediaDevices().then((devices) => {
             let inputOnly = devices.filter(((d) => {
@@ -168,6 +170,7 @@ class App {
             });
         });
         settings.addEventListener("click", () => {
+            console.log("!");
             $("#settings-modal").modal("toggle");
         });
         // jQuery hacks for file share etc
@@ -256,13 +259,14 @@ class App {
         this.shareFile.addEventListener("click", () => {
             $("#share-file").popover("toggle");
         });
-        closeQuickstartButton.addEventListener("click", () => {
-            document.querySelector("#quick-start-container").style.display = "none";
-            this.userSettings.showQuickStart = false;
-            this.userSettings.saveSetting();
-        });
+        // closeQuickstartButton.addEventListener("click", () => {
+        //     (document.querySelector("#quick-start-container") as HTMLElement).classList.add("hide");
+        //     this.userSettings.showQuickStart = false;
+        //     this.userSettings.saveSetting();
+        // })
         helpButton.addEventListener("click", () => {
-            document.querySelector("#quick-start-container").style.display = "block";
+            $("#quick-start-container").modal("show");
+            document.querySelector("#quick-start-container").classList.remove("hide");
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         });
@@ -296,11 +300,12 @@ class App {
             $("#random-slug").popover("show");
         }
         else {
+            startButton;
             startButton.textContent = "JOIN";
         }
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
-                startButton.disabled = false;
+                this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
             }
             else {
                 startButton.disabled = true;
@@ -315,6 +320,7 @@ class App {
         // });
         startButton.addEventListener("click", () => {
             this.videoGrid.classList.add("d-flex");
+            this.lockContext.classList.remove("hide");
             document.querySelector(".fa-dungeon").classList.toggle("hide");
             document.querySelector(".top-bar").classList.remove("d-none");
             document.querySelector("#record").classList.remove("d-none");
@@ -343,7 +349,20 @@ class App {
             broker.On("fileShare", (fileinfo, arrayBuffer) => {
                 this.fileReceived(fileinfo, arrayBuffer);
             });
+            broker.On("lockContext", () => {
+                this.lockContext.classList.toggle("fa-lock-open");
+                this.lockContext.classList.toggle("fa-lock");
+            });
             // hook up dungeon functions
+            broker.On("isRoomLocked", (data) => {
+                startButton.disabled = data.state;
+                if (data.state) {
+                    slug.classList.add("is-invalid");
+                }
+                else {
+                    slug.classList.remove("is-invalid");
+                }
+            });
             broker.On("leaveDungeon", (data) => {
                 console.log("leaveDungeon", data);
                 this.dungeons.get(data.key).removeParticipant(data.peerId);
@@ -432,6 +451,9 @@ class App {
                 // noop
             };
             broker.OnOpen = (ci) => {
+                if (slug.value.length >= 6) {
+                    this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
+                }
                 this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(UserSettings_1.UserSettings.defaultConstraints, (mediaStream) => {
