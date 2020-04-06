@@ -1,5 +1,5 @@
 import adapter from 'webrtc-adapter';
-import { Factory, WebRTC, BinaryMessage, Message, Utils } from 'thor-io.client-vnext'
+import { Factory, WebRTC, BinaryMessage, Message } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
@@ -10,6 +10,7 @@ import { MediaStreamBlender, MediaStreamRecorder } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
 import { AppComponentToaster } from './Components/AppComponentToaster';
 import { DungeonComponent } from './Components/DungeonComponent';
+import {DOMUtils} from './Helpers/DOMUtils';
 
 
 
@@ -24,34 +25,29 @@ export class App {
     factory: Factory;
     rtcClient: WebRTC;
     localMediaStream: MediaStream;
-    Slug: string;
+    slug: string;
     participants: Map<string, AppParticipant>;
     shareContainer: any;
     fullScreenVideo: HTMLVideoElement;
-    peerId: any;
     numOfChatMessagesUnread: number;
     userSettings: UserSettings;
     mediaStreamBlender: MediaStreamBlender;
-
     /**
      *
      *
      * @memberof App
      */
     testCameraResolutions() {
-        let parent = document.querySelector("#sel-video-res");
+        let parent = DOMUtils.get("#sel-video-res");
         parent.innerHTML = "";
-        let deviceId = (document.querySelector("#sel-video") as HTMLInputElement).value;
-
+        let deviceId = (DOMUtils.get("#sel-video") as HTMLInputElement).value;
         DetectResolutions.testResolutions(deviceId == "" ? undefined : deviceId, (result) => {
-
             let option = document.createElement("option");
             option.textContent = `${result.label} ${result.width} x ${result.height} ${result.ratio}`;
             option.value = result.label;
             parent.append(option);
-
         });
-        parent.removeAttribute("disabled");
+        parent.removeAttribute("disabled");        
     }
 
     /**
@@ -69,9 +65,7 @@ export class App {
         }).catch(err => {
             console.error(err);
         });
-
     }
-
     /**
      * Adds a fileshare message to chat, when someone shared a file...
      *
@@ -80,24 +74,17 @@ export class App {
      * @memberof App
      */
     fileReceived(fileinfo: any, arrayBuffer: ArrayBuffer) {
-
         const p = document.createElement("p");
         p.textContent = "Hey,here is shared file, click to download.. ";
-
-        const blob = new Blob([arrayBuffer], {
+        const blobUrl = window.URL.createObjectURL( new Blob([arrayBuffer], {
             type: fileinfo.mimeType
-        });
-
-        const blobUrl = window.URL.createObjectURL(blob);
+        }));
         const download = document.createElement("a");
-
         download.setAttribute("href", blobUrl);
         download.textContent = fileinfo.name;
         download.setAttribute("download", fileinfo.name);
-
         p.append(download);
-
-        document.querySelector("#chatmessages").prepend(p);
+        DOMUtils.get("#chatmessages").prepend(p);
 
 
     }
@@ -134,7 +121,7 @@ export class App {
                 this.rtcClient.LocalStreams[0].addTrack(t);
             });
             this.addLocalVideo(stream);
-            document.querySelector("#share-screen").classList.add("hide")
+            DOMUtils.get("#share-screen").classList.add("hide")
         }).catch(err => console.error)
     }
 
@@ -187,7 +174,7 @@ export class App {
             this.singleStreamRecorder.start(10);
              this.isRecording = true;
         } else {
-            document.querySelector("i.is-recordig").classList.remove("flash");
+            DOMUtils.get("i.is-recordig").classList.remove("flash");
             this.isRecording = false;
             this.singleStreamRecorder.stop();
             this.singleStreamRecorder.flush().then((blobUrl: string) => {
@@ -212,7 +199,7 @@ export class App {
 
         p.append(download);
 
-        document.querySelector("#recorder-download").append(p);
+        DOMUtils.get("#recorder-download").append(p);
 
         $("#recorder-result").modal("show");
         
@@ -234,13 +221,11 @@ export class App {
         video.muted = true;
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
-        let container = document.querySelector(".local") as HTMLElement;
+        let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
 
         // and local stream to mixer / blender;
         this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
-
-
 
     }
 
@@ -301,6 +286,7 @@ export class App {
      */
     addRemoteVideo(id: string, mediaStream: MediaStream) {
 
+        console.log("addRemoteVideo",id,mediaStream);
 
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
@@ -355,7 +341,7 @@ export class App {
         });
 
 
-        document.querySelector("#remote-videos").append(item);
+        DOMUtils.get("#remote-videos").append(item);
 
 
     }
@@ -369,9 +355,8 @@ export class App {
     addDungeon(key: string) {
         let d = new DungeonComponent(key);
         this.dungeons.set(key, d);
-        d.render(document.querySelector(".dungeons"));
-
-        document.querySelector("#dungeon-" + key + " i").addEventListener("click", () => {
+        d.render(DOMUtils.get(".dungeons"));
+        DOMUtils.get("#dungeon-" + key + " i").addEventListener("click", () => {
             d.destroy((peers: Array<string>) => {
                 peers.forEach((peerId: string) => {
                     this.factory.GetController("broker").Invoke("leaveDungeon", {
@@ -380,23 +365,21 @@ export class App {
                     });
                 });
                 this.dungeons.delete(key);
-                document.querySelector("#dungeon-" + key).remove();
+                DOMUtils.get("#dungeon-" + key).remove();
             });
-
-
         });
 
-        document.querySelector("#dungeon-" + key).addEventListener("click", () => {
-            document.querySelector(".video-grid").classList.add("blur");
+        DOMUtils.get("#dungeon-" + key).addEventListener("click", () => {
+            DOMUtils.get(".video-grid").classList.add("blur");
 
             this.audioNode.muted = true;
 
-            document.querySelector(".dungeons-header").classList.add("flash");
+            DOMUtils.get(".dungeons-header").classList.add("flash");
 
 
         });
-        if (document.querySelector(".dungeons").classList.contains("d-none")) {
-            document.querySelector(".dungeons").classList.remove("d-none");
+        if (DOMUtils.get(".dungeons").classList.contains("d-none")) {
+            DOMUtils.get(".dungeons").classList.remove("d-none");
         }
 
     }
@@ -434,46 +417,39 @@ export class App {
             return p;
         }
     }
-
     /**
      * Creates an instance of App - Kollokvium
      * @memberof App
      */
     constructor() {
 
+        this.userSettings = new UserSettings();
+
         // see settings.json
         this.appDomain = new AppDomain();
 
+        DOMUtils.get("#appDomain").textContent = this.appDomain.domain;
+        DOMUtils.get("#appVersion").textContent = this.appDomain.version;
+
+
         this.mediaStreamBlender = new MediaStreamBlender();
+        this.factory = this.connectToServer(this.appDomain.serverUrl, {})
 
-        // hook up listeners for MediaBlender
-
-
-        let watermark = document.querySelector("#watermark") as HTMLImageElement;
-
-        this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
-            // postprocess , add a watermark image to recorder.      
+        let blenderWaterMark = DOMUtils.get("#watermark") as HTMLImageElement;
+        this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {  
             ctx.save();
             ctx.filter = "invert()";
-            ctx.drawImage(watermark, 10, 10, 100, 100);
+            ctx.drawImage(blenderWaterMark, 10, 10, 100, 100);
             ctx.restore();
         }
-
         this.mediaStreamBlender.onTrack = () => {
-
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
-
-
         }
         this.mediaStreamBlender.onRecordingStart = () => {
-
             this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
         }
-
         this.mediaStreamBlender.onRecordingEnded = (blobUrl: string) => {
-
             this.displayRecording(blobUrl);
-
         };
 
         this.mediaStreamBlender.onTrackEnded = () => {
@@ -481,82 +457,73 @@ export class App {
             this.mediaStreamBlender.refreshCanvas();
         }
 
-        document.querySelector("#appDomain").textContent = this.appDomain.domain;
-        document.querySelector("#appVersion").textContent = this.appDomain.version;
-
-
-        this.userSettings = new UserSettings();
-
         //Handle modal quick start early, if its been dismissed hide straight away
         //  if (this.userSettings.showQuickStart)
-        // (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
+        // (Utils.$("#quick-start-container") as HTMLElement).classList.remove("hide");
 
 
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
-            document.querySelector(".only-desktop").classList.add("hide");
+            DOMUtils.get(".only-desktop").classList.add("hide");
         }
 
-        // if (!location.href.includes("https://"))
-
-        this.peerId = null;
         this.numOfChatMessagesUnread = 0;
 
         this.participants = new Map<string, AppParticipant>();
         this.dungeons = new Map<string, DungeonComponent>();
 
-        this.Slug = location.hash.replace("#", "");
+        this.slug = location.hash.replace("#", "");
 
-        this.fullScreenVideo = document.querySelector(".full") as HTMLVideoElement;
-        this.shareContainer = document.querySelector("#share-container");
-        this.shareFile = document.querySelector("#share-file") as HTMLElement;
+        this.fullScreenVideo = DOMUtils.get(".full") as HTMLVideoElement;
+        this.shareContainer = DOMUtils.get("#share-container");
+        this.shareFile = DOMUtils.get("#share-file") as HTMLElement;
 
-        this.videoGrid = document.querySelector("#video-grid") as HTMLElement;
-
-
-        this.audioNode = document.querySelector("#remtote-audio-node audio") as HTMLAudioElement;
+        this.videoGrid = DOMUtils.get("#video-grid") as HTMLElement;
 
 
-
-        this.lockContext = document.querySelector("#context-lock") as HTMLElement;
+        this.audioNode = DOMUtils.get("#remtote-audio-node audio") as HTMLAudioElement;
 
 
 
-        let slug = document.querySelector("#slug") as HTMLInputElement;
-        let startButton = document.querySelector("#joinconference") as HTMLInputElement;
-        let chatWindow = document.querySelector(".chat") as HTMLElement;
-        let chatMessage = document.querySelector("#chat-message") as HTMLInputElement;
-        let chatMessages = document.querySelector("#chatmessages") as HTMLElement;
+        this.lockContext = DOMUtils.get("#context-lock") as HTMLElement;
 
-        let muteAudio = document.querySelector("#mute-local-audio") as HTMLElement;
-        let muteVideo = document.querySelector("#mute-local-video") as HTMLElement;
 
-        let muteSpeakers = document.querySelector("#mute-speakers") as HTMLElement;
 
-        let startScreenShare = document.querySelector("#share-screen") as HTMLElement;
+        let slug = DOMUtils.get("#slug") as HTMLInputElement;
+        let startButton = DOMUtils.get("#joinconference") as HTMLInputElement;
+        let chatWindow = DOMUtils.get(".chat") as HTMLElement;
+        let chatMessage = DOMUtils.get("#chat-message") as HTMLInputElement;
+        let chatMessages = DOMUtils.get("#chatmessages") as HTMLElement;
 
-        let settings = document.querySelector("#settings") as HTMLElement;
-        let saveSettings = document.querySelector("#save-settings") as HTMLElement;
+        let muteAudio = DOMUtils.get("#mute-local-audio") as HTMLElement;
+        let muteVideo = DOMUtils.get("#mute-local-video") as HTMLElement;
 
-        let unreadBadge = document.querySelector("#unread-messages") as HTMLElement;
+        let muteSpeakers = DOMUtils.get("#mute-speakers") as HTMLElement;
 
-        let generateSlug = document.querySelector("#generate-slug") as HTMLHtmlElement
+        let startScreenShare = DOMUtils.get("#share-screen") as HTMLElement;
 
-        let nickname = document.querySelector("#txt-nick") as HTMLInputElement;
+        let settings = DOMUtils.get("#settings") as HTMLElement;
+        let saveSettings = DOMUtils.get("#save-settings") as HTMLElement;
 
-        let videoDevice = document.querySelector("#sel-video") as HTMLInputElement;
-        let audioDevice = document.querySelector("#sel-audio") as HTMLInputElement;
-        let videoResolution = document.querySelector("#sel-video-res") as HTMLInputElement;
+        let unreadBadge = DOMUtils.get("#unread-messages") as HTMLElement;
+
+        let generateSlug = DOMUtils.get("#generate-slug") as HTMLHtmlElement
+
+        let nickname = DOMUtils.get("#txt-nick") as HTMLInputElement;
+
+        let videoDevice = DOMUtils.get("#sel-video") as HTMLInputElement;
+        let audioDevice = DOMUtils.get("#sel-audio") as HTMLInputElement;
+        let videoResolution = DOMUtils.get("#sel-video-res") as HTMLInputElement;
         // just set the value to saved key, as user needs to scan..
 
-        let closeQuickstartButton = document.querySelector("#close-quick-start") as HTMLInputElement;
-        let helpButton = document.querySelector("#help") as HTMLInputElement;
+        let closeQuickstartButton = DOMUtils.get("#close-quick-start") as HTMLInputElement;
+        let helpButton = DOMUtils.get("#help") as HTMLInputElement;
 
-        document.querySelector("#sel-video-res option").textContent = "Using dynamic resolution";
+        DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
-        let toogleRecord = document.querySelector(".record") as HTMLAudioElement;
+        let toogleRecord = DOMUtils.get(".record") as HTMLAudioElement;
 
-        let testResolutions = document.querySelector("#test-resolutions") as HTMLButtonElement;
+        let testResolutions = DOMUtils.get("#test-resolutions") as HTMLButtonElement;
 
 
         nickname.value = this.userSettings.nickname;
@@ -575,6 +542,8 @@ export class App {
 
         toogleRecord.addEventListener("click", () => {
             toogleRecord.classList.toggle("flash");
+    
+            
             this.mediaStreamBlender.render(25);
             this.mediaStreamBlender.record();
 
@@ -604,10 +573,10 @@ export class App {
 
                 if (d.kind == "videoinput") {
                     if (option.value == this.userSettings.videoDevice) option.selected = true;
-                    document.querySelector("#sel-video").append(option);
+                    DOMUtils.get("#sel-video").append(option);
                 } else {
                     if (option.value == this.userSettings.audioDevice) option.selected = true;
-                    document.querySelector("#sel-audio").append(option);
+                    DOMUtils.get("#sel-audio").append(option);
                 }
 
             });
@@ -618,7 +587,7 @@ export class App {
                 let option = document.createElement("option");
                 option.textContent = d.label || d.kind;
                 option.setAttribute("value", d.deviceId);
-                document.querySelector("#sel-audio-out").append(option);
+                DOMUtils.get("#sel-audio-out").append(option);
             }));
 
 
@@ -689,9 +658,9 @@ export class App {
 
 
 
-        document.querySelector("#create-dungeon").addEventListener("click", () => {
+        DOMUtils.get("#create-dungeon").addEventListener("click", () => {
             $("#modal-dungeon").modal("toggle");
-            let container = document.querySelector(".dungeon-thumbs");
+            let container = DOMUtils.get(".dungeon-thumbs");
             container.innerHTML = "";
             // get a new list of participants , and show thumbs
             this.participants.forEach((p: AppParticipant) => {
@@ -709,13 +678,12 @@ export class App {
             });
         });
 
-        document.querySelector("button#invite-dungeon").addEventListener("click", () => {
-            document.querySelector(".dungeons").classList.remove("d-none");
+        DOMUtils.get("button#invite-dungeon").addEventListener("click", () => {
+            DOMUtils.get(".dungeons").classList.remove("d-none");
             $("#modal-dungeon").modal("toggle");
             let peers = new Array<string>();
-            document.querySelectorAll(".dungeon-paricipant").forEach((el: HTMLElement) => {
+            DOMUtils.getAll(".dungeon-paricipant").forEach((el: HTMLElement) => {
                 peers.push(el.dataset.peerId);
-
             });
             const key = Math.random().toString(36).substring(6);
             this.addDungeon(key);
@@ -731,7 +699,7 @@ export class App {
         this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
             const option = document.createElement("option");
             option.setAttribute("value", slug);
-            document.querySelector("#slug-history").prepend(option);
+            DOMUtils.get("#slug-history").prepend(option);
         });
 
         generateSlug.addEventListener("click", () => {
@@ -771,26 +739,28 @@ export class App {
             this.userSettings.saveSetting();
         })
 
-        document.querySelector("button#share-link").addEventListener("click", (e: any) => {
-            navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then(() => {
+    
+
+        DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
+            navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
                 e.target.textContent = "Done!"
             });
         });
 
-        if (this.Slug.length >= 6) {
-            slug.value = this.Slug;
+        if (this.slug.length >= 6) {
+            slug.value = this.slug;
             startButton.disabled = false;
-            document.querySelector("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
+            DOMUtils.get("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
         }
 
-        document.querySelector("#close-chat").addEventListener("click", () => {
+        DOMUtils.get("#close-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
             unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
             unreadBadge.textContent = "0";
 
         });
-        document.querySelector("#show-chat").addEventListener("click", () => {
+        DOMUtils.get("#show-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
             unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
@@ -831,23 +801,23 @@ export class App {
 
 
 
-            document.querySelector(".fa-dungeon").classList.toggle("hide");
-            document.querySelector(".top-bar").classList.remove("d-none");
+            DOMUtils.get(".fa-dungeon").classList.toggle("hide");
+            DOMUtils.get(".top-bar").classList.remove("d-none");
 
-            document.querySelector("#record").classList.remove("d-none");
+            DOMUtils.get("#record").classList.remove("d-none");
 
             $("#random-slug").popover("hide");
 
-            document.querySelector("#share-file").classList.toggle("hide");
-            // document.querySelector("#share-screen").classList.toggle("d-none");
-            document.querySelector("#show-chat").classList.toggle("d-none");
-            document.querySelector(".our-brand").remove();
+            DOMUtils.get("#share-file").classList.toggle("hide");
+            // Utils.$("#share-screen").classList.toggle("d-none");
+            DOMUtils.get("#show-chat").classList.toggle("d-none");
+            DOMUtils.get(".our-brand").remove();
             $("#slug").popover('hide');
             startButton.classList.add("hide");
-            document.querySelector(".remote").classList.remove("hide");
+            DOMUtils.get(".remote").classList.remove("hide");
 
-            document.querySelector(".overlay").classList.add("d-none");
-            document.querySelector(".join").classList.add("d-none");
+            DOMUtils.get(".overlay").classList.add("d-none");
+            DOMUtils.get(".join").classList.add("d-none");
 
             this.userSettings.slugHistory.addToHistory(slug.value);
 
@@ -860,10 +830,15 @@ export class App {
 
         });
 
-        // if local ws://localhost:1337/     
-        //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connectToServer(this.appDomain.serverUrl, {})
 
+        chatMessage.addEventListener("keydown", (e) => {
+            if (e.keyCode == 13) {
+                this.sendMessage(this.userSettings.nickname, chatMessage.value)
+                chatMessage.value = "";
+            }
+        });
+     
+    
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
         }
@@ -876,51 +851,33 @@ export class App {
             });
 
             broker.On("lockContext", () => {
-
                 this.lockContext.classList.toggle("fa-lock-open");
                 this.lockContext.classList.toggle("fa-lock");
             });
 
-            // hook up dungeon functions
-
-
             broker.On("isRoomLocked", (data: any) => {
-
-
                 startButton.disabled = data.state;
                 if (data.state) {
                     slug.classList.add("is-invalid");
                 } else {
                     slug.classList.remove("is-invalid");
                 }
-
             });
 
-
             broker.On("leaveDungeon", (data: any) => {
-
-                console.log("leaveDungeon", data);
                 this.dungeons.get(data.key).removeParticipant(data.peerId);
-
-
             });
 
             broker.On("inviteDungeon", (invite: any) => {
-
                 let toast = AppComponentToaster.dungeonToaster(
                     "Dungeon invite", "Someone in the meeting created a dungeon...");
-
                 let node = toast.children[0] as HTMLElement;
                 node.dataset.peerId = invite.peerId;
-
                 toast.querySelector(".btn-primary").addEventListener("click", (el: any) => {
                     this.factory.GetController("broker").Invoke("acceptDungeon", invite);
                     this.addDungeon(invite.key);
-
                     node.remove();
-
                     try {
-
                         this.dungeons.get(invite.key).addDungeonParticipant(this.participants.get(invite.creator));
                     } catch (e) {
                         console.log(e);
@@ -931,9 +888,7 @@ export class App {
                     this.factory.GetController("broker").Invoke("declineDungeon", invite);
                     node.remove();
                 });
-
-
-                document.querySelector(".toasters").prepend(toast);
+                DOMUtils.get(".toasters").prepend(toast);
                 $(".toast").toast("show");
 
             });
@@ -945,39 +900,21 @@ export class App {
                 } catch (e) {
                     console.log(e);
                 }
-
-                console.log(data, d);
             });
-
-
-
-            // hook up chat functions...
-
+           
             broker.On("chatMessage", (im: any) => {
-
                 this.numOfChatMessagesUnread++;
                 let message = document.createElement("p");
-
-                message.textContent = im.text;
-
                 let sender = document.createElement("mark");
+                message.textContent = im.text;
                 sender.textContent = im.from;
 
                 message.prepend(sender);
-
                 chatMessages.prepend(message);
 
                 if (chatWindow.classList.contains("d-none")) {
                     unreadBadge.classList.remove("d-none");
                     unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
-                }
-
-            });
-
-            chatMessage.addEventListener("keydown", (e) => {
-                if (e.keyCode == 13) {
-                    this.sendMessage(this.userSettings.nickname, chatMessage.value)
-                    chatMessage.value = "";
                 }
             });
 
@@ -993,11 +930,11 @@ export class App {
 
             }
             this.rtcClient.OnContextDisconnected = (peer) => {
-                document.querySelector(".p" + peer.id).remove();
+                DOMUtils.get(".p" + peer.id).remove();
                 this.participants.delete(peer.id);
             };
             this.rtcClient.OnContextConnected = (peer) => {
-                document.querySelector(".remote").classList.add("hide");
+                DOMUtils.get(".remote").classList.add("hide");
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
@@ -1011,7 +948,7 @@ export class App {
 
 
                 participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
-                    let p = document.querySelector(".p" + id);
+                    let p = DOMUtils.get(".p" + id);
                     if (p) p.remove();
 
                     // todo:  Remove from blender..
@@ -1053,7 +990,11 @@ export class App {
     Launch the application
 */
 document.addEventListener("DOMContentLoaded", () => {
-    if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
+  
+    if(!(location.href.includes("file://"))){ // temp hack for electron
+        if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
+    }
+
     App.getInstance();
 
 });

@@ -13,54 +13,41 @@ const thor_io_vnext_1 = require("thor-io.vnext");
 const ChatMessageModel_1 = require("../Models/ChatMessageModel");
 const DungeonModel_1 = require("../Models/DungeonModel");
 const ExtendedPeerConnection_1 = require("../Models/ExtendedPeerConnection");
-// Controller will be know as "broker", and not seald ( seald = true, is background sevices),
-// controller (broker) will pass a heartbeat to client each 5 seconds to keep alive. 
 let Broker = class Broker extends thor_io_vnext_1.ControllerBase {
-    /**
-     *Creates an instance of Broker.
-     * @param {Connection} connection
-     * @memberof Broker
-     */
     constructor(connection) {
         super(connection);
-        this.Connections = new Array();
+        this.connections = new Array();
     }
     lockContext() {
-        this.Peer.locked = !this.Peer.locked;
-        this.getExtendedPeerConnections(this.Peer).forEach((c) => {
-            c.Peer.locked = this.Peer.locked;
+        this.peer.locked = !this.peer.locked;
+        this.getExtendedPeerConnections(this.peer).forEach((c) => {
+            c.peer.locked = this.peer.locked;
         });
         let expression = (pre) => {
-            return pre.Peer.context == this.Peer.context;
+            return pre.peer.context == this.peer.context;
         };
-        this.invokeTo(expression, this.Peer, "lockContext", this.alias);
+        this.invokeTo(expression, this.peer, "lockContext", this.alias);
     }
     isRoomLocked(slug) {
-        /**
-          *
-          *
-          * @param {string} peerId
-          * @memberof Broker
-          */
         let match = this.findOn(this.alias, (pre) => {
-            return pre.Peer.context === slug && pre.Peer.locked === true;
+            return pre.peer.context === slug && pre.peer.locked === true;
         });
         this.invoke({ "state": match.length > 0 ? true : false }, "isRoomLocked");
     }
     onopen() {
-        this.Peer = new ExtendedPeerConnection_1.ExtendedPeerConnection(thor_io_vnext_1.ControllerBase.newGuid(), this.connection.id);
-        this.invoke(this.Peer, "contextCreated", this.alias);
+        this.peer = new ExtendedPeerConnection_1.ExtendedPeerConnection(thor_io_vnext_1.ControllerBase.newGuid(), this.connection.id);
+        this.invoke(this.peer, "contextCreated", this.alias);
     }
     changeContext(change) {
-        let match = this.getExtendedPeerConnections(this.Peer).find((c) => {
-            c.Peer.locked == false && c.Peer.context == change.context;
+        let match = this.getExtendedPeerConnections(this.peer).find((pre) => {
+            return pre.peer.locked == false && pre.peer.context == change.context;
         });
         if (!match) {
-            this.Peer.context = change.context;
-            this.invoke(this.Peer, "contextChanged", this.alias);
+            this.peer.context = change.context;
+            this.invoke(this.peer, "contextChanged", this.alias);
         }
         else {
-            this.invoke(this.Peer, "contextChangedFailure", this.alias);
+            this.invoke(this.peer, "contextChangedFailure", this.alias);
         }
     }
     contextSignal(signal) {
@@ -70,114 +57,105 @@ let Broker = class Broker extends thor_io_vnext_1.ControllerBase {
         this.invokeTo(expression, signal, "contextSignal", this.alias);
     }
     connectContext() {
-        /**
-         *
-         *
-         * @param {Broker} p
-         * @returns
-         */
-        if (!this.Peer.locked) {
-            let connections = this.getExtendedPeerConnections(this.Peer).map((p) => {
-                return p.Peer;
+        if (!this.peer.locked) {
+            let connections = this.getExtendedPeerConnections(this.peer).map((p) => {
+                return p.peer;
             });
             this.invoke(connections, "connectTo", this.alias);
         }
     }
     getExtendedPeerConnections(peerConnetion) {
         let match = this.findOn(this.alias, (pre) => {
-            return pre.Peer.context === this.Peer.context && pre.Peer.peerId !== peerConnetion.peerId;
+            return pre.peer.context === this.peer.context && pre.peer.peerId !== peerConnetion.peerId;
         });
         return match;
     }
     fileShare(fileInfo, topic, controller, blob) {
         let expression = (pre) => {
-            return pre.Peer.context >= this.Peer.context;
+            return pre.peer.context >= this.peer.context;
         };
-        this.invokeTo(expression, { text: "File shared (see '" + fileInfo.name + "')", from: 'Kollokvium' }, "instantMessage", this.alias);
+        this.invokeTo(expression, { text: "You recived a file (see '" + fileInfo.name + "')", from: 'Kollokvium' }, "chatMessage", this.alias);
         this.invokeTo(expression, fileInfo, "fileShare", this.alias, blob);
     }
     setNickname(name) {
-        this.nickName = name;
+        this.nickname = name;
     }
     chatMessage(data, topic, controller) {
         let expression;
         let mentions = data.text.match(/\B@[a-z0-9_-]+/gi);
-        // has mentions, then targt only thoose ..
+        // has mentions, then target only thoose ..
         if (!mentions) {
             data.hasMentions = false;
             expression = (pre) => {
-                return pre.Peer.context == this.Peer.context;
+                return pre.peer.context == this.peer.context;
             };
         }
         else {
             data.hasMentions = true;
             // Make sure i also get it, push self
-            mentions.push(this.nickName);
+            mentions.push(this.nickname);
             expression = (pre) => {
-                return pre.Peer.context == this.Peer.context && mentions.includes(`${pre.nickName}`);
+                return pre.peer.context == this.peer.context && mentions.includes(`${pre.nickname}`);
             };
         }
         this.invokeTo(expression, data, "chatMessage");
     }
     leaveDungeon(data) {
         this.invokeTo((pre) => {
-            return pre.Peer.peerId == data.peerId;
+            return pre.peer.peerId == data.peerId;
         }, {
             key: data.key,
-            peerId: this.Peer.peerId
+            peerId: this.peer.peerId
         }, "leaveDungeon");
     }
     inviteDungeon(dungeon) {
-        dungeon.creator = this.Peer.peerId;
+        dungeon.creator = this.peer.peerId;
         dungeon.peerIds.forEach((peerId) => {
             this.invokeTo((pre) => {
-                return pre.Peer.peerId == peerId;
+                return pre.peer.peerId == peerId;
             }, dungeon, "inviteDungeon");
         });
     }
     declineDungeon(dungeon) {
         dungeon.peerIds.forEach((peerId) => {
             this.invokeTo((pre) => {
-                return pre.Peer.peerId == peerId;
+                return pre.peer.peerId == peerId;
             }, {
                 key: dungeon.key,
                 context: dungeon.context,
-                peerId: this.Peer.peerId
+                peerId: this.peer.peerId
             }, "declineDungeon");
         });
         // notify creator as well i declined
         this.invokeTo((pre) => {
-            return pre.Peer.peerId == dungeon.creator;
+            return pre.peer.peerId == dungeon.creator;
         }, {
             key: dungeon.key,
             context: dungeon.context,
-            peerId: this.Peer.peerId
+            peerId: this.peer.peerId
         }, "declineDungeon");
     }
-    /**
-     *
-     *
-     * @param {string} peerId
-     * @memberof Broker
-     */
     acceptDungeon(dungeon) {
         dungeon.peerIds.forEach((peerId) => {
             this.invokeTo((pre) => {
-                return pre.Peer.peerId == peerId && pre.Peer.peerId !== this.Peer.peerId;
+                return pre.peer.peerId == peerId && pre.peer.peerId !== this.peer.peerId;
             }, {
                 key: dungeon.key,
                 context: dungeon.context,
-                peerId: this.Peer.peerId
+                peerId: this.peer.peerId
             }, "acceptDungeon");
         });
         // notify creator as well i accepted
         this.invokeTo((pre) => {
-            return pre.Peer.peerId == dungeon.creator;
+            return pre.peer.peerId == dungeon.creator;
         }, {
             key: dungeon.key,
             context: dungeon.context,
-            peerId: this.Peer.peerId
+            peerId: this.peer.peerId
         }, "acceptDungeon");
+    }
+    isAlive() {
+        this.invoke({ timestamp: Date.now() }, "isAlive");
     }
 };
 __decorate([
@@ -252,6 +230,12 @@ __decorate([
     __metadata("design:paramtypes", [DungeonModel_1.DungeonModel]),
     __metadata("design:returntype", void 0)
 ], Broker.prototype, "acceptDungeon", null);
+__decorate([
+    thor_io_vnext_1.CanInvoke(true),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], Broker.prototype, "isAlive", null);
 Broker = __decorate([
     thor_io_vnext_1.ControllerProperties("broker", false, 5 * 1000),
     __metadata("design:paramtypes", [thor_io_vnext_1.Connection])

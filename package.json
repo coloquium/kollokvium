@@ -5,9 +5,43 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "run-electron": "electron electron-launch.js",
+    "pack-electron": "",
+    "dist-electron": "build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "team kollokvium",
+
+
+  "build": {
+    "appId": "Kollokvium",
+    "category": "",
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "squirrel",
+      "icon": "build/icon.ico"
+    }
+  },
+
   "license": "MIT",
   "dependencies": {
     "@types/bootstrap": "^4.3.1",
@@ -19,5 +53,10 @@
     "thor-io.client-vnext": "^2.0.2-beta.2",
     "thor-io.vnext": "^2.0.3-beta.4",
     "webrtc-adapter": "^7.5.1"
+  },
+  "devDependencies": {
+    "electron": "^8.2.0",
+    "electron-packager": "^14.2.1"
   }
+
 }

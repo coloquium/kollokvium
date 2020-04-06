@@ -253,7 +253,7 @@ li:first-child:nth-last-child(9), li:first-child:nth-last-child(9)~li {
     color: #fff;
 }
 
-.red {
+.red,.record {
     color: #ff0000;
 }
 

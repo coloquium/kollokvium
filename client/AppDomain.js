@@ -12,6 +12,7 @@ class AppDomain {
         return `${this.contextPrefix}-${value}`;
     }
     constructor() {
+        this.host = appConfig.host;
         this.domain = appConfig.domain;
         this.contextPrefix = appConfig.contextPrefix;
         this.serverUrl = appConfig.serverUrl;

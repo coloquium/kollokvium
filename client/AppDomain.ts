@@ -9,6 +9,7 @@
 
 
  export class AppDomain {
+    host: any;
     getSlug(value: string): string {
      return `${this.contextPrefix}-${value}`;
     }
@@ -18,6 +19,7 @@
     contextPrefix:string;
     constructor(){
     
+        this.host = appConfig.host;
         this.domain = appConfig.domain;
         this.contextPrefix = appConfig.contextPrefix;
         this.serverUrl = appConfig.serverUrl;

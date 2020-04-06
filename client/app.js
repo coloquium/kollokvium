@@ -9,6 +9,7 @@ const mediastreamblender_1 = require("mediastreamblender");
 const DetectResolutions_1 = require("./Helpers/DetectResolutions");
 const AppComponentToaster_1 = require("./Components/AppComponentToaster");
 const DungeonComponent_1 = require("./Components/DungeonComponent");
+const DOMUtils_1 = require("./Helpers/DOMUtils");
 class App {
     /**
      * Creates an instance of App - Kollokvium
@@ -31,16 +32,18 @@ class App {
                 }
             ]
         };
+        this.userSettings = new UserSettings_1.UserSettings();
         // see settings.json
         this.appDomain = new AppDomain_1.AppDomain();
+        DOMUtils_1.DOMUtils.get("#appDomain").textContent = this.appDomain.domain;
+        DOMUtils_1.DOMUtils.get("#appVersion").textContent = this.appDomain.version;
         this.mediaStreamBlender = new mediastreamblender_1.MediaStreamBlender();
-        // hook up listeners for MediaBlender
-        let watermark = document.querySelector("#watermark");
+        this.factory = this.connectToServer(this.appDomain.serverUrl, {});
+        let blenderWaterMark = DOMUtils_1.DOMUtils.get("#watermark");
         this.mediaStreamBlender.onFrameRendered = (ctx) => {
-            // postprocess , add a watermark image to recorder.      
             ctx.save();
             ctx.filter = "invert()";
-            ctx.drawImage(watermark, 10, 10, 100, 100);
+            ctx.drawImage(blenderWaterMark, 10, 10, 100, 100);
             ctx.restore();
         };
         this.mediaStreamBlender.onTrack = () => {
@@ -56,51 +59,46 @@ class App {
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
             this.mediaStreamBlender.refreshCanvas();
         };
-        document.querySelector("#appDomain").textContent = this.appDomain.domain;
-        document.querySelector("#appVersion").textContent = this.appDomain.version;
-        this.userSettings = new UserSettings_1.UserSettings();
         //Handle modal quick start early, if its been dismissed hide straight away
         //  if (this.userSettings.showQuickStart)
-        // (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
+        // (Utils.$("#quick-start-container") as HTMLElement).classList.remove("hide");
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
-            document.querySelector(".only-desktop").classList.add("hide");
+            DOMUtils_1.DOMUtils.get(".only-desktop").classList.add("hide");
         }
-        // if (!location.href.includes("https://"))
-        this.peerId = null;
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map();
         this.dungeons = new Map();
-        this.Slug = location.hash.replace("#", "");
-        this.fullScreenVideo = document.querySelector(".full");
-        this.shareContainer = document.querySelector("#share-container");
-        this.shareFile = document.querySelector("#share-file");
-        this.videoGrid = document.querySelector("#video-grid");
-        this.audioNode = document.querySelector("#remtote-audio-node audio");
-        this.lockContext = document.querySelector("#context-lock");
-        let slug = document.querySelector("#slug");
-        let startButton = document.querySelector("#joinconference");
-        let chatWindow = document.querySelector(".chat");
-        let chatMessage = document.querySelector("#chat-message");
-        let chatMessages = document.querySelector("#chatmessages");
-        let muteAudio = document.querySelector("#mute-local-audio");
-        let muteVideo = document.querySelector("#mute-local-video");
-        let muteSpeakers = document.querySelector("#mute-speakers");
-        let startScreenShare = document.querySelector("#share-screen");
-        let settings = document.querySelector("#settings");
-        let saveSettings = document.querySelector("#save-settings");
-        let unreadBadge = document.querySelector("#unread-messages");
-        let generateSlug = document.querySelector("#generate-slug");
-        let nickname = document.querySelector("#txt-nick");
-        let videoDevice = document.querySelector("#sel-video");
-        let audioDevice = document.querySelector("#sel-audio");
-        let videoResolution = document.querySelector("#sel-video-res");
+        this.slug = location.hash.replace("#", "");
+        this.fullScreenVideo = DOMUtils_1.DOMUtils.get(".full");
+        this.shareContainer = DOMUtils_1.DOMUtils.get("#share-container");
+        this.shareFile = DOMUtils_1.DOMUtils.get("#share-file");
+        this.videoGrid = DOMUtils_1.DOMUtils.get("#video-grid");
+        this.audioNode = DOMUtils_1.DOMUtils.get("#remtote-audio-node audio");
+        this.lockContext = DOMUtils_1.DOMUtils.get("#context-lock");
+        let slug = DOMUtils_1.DOMUtils.get("#slug");
+        let startButton = DOMUtils_1.DOMUtils.get("#joinconference");
+        let chatWindow = DOMUtils_1.DOMUtils.get(".chat");
+        let chatMessage = DOMUtils_1.DOMUtils.get("#chat-message");
+        let chatMessages = DOMUtils_1.DOMUtils.get("#chatmessages");
+        let muteAudio = DOMUtils_1.DOMUtils.get("#mute-local-audio");
+        let muteVideo = DOMUtils_1.DOMUtils.get("#mute-local-video");
+        let muteSpeakers = DOMUtils_1.DOMUtils.get("#mute-speakers");
+        let startScreenShare = DOMUtils_1.DOMUtils.get("#share-screen");
+        let settings = DOMUtils_1.DOMUtils.get("#settings");
+        let saveSettings = DOMUtils_1.DOMUtils.get("#save-settings");
+        let unreadBadge = DOMUtils_1.DOMUtils.get("#unread-messages");
+        let generateSlug = DOMUtils_1.DOMUtils.get("#generate-slug");
+        let nickname = DOMUtils_1.DOMUtils.get("#txt-nick");
+        let videoDevice = DOMUtils_1.DOMUtils.get("#sel-video");
+        let audioDevice = DOMUtils_1.DOMUtils.get("#sel-audio");
+        let videoResolution = DOMUtils_1.DOMUtils.get("#sel-video-res");
         // just set the value to saved key, as user needs to scan..
-        let closeQuickstartButton = document.querySelector("#close-quick-start");
-        let helpButton = document.querySelector("#help");
-        document.querySelector("#sel-video-res option").textContent = "Using dynamic resolution";
-        let toogleRecord = document.querySelector(".record");
-        let testResolutions = document.querySelector("#test-resolutions");
+        let closeQuickstartButton = DOMUtils_1.DOMUtils.get("#close-quick-start");
+        let helpButton = DOMUtils_1.DOMUtils.get("#help");
+        DOMUtils_1.DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
+        let toogleRecord = DOMUtils_1.DOMUtils.get(".record");
+        let testResolutions = DOMUtils_1.DOMUtils.get("#test-resolutions");
         nickname.value = this.userSettings.nickname;
         this.videoGrid.addEventListener("click", () => {
             this.videoGrid.classList.remove("blur");
@@ -108,6 +106,7 @@ class App {
         });
         toogleRecord.addEventListener("click", () => {
             toogleRecord.classList.toggle("flash");
+            toogleRecord.classList.toggle("red");
             this.mediaStreamBlender.render(25);
             this.mediaStreamBlender.record();
         });
@@ -128,12 +127,12 @@ class App {
                 if (d.kind == "videoinput") {
                     if (option.value == this.userSettings.videoDevice)
                         option.selected = true;
-                    document.querySelector("#sel-video").append(option);
+                    DOMUtils_1.DOMUtils.get("#sel-video").append(option);
                 }
                 else {
                     if (option.value == this.userSettings.audioDevice)
                         option.selected = true;
-                    document.querySelector("#sel-audio").append(option);
+                    DOMUtils_1.DOMUtils.get("#sel-audio").append(option);
                 }
             });
             devices.filter(((d) => {
@@ -142,7 +141,7 @@ class App {
                 let option = document.createElement("option");
                 option.textContent = d.label || d.kind;
                 option.setAttribute("value", d.deviceId);
-                document.querySelector("#sel-audio-out").append(option);
+                DOMUtils_1.DOMUtils.get("#sel-audio-out").append(option);
             }));
             videoDevice.value = this.userSettings.videoDevice;
             audioDevice.value = this.userSettings.audioDevice;
@@ -190,9 +189,9 @@ class App {
                 });
             });
         });
-        document.querySelector("#create-dungeon").addEventListener("click", () => {
+        DOMUtils_1.DOMUtils.get("#create-dungeon").addEventListener("click", () => {
             $("#modal-dungeon").modal("toggle");
-            let container = document.querySelector(".dungeon-thumbs");
+            let container = DOMUtils_1.DOMUtils.get(".dungeon-thumbs");
             container.innerHTML = "";
             // get a new list of participants , and show thumbs
             this.participants.forEach((p) => {
@@ -210,11 +209,11 @@ class App {
                 });
             });
         });
-        document.querySelector("button#invite-dungeon").addEventListener("click", () => {
-            document.querySelector(".dungeons").classList.remove("d-none");
+        DOMUtils_1.DOMUtils.get("button#invite-dungeon").addEventListener("click", () => {
+            DOMUtils_1.DOMUtils.get(".dungeons").classList.remove("d-none");
             $("#modal-dungeon").modal("toggle");
             let peers = new Array();
-            document.querySelectorAll(".dungeon-paricipant").forEach((el) => {
+            DOMUtils_1.DOMUtils.getAll(".dungeon-paricipant").forEach((el) => {
                 peers.push(el.dataset.peerId);
             });
             const key = Math.random().toString(36).substring(6);
@@ -228,7 +227,7 @@ class App {
         this.userSettings.slugHistory.getHistory().forEach((slug) => {
             const option = document.createElement("option");
             option.setAttribute("value", slug);
-            document.querySelector("#slug-history").prepend(option);
+            DOMUtils_1.DOMUtils.get("#slug-history").prepend(option);
         });
         generateSlug.addEventListener("click", () => {
             slug.value = Math.random().toString(36).substring(2).toLocaleLowerCase();
@@ -257,23 +256,23 @@ class App {
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         });
-        document.querySelector("button#share-link").addEventListener("click", (e) => {
-            navigator.clipboard.writeText(`${location.origin}/#${slug.value}`).then(() => {
+        DOMUtils_1.DOMUtils.get("button#share-link").addEventListener("click", (e) => {
+            navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
                 e.target.textContent = "Done!";
             });
         });
-        if (this.Slug.length >= 6) {
-            slug.value = this.Slug;
+        if (this.slug.length >= 6) {
+            slug.value = this.slug;
             startButton.disabled = false;
-            document.querySelector("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
+            DOMUtils_1.DOMUtils.get("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
         }
-        document.querySelector("#close-chat").addEventListener("click", () => {
+        DOMUtils_1.DOMUtils.get("#close-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
             unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
             unreadBadge.textContent = "0";
         });
-        document.querySelector("#show-chat").addEventListener("click", () => {
+        DOMUtils_1.DOMUtils.get("#show-chat").addEventListener("click", () => {
             chatWindow.classList.toggle("d-none");
             unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
@@ -304,26 +303,29 @@ class App {
         startButton.addEventListener("click", () => {
             this.videoGrid.classList.add("d-flex");
             this.lockContext.classList.remove("hide");
-            document.querySelector(".fa-dungeon").classList.toggle("hide");
-            document.querySelector(".top-bar").classList.remove("d-none");
-            document.querySelector("#record").classList.remove("d-none");
+            DOMUtils_1.DOMUtils.get(".fa-dungeon").classList.toggle("hide");
+            DOMUtils_1.DOMUtils.get(".top-bar").classList.remove("d-none");
+            DOMUtils_1.DOMUtils.get("#record").classList.remove("d-none");
             $("#random-slug").popover("hide");
-            document.querySelector("#share-file").classList.toggle("hide");
-            // document.querySelector("#share-screen").classList.toggle("d-none");
-            document.querySelector("#show-chat").classList.toggle("d-none");
-            document.querySelector(".our-brand").remove();
+            DOMUtils_1.DOMUtils.get("#share-file").classList.toggle("hide");
+            // Utils.$("#share-screen").classList.toggle("d-none");
+            DOMUtils_1.DOMUtils.get("#show-chat").classList.toggle("d-none");
+            DOMUtils_1.DOMUtils.get(".our-brand").remove();
             $("#slug").popover('hide');
             startButton.classList.add("hide");
-            document.querySelector(".remote").classList.remove("hide");
-            document.querySelector(".overlay").classList.add("d-none");
-            document.querySelector(".join").classList.add("d-none");
+            DOMUtils_1.DOMUtils.get(".remote").classList.remove("hide");
+            DOMUtils_1.DOMUtils.get(".overlay").classList.add("d-none");
+            DOMUtils_1.DOMUtils.get(".join").classList.add("d-none");
             this.userSettings.slugHistory.addToHistory(slug.value);
             this.userSettings.saveSetting();
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
         });
-        // if local ws://localhost:1337/     
-        //  wss://simpleconf.herokuapp.com/
-        this.factory = this.connectToServer(this.appDomain.serverUrl, {});
+        chatMessage.addEventListener("keydown", (e) => {
+            if (e.keyCode == 13) {
+                this.sendMessage(this.userSettings.nickname, chatMessage.value);
+                chatMessage.value = "";
+            }
+        });
         this.factory.OnClose = (reason) => {
             console.error(reason);
         };
@@ -336,7 +338,6 @@ class App {
                 this.lockContext.classList.toggle("fa-lock-open");
                 this.lockContext.classList.toggle("fa-lock");
             });
-            // hook up dungeon functions
             broker.On("isRoomLocked", (data) => {
                 startButton.disabled = data.state;
                 if (data.state) {
@@ -347,7 +348,6 @@ class App {
                 }
             });
             broker.On("leaveDungeon", (data) => {
-                console.log("leaveDungeon", data);
                 this.dungeons.get(data.key).removeParticipant(data.peerId);
             });
             broker.On("inviteDungeon", (invite) => {
@@ -369,7 +369,7 @@ class App {
                     this.factory.GetController("broker").Invoke("declineDungeon", invite);
                     node.remove();
                 });
-                document.querySelector(".toasters").prepend(toast);
+                DOMUtils_1.DOMUtils.get(".toasters").prepend(toast);
                 $(".toast").toast("show");
             });
             broker.On("acceptDungeon", (data) => {
@@ -380,26 +380,18 @@ class App {
                 catch (e) {
                     console.log(e);
                 }
-                console.log(data, d);
             });
-            // hook up chat functions...
             broker.On("chatMessage", (im) => {
                 this.numOfChatMessagesUnread++;
                 let message = document.createElement("p");
-                message.textContent = im.text;
                 let sender = document.createElement("mark");
+                message.textContent = im.text;
                 sender.textContent = im.from;
                 message.prepend(sender);
                 chatMessages.prepend(message);
                 if (chatWindow.classList.contains("d-none")) {
                     unreadBadge.classList.remove("d-none");
                     unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
-                }
-            });
-            chatMessage.addEventListener("keydown", (e) => {
-                if (e.keyCode == 13) {
-                    this.sendMessage(this.userSettings.nickname, chatMessage.value);
-                    chatMessage.value = "";
                 }
             });
             this.rtcClient.OnLocalStream = (mediaStream) => {
@@ -412,11 +404,11 @@ class App {
                 this.rtcClient.ConnectContext();
             };
             this.rtcClient.OnContextDisconnected = (peer) => {
-                document.querySelector(".p" + peer.id).remove();
+                DOMUtils_1.DOMUtils.get(".p" + peer.id).remove();
                 this.participants.delete(peer.id);
             };
             this.rtcClient.OnContextConnected = (peer) => {
-                document.querySelector(".remote").classList.add("hide");
+                DOMUtils_1.DOMUtils.get(".remote").classList.add("hide");
             };
             this.rtcClient.OnRemoteTrack = (track, connection) => {
                 let participant = this.tryAddParticipant(connection.id);
@@ -424,7 +416,7 @@ class App {
                     this.mediaStreamBlender.addTracks(`audio-${connection.id}`, [track], false);
                 });
                 participant.onVideoTrackLost = (id, stream, track) => {
-                    let p = document.querySelector(".p" + id);
+                    let p = DOMUtils_1.DOMUtils.get(".p" + id);
                     if (p)
                         p.remove();
                     // todo:  Remove from blender..
@@ -454,9 +446,9 @@ class App {
      * @memberof App
      */
     testCameraResolutions() {
-        let parent = document.querySelector("#sel-video-res");
+        let parent = DOMUtils_1.DOMUtils.get("#sel-video-res");
         parent.innerHTML = "";
-        let deviceId = document.querySelector("#sel-video").value;
+        let deviceId = DOMUtils_1.DOMUtils.get("#sel-video").value;
         DetectResolutions_1.DetectResolutions.testResolutions(deviceId == "" ? undefined : deviceId, (result) => {
             let option = document.createElement("option");
             option.textContent = `${result.label} ${result.width} x ${result.height} ${result.ratio}`;
@@ -489,16 +481,15 @@ class App {
     fileReceived(fileinfo, arrayBuffer) {
         const p = document.createElement("p");
         p.textContent = "Hey,here is shared file, click to download.. ";
-        const blob = new Blob([arrayBuffer], {
+        const blobUrl = window.URL.createObjectURL(new Blob([arrayBuffer], {
             type: fileinfo.mimeType
-        });
-        const blobUrl = window.URL.createObjectURL(blob);
+        }));
         const download = document.createElement("a");
         download.setAttribute("href", blobUrl);
         download.textContent = fileinfo.name;
         download.setAttribute("download", fileinfo.name);
         p.append(download);
-        document.querySelector("#chatmessages").prepend(p);
+        DOMUtils_1.DOMUtils.get("#chatmessages").prepend(p);
     }
     /**
      * Send a file to all in conference
@@ -529,7 +520,7 @@ class App {
                 this.rtcClient.LocalStreams[0].addTrack(t);
             });
             this.addLocalVideo(stream);
-            document.querySelector("#share-screen").classList.add("hide");
+            DOMUtils_1.DOMUtils.get("#share-screen").classList.add("hide");
         }).catch(err => console.error);
     }
     /**
@@ -576,7 +567,7 @@ class App {
             this.isRecording = true;
         }
         else {
-            document.querySelector("i.is-recordig").classList.remove("flash");
+            DOMUtils_1.DOMUtils.get("i.is-recordig").classList.remove("flash");
             this.isRecording = false;
             this.singleStreamRecorder.stop();
             this.singleStreamRecorder.flush().then((blobUrl) => {
@@ -597,7 +588,7 @@ class App {
         download.textContent = "Your recording has ended, here is the file. ( click to download )";
         download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
         p.append(download);
-        document.querySelector("#recorder-download").append(p);
+        DOMUtils_1.DOMUtils.get("#recorder-download").append(p);
         $("#recorder-result").modal("show");
     }
     /**
@@ -612,7 +603,7 @@ class App {
         video.muted = true;
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
-        let container = document.querySelector(".local");
+        let container = DOMUtils_1.DOMUtils.get(".local");
         container.append(video);
         // and local stream to mixer / blender;
         this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
@@ -652,6 +643,7 @@ class App {
      * @memberof App
      */
     addRemoteVideo(id, mediaStream) {
+        console.log("addRemoteVideo", id, mediaStream);
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
         }
@@ -689,7 +681,7 @@ class App {
                 document.exitFullscreen();
             }
         });
-        document.querySelector("#remote-videos").append(item);
+        DOMUtils_1.DOMUtils.get("#remote-videos").append(item);
     }
     /**
      *
@@ -700,8 +692,8 @@ class App {
     addDungeon(key) {
         let d = new DungeonComponent_1.DungeonComponent(key);
         this.dungeons.set(key, d);
-        d.render(document.querySelector(".dungeons"));
-        document.querySelector("#dungeon-" + key + " i").addEventListener("click", () => {
+        d.render(DOMUtils_1.DOMUtils.get(".dungeons"));
+        DOMUtils_1.DOMUtils.get("#dungeon-" + key + " i").addEventListener("click", () => {
             d.destroy((peers) => {
                 peers.forEach((peerId) => {
                     this.factory.GetController("broker").Invoke("leaveDungeon", {
@@ -710,16 +702,16 @@ class App {
                     });
                 });
                 this.dungeons.delete(key);
-                document.querySelector("#dungeon-" + key).remove();
+                DOMUtils_1.DOMUtils.get("#dungeon-" + key).remove();
             });
         });
-        document.querySelector("#dungeon-" + key).addEventListener("click", () => {
-            document.querySelector(".video-grid").classList.add("blur");
+        DOMUtils_1.DOMUtils.get("#dungeon-" + key).addEventListener("click", () => {
+            DOMUtils_1.DOMUtils.get(".video-grid").classList.add("blur");
             this.audioNode.muted = true;
-            document.querySelector(".dungeons-header").classList.add("flash");
+            DOMUtils_1.DOMUtils.get(".dungeons-header").classList.add("flash");
         });
-        if (document.querySelector(".dungeons").classList.contains("d-none")) {
-            document.querySelector(".dungeons").classList.remove("d-none");
+        if (DOMUtils_1.DOMUtils.get(".dungeons").classList.contains("d-none")) {
+            DOMUtils_1.DOMUtils.get(".dungeons").classList.remove("d-none");
         }
     }
     /**
@@ -766,7 +758,9 @@ exports.App = App;
     Launch the application
 */
 document.addEventListener("DOMContentLoaded", () => {
-    if (!(location.href.includes("https://") || location.href.includes("http://localhost")))
-        location.href = location.href.replace("http://", "https://");
+    if (!(location.href.includes("file://"))) { // temp hack for electron
+        if (!(location.href.includes("https://") || location.href.includes("http://localhost")))
+            location.href = location.href.replace("http://", "https://");
+    }
     App.getInstance();
 });
