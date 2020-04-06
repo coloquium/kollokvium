@@ -1,9 +1,10 @@
-body{
+body {
     font-family: 'Nanum Gothic', sans-serif;
 }
+
 main {
     position: relative;
-    background-image: url(../video/coverr-sunrise-1563948708950.jpg);    
+    background-image: url(../img/background.jpg);
     background-size: cover;
     height: 100vh;
     min-height: 25rem;
@@ -31,7 +32,6 @@ main .container {
     z-index: 2;
 }
 
-
 main .overlay {
     position: absolute;
     top: 0;
@@ -50,9 +50,7 @@ main .overlay {
     top: 0;
     left: 0;
     z-index: 10;
-
 }
-
 
 .remote {
     height: auto;
@@ -60,9 +58,7 @@ main .overlay {
     top: 0;
     left: 0;
     z-index: 10;
-
 }
-
 
 .hide {
     display: none;
@@ -75,39 +71,34 @@ main .overlay {
 }
 
 .local video {
-  
     right: 0;
     float: left;
     margin: 1rem;
     max-height: 100px;
-    
-    border: 2px solid #fff; 
-
+    border: 2px solid #fff;
 }
 
-.local:first-child{
-   transform: rotateY(180deg);    
+.local:first-child {
+    transform: rotateY(180deg);
 }
 
-.controls{
+.controls {
     position: absolute;
     bottom: 0px;
-    float:left;
+    float: left;
     z-index: 1200;
     color: #fff;
-    background: rgba(0,0,0,0.7);;
- 
-    
-}
-.controls i{
-    cursor: hand;
-    
-}
-.controls i:hover{
-    color: #fff;
-    
+    background: rgba(0, 0, 0, 0.7);
+    ;
 }
 
+.controls i {
+    cursor: hand;
+}
+
+.controls i:hover {
+    color: #fff;
+}
 
 .controls span.badge {
     float: right;
@@ -118,49 +109,44 @@ main .overlay {
     margin-left: 20px;
 }
 
-
 .controls i {
- 
     opacity: 0.7;
-    cursor:pointer;
+    cursor: pointer;
 }
-
-
 
 #chatmessages mark {
     margin-right: 1rem;
 }
 
-.custom-heading{
+.custom-heading {
     font-family: 'Nanum Gothic', sans-serif;
     font-weight: 800;
 }
 
-.our-brand{
+.our-brand {
     position: absolute;
-    top:0.5rem;
-    right:1rem;
+    top: 0.5rem;
+    right: 1rem;
     padding: 1rem;
     z-index: 100;
     color: #fff;
 }
 
-.top-bar{
+.top-bar {
     position: absolute;
-    top:0rem;
+    top: 0rem;
     width: 100% !important;
     padding: 1em;
     z-index: 8;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0, 0, 0, 0.7);
 }
 
 .top-bar i {
-    color:#fff;
+    color: #fff;
     margin-right: 16px;
 }
 
-#file-form{
-
+#file-form {
     position: absolute;
     z-index: 200;
 }
@@ -170,17 +156,12 @@ main .overlay {
     height: auto;
 }
 
-
-
-
 .video-grid ul {
-
     list-style: none;
-            display: block;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .video-grid ul li {
@@ -190,25 +171,19 @@ main .overlay {
     position: relative;
     display: block;
     overflow: hidden;
-  
-
 }
 
 .video-grid ul li video {
-
     object-fit: cover;
     width: 100%;
     height: 100%;
-
     position: absolute;
     left: 50%;
     /* % of surrounding element */
     top: 50%;
     transform: translate(-50%, -50%);
     /* % of current element */
-
 }
-
 
 li:first-child:nth-last-child(1) {
     /* -or- li:only-child { */
@@ -216,28 +191,27 @@ li:first-child:nth-last-child(1) {
 }
 
 /* two items */
-li:first-child:nth-last-child(2),
-li:first-child:nth-last-child(2)~li {
+
+li:first-child:nth-last-child(2), li:first-child:nth-last-child(2)~li {
     width: 50%;
     height: 100%;
 }
 
 /* three items */
-li:first-child:nth-last-child(3),
-li:first-child:nth-last-child(3)~li {
+
+li:first-child:nth-last-child(3), li:first-child:nth-last-child(3)~li {
     width: 50%;
     height: 50%;
 }
 
 /* four items */
-li:first-child:nth-last-child(4),
-li:first-child:nth-last-child(4)~li {
+
+li:first-child:nth-last-child(4), li:first-child:nth-last-child(4)~li {
     width: 50%;
     height: 50%;
 }
 
-li:first-child:nth-last-child(5),
-li:first-child:nth-last-child(5)~li {
+li:first-child:nth-last-child(5), li:first-child:nth-last-child(5)~li {
     width: 50%;
     height: 33%;
 }
@@ -247,20 +221,17 @@ li:first-child:nth-last-child(6) li:first-child:nth-last-child(6)~li {
     height: 33%;
 }
 
-li:first-child:nth-last-child(7),
-li:first-child:nth-last-child(7)~li {
+li:first-child:nth-last-child(7), li:first-child:nth-last-child(7)~li {
     width: 33%;
     height: 33%
 }
 
-li:first-child:nth-last-child(8),
-li:first-child:nth-last-child(8)~li {
+li:first-child:nth-last-child(8), li:first-child:nth-last-child(8)~li {
     width: 33%;
     height: 33%
 }
 
-li:first-child:nth-last-child(9),
-li:first-child:nth-last-child(9)~li {
+li:first-child:nth-last-child(9), li:first-child:nth-last-child(9)~li {
     width: 33%;
     height: 33%
 }
@@ -268,32 +239,29 @@ li:first-child:nth-last-child(9)~li {
 .video-tools {
     position: absolute;
     z-index: 1000;
-    margin-top:80px;
+    margin-top: 80px;
     margin-left: 20px;
 }
 
 .video-tools i {
     margin-right: 10px;
     z-index: 1000;
-
     margin: .5rem;
 }
 
-.fullscreen {
+.white {
     color: #fff;
-
 }
 
-.record {
+.red {
     color: #ff0000;
-    
 }
 
 .flash {
     animation: blinker 1s linear infinite;
 }
 
-.blur{
+.blur {
     filter: blur(20px);
 }
 
@@ -303,23 +271,22 @@ li:first-child:nth-last-child(9)~li {
     }
 }
 
-#dungeon-messages{
+#dungeon-messages {
     position: relative;
-    top:-20px;
+    top: -20px;
     left: -20px;
 }
 
-.dungeon-thumbs canvas{
+.dungeon-thumbs canvas {
     max-width: 120px;
-   
 }
 
-.dungeon-paricipant{
-    border:2px solid #ff0000;
+.dungeon-paricipant {
+    border: 2px solid #ff0000;
     filter: none;
-} 
+}
 
-.dungeons{
+.dungeons {
     position: absolute;
     z-index: 9;
     width: 400px;
@@ -329,15 +296,13 @@ li:first-child:nth-last-child(9)~li {
     top: 130px;
     left: 1rem;
     padding: 1rem;
-
-
 }
 
-.dungeons-focus{
+.dungeons-focus {
     background: red
-} 
+}
 
-.dungeon-header{
+.dungeon-header {
     height: 2rem;
     width: 100% !important;
 }
@@ -346,34 +311,33 @@ li:first-child:nth-last-child(9)~li {
     float: right;
 }
 
-.dungeon{
+.dungeon {
     width: 100%;
-    color:#fff;
-
+    color: #fff;
 }
 
-.dungeon ul{
+.dungeon ul {
     list-style: none outside none;
     margin: 0;
     padding: 0;
 }
 
-.dungeon li{
+.dungeon li {
     float: left;
     width: 33%;
-    height:100px;
-    overflow:hidden;
+    height: 100px;
+    overflow: hidden;
     padding: 2px;
 }
-.dungeon img{    
-    width:100%;
+
+.dungeon img {
+    width: 100%;
     height: auto;
 }
 
-
 .toasters {
     position: absolute;
-    top:80px;
+    top: 80px;
     right: 10px;
     z-index: 10000
 }
@@ -381,11 +345,9 @@ li:first-child:nth-last-child(9)~li {
 .modal-box {
     position: absolute !important;
     left: 50%;
-    top:50%;
+    top: 50%;
     transform: translate(-50%, -50%);
-    background-color:transparent;
+    background-color: transparent;
     z-index: 99999;
-    padding:50px;
-
+    padding: 50px;
 }
-

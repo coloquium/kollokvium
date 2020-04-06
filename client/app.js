@@ -50,14 +50,7 @@ class App {
             this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
         };
         this.mediaStreamBlender.onRecordingEnded = (blobUrl) => {
-            let p = document.createElement("p");
-            const download = document.createElement("a");
-            download.setAttribute("href", blobUrl);
-            download.textContent = "Your recording has ended, here is the file. ( click to download )";
-            download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
-            p.append(download);
-            document.querySelector("#recorder-download").append(p);
-            $("#recorder-result").modal("show");
+            this.displayRecording(blobUrl);
         };
         this.mediaStreamBlender.onTrackEnded = () => {
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
@@ -259,14 +252,8 @@ class App {
         this.shareFile.addEventListener("click", () => {
             $("#share-file").popover("toggle");
         });
-        // closeQuickstartButton.addEventListener("click", () => {
-        //     (document.querySelector("#quick-start-container") as HTMLElement).classList.add("hide");
-        //     this.userSettings.showQuickStart = false;
-        //     this.userSettings.saveSetting();
-        // })
         helpButton.addEventListener("click", () => {
             $("#quick-start-container").modal("show");
-            document.querySelector("#quick-start-container").classList.remove("hide");
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         });
@@ -314,10 +301,6 @@ class App {
         nickname.addEventListener("change", () => {
             this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
         });
-        // chatNick.value = this.userSettings.nickname;
-        // chatNick.addEventListener("click", () => {
-        //     chatNick.value = "";
-        // });
         startButton.addEventListener("click", () => {
             this.videoGrid.classList.add("d-flex");
             this.lockContext.classList.remove("hide");
@@ -465,6 +448,11 @@ class App {
             broker.Connect();
         };
     }
+    /**
+     *
+     *
+     * @memberof App
+     */
     testCameraResolutions() {
         let parent = document.querySelector("#sel-video-res");
         parent.innerHTML = "";
@@ -477,7 +465,13 @@ class App {
         });
         parent.removeAttribute("disabled");
     }
-    // Create a an AppDomain of kollokvium;
+    /**
+     *
+     *
+     * @param {MediaStreamConstraints} constraints
+     * @param {Function} cb
+     * @memberof App
+     */
     getLocalStream(constraints, cb) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
             cb(mediaStream);
@@ -569,6 +563,44 @@ class App {
         });
     }
     /**
+     *
+     *
+     * @param {string} id
+     * @param {MediaStream} mediaStream
+     * @memberof App
+     */
+    recordSinglestream(id, mediaStream) {
+        if (!this.isRecording) {
+            this.singleStreamRecorder = new mediastreamblender_1.MediaStreamRecorder(mediaStream.getTracks());
+            this.singleStreamRecorder.start(10);
+            this.isRecording = true;
+        }
+        else {
+            document.querySelector("i.is-recordig").classList.remove("flash");
+            this.isRecording = false;
+            this.singleStreamRecorder.stop();
+            this.singleStreamRecorder.flush().then((blobUrl) => {
+                this.displayRecording(blobUrl);
+            });
+        }
+    }
+    /**
+     *
+     *
+     * @param {string} blobUrl
+     * @memberof App
+     */
+    displayRecording(blobUrl) {
+        let p = document.createElement("p");
+        const download = document.createElement("a");
+        download.setAttribute("href", blobUrl);
+        download.textContent = "Your recording has ended, here is the file. ( click to download )";
+        download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
+        p.append(download);
+        document.querySelector("#recorder-download").append(p);
+        $("#recorder-result").modal("show");
+    }
+    /**
      * Add a local media stream to the UI
      *
      * @param {MediaStream} mediaStream
@@ -624,12 +656,20 @@ class App {
             this.shareContainer.classList.add("hide");
         }
         let videoTools = document.createElement("div");
-        videoTools.classList.add("video-tools");
+        videoTools.classList.add("video-tools", "p2", "darken");
         let item = document.createElement("li");
         item.setAttribute("class", "p" + id);
         let f = document.createElement("i");
-        f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen");
+        f.classList.add("fas", "fa-arrows-alt", "fa-2x", "white");
+        let r = document.createElement("i");
+        r.classList.add("fas", "fa-circle", "fa-2x", "red");
+        r.addEventListener("click", () => {
+            if (!this.isRecording)
+                r.classList.add("flash", "is-recordig");
+            this.recordSinglestream(id, mediaStream);
+        });
         videoTools.append(f);
+        videoTools.append(r);
         item.prepend(videoTools);
         let video = document.createElement("video");
         video.srcObject = mediaStream;
@@ -651,6 +691,12 @@ class App {
         });
         document.querySelector("#remote-videos").append(item);
     }
+    /**
+     *
+     *
+     * @param {string} key
+     * @memberof App
+     */
     addDungeon(key) {
         let d = new DungeonComponent_1.DungeonComponent(key);
         this.dungeons.set(key, d);
@@ -710,8 +756,6 @@ class App {
             };
             return p;
         }
-    }
-    dungeonFocues() {
     }
     static getInstance() {
         return new App();

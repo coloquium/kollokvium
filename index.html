@@ -1,5 +1,4 @@
 <html lang="en-US">
-
 <head>
     <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
     <meta charset="utf-8">
@@ -19,29 +18,23 @@
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicons/favicon-16x16.png">
     <meta name="theme-color" content="#ffffff">
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
-
     <!-- remove GA ,if you customize, host by yourself -->
-    <!-- <script>
+    <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-160656421-1');
-    </script> -->
+    </script>
     <!-- remove GA, if you customize, host by yourself -->
-
     <script src="https://kit.fontawesome.com/3aa27899ac.js" crossorigin="anonymous"></script>
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/app.css">
-
 </head>
 
 <body>
-
-
 
     <div class="toasters">
     </div>
@@ -50,14 +43,7 @@
         <audio></audio>
     </div>
 
-
-
-
-
     <div class="dungeons d-none">
-
-
-
     </div>
 
     <div class="our-brand" id="appVersion">
@@ -65,27 +51,16 @@
     </div>
 
     <div class="top-bar">
-
-
-
         <i id="help" class="fa fa-question-circle fa-2x" style="cursor:pointer;" aria-hidden="true"></i>
         <i class="fas fa-volume-up fa-2x" title="mute all audio" id="mute-speakers" style="cursor:pointer;"></i>
-
-
         <!-- <i class="fas fa-share-alt fa-2x" id="share-slug" data-container="body" data-toggle="popover"
         data-placement="bottom" data-trigger="click" data-content="Yor room link is now in the clipboard"></i> -->
-
         <div class="hide">
             <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
         </div>
-
-
         <i class="fas fa-lock-open fa-2x hide" id="context-lock"></i>
-
         <!-- <span id="dungeon-messages" class="badge badge-danger style=" float:right">beta</span> -->
     </div>
-
-
 
     <div class="modal" tabindex="-1" role="dialog" id="quick-start-container">
         <div class="modal-dialog" role="document">
@@ -95,7 +70,6 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-
                 </div>
                 <div class="modal-body">
                     <p>TBD</p>
@@ -103,90 +77,21 @@
             </div>
         </div>
     </div>
-    <!--
-    <div id="quick-start-container" class="container-fluid modal-box hide">
-             <div id="quickstart" class="card">
-                <div class="card-header">
-                    Quick start guide
-                </div>
-                <div class="card-body">
-                    <p>
-                        Welcome to Kollokvium, an easy to use no sign up required audio, video and text chat with built in end to end privacy over a peer to peer (no middle man) network<br /><br/>
-                        To start your own room:
-                        <div class="list-group">
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 1: Please click "allow" for both camera and microphone when the prompt is shown.
-                            </div>
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 2: Either click the Dice button for a random room name or input your own room name, this must be atleast 6 characters<br/><br/>
-                                <i class="fas fa-exclamation"></i> Please Note: anyone with your room name can enter your room, if you would like to ensure your privacy, please use the dice button or input a unique name and communicate it only to your partners
-                            </div>
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 3: Click Start
-                            </div>
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 4: Click copy link and share it with who you would like to invite to your room
-                            </div>
-                        </div>
-                        <br />
-                        Once you are in the chat room the following commands can be found at the bottom menu, their functions are as follows:<br/><br/>
-                        <table cellpadding="5">
-                            <tr>
-                                <td><i class="fas fa-cog" id="settings" aria-hidden="true"></i></td>
-                                <td>Settings</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-video" id="mute-local-video" aria-hidden="true"></i></td>
-                                <td>Enable/Disable Video Streaming</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-microphone" id="mute-local-audio" aria-hidden="true"></i></td>
-                                <td>Enable/Disable Audio Streaming</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-circle record" aria-hidden="true"></i></td>
-                                <td>Record/Stop Recording</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-file" id="share-file" aria-hidden="true" data-original-title="" title=""></i></td>
-                                <td>Share a file</td>
-                            </tr>
-                            <tr>
-                                <td><i id="show-chat" class="fas fa-comment-alt" aria-hidden="true"></i></td>
-                                <td>Show text chat window</td>
-                            </tr>
-                        </table>
-                    </p>
-                    <button class="btn btn-primary float-right" id="close-quick-start"><i class="fas fa-window-close"></i> Close</button>
-                </div>
-            </div> 
-    
-        </div>
-
-        -->
 
     <main>
-
         <div class="overlay"></div>
-
         <div class="container-fluid chat d-none mt-3">
-
-
             <div class="card bg-light h-100">
                 <div class="card-header">Chat
-
                     <span style="float:right" id="close-chat">
                         <span aria-hidden="true">&times;</span>
                     </span>
-
                 </div>
                 <div class="card-body" style="overflow:auto">
                     <p class="card-text" id="chatmessages">
-
                     </p>
                 </div>
                 <div class="card-footer">
-
                     <div class="form">
                         <div class="form-row">
                             <div class="form-group col-md-10">
@@ -198,17 +103,11 @@
 
                 </div>
             </div>
-
-
         </div>
         </div>
-
-
         </div>
 
         <div class="container-fluid remote hide my-2" id="share-container">
-
-
             <div class="alert alert-secondary">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -217,23 +116,14 @@
                 <p>
                     <strong>You just need to share link,copy and share!</strong>
                     <button class="mr-1 btn btn-primary mx-1 my bt-sm" id="share-link">Copy link</button>
-
                 </p>
             </div>
-
-
-
-
         </div>
 
         <div class="video-grid h-100 w-100 d-none flex-wrap" id="video-grid">
-
             <ul class="d-flex flex-wrap flex-row" id="remote-videos">
             </ul>
-
         </div>
-
-
 
         <div class="container h-100 join">
             <div class="d-flex h-100 text-center align-items-center">
@@ -274,19 +164,14 @@
                 </div>
             </div>
         </div>
-
         </div>
 
 
         <div id="share-form" class="hide">
-
             <input type="file" class="file-selected" class="form-contol">
         </div>
 
-
         <div class="local">
-
-
         </div>
 
         <div class="controls d-inline-flex flex-row align-items-center w-100 justify-content-center">
@@ -301,32 +186,22 @@
             </div>
 
             <div class="p-3 d-none" id="record">
-
-                <i class="fas fa-circle fa-2x record">
-
+                <i class="fas fa-circle fa-2x record" title="Record all meeting participants">
                 </i>
             </div>
             <div class="p-3 only-desktop">
                 <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
             </div>
 
-
             <div class="p-3">
                 <i class="fas fa-file hide fa-2x " id="share-file"></i>
             </div>
             <div class="p-3">
-
                 <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
                 <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
                 </i>
-
             </div>
-
-
-
-
         </div>
-
 
         <div class="modal" tabindex="-1" role="dialog" id="modal-dungeon">
             <div class="modal-dialog" role="document">
@@ -351,14 +226,10 @@
             </div>
         </div>
 
-
         <div id="recorder-result" class="modal fade" role="dialog">
             <div class="modal-dialog">
-
-
                 <div class="modal-content">
                     <div class="modal-header">
-
                         <h4 class="modal-title">Recording ended...</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -371,7 +242,6 @@
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -386,39 +256,23 @@
                         </button>
                     </div>
                     <div class="modal-body">
-
-
-
-
                         <div class="form-group">
                             <label for="txt-nick">Nickname</label>
                             <input type="email" class="form-control" id="txt-nick"
                                 placeholder="Nickname displayed in chat...">
                         </div>
-
-
-
-
-
-
-
                         <div class="form-group">
                             <label for="sel-video">Video input</label>
                             <select class="form-control" id="sel-video">
                                 <option value="">Not set </option>
                             </select>
                         </div>
-
-
-
                         <div class="form-group">
                             <label for="sel-audio">Audio input</label>
-
                             <select class="form-control" id="sel-audio">
                                 <option value="">Not set</option>
                             </select>
                         </div>
-
                         <div class="form-group d-none">
                             <label for="sel-audio-out">Audio output</label>
 
@@ -426,7 +280,6 @@
                                 <option value="">Not set</option>
                             </select>
                         </div>
-
                         <hr>
                         <div class="form-group">
                             <label for="sel-video-res">Camera resolution</label>
@@ -439,14 +292,10 @@
                                     <option value="">Not set</option>
                                 </select>
                             </div>
-
                             <small class="form-text text-danger">
                                 Camera resolution will not be saved. will only be applied to current session.
                             </small>
-
                         </div>
-
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-link pull-left" id="clear-settings" disabled>Clear
@@ -457,16 +306,7 @@
                 </div>
             </div>
         </div>
-
     </main>
-
-
-
-
-
-
-
-    </div>
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
         crossorigin="anonymous"></script>

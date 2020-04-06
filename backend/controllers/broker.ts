@@ -82,7 +82,7 @@ export class Broker extends ControllerBase {
     @CanInvoke(true)
     changeContext(change: ExtendedPeerConnection) {
 
-        let match = this.getExtendedPeerConnections(this.Peer).find((c: Broker) => {
+        let match = this.getExtendedPeerConnections(this.Peer).find((c: any) => {
             c.Peer.locked == false && c.Peer.context == change.context;
         });
 

@@ -6,7 +6,7 @@ import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './Helpers/ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
-import { MediaStreamBlender } from 'mediastreamblender'
+import { MediaStreamBlender, MediaStreamRecorder } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
 import { AppComponentToaster } from './Components/AppComponentToaster';
 import { DungeonComponent } from './Components/DungeonComponent';
@@ -19,7 +19,25 @@ export class App {
     audioNode: HTMLAudioElement;
     dungeons: Map<string, DungeonComponent>;
     lockContext: HTMLElement;
+    singleStreamRecorder: MediaStreamRecorder
+    shareFile: HTMLElement;
+    factory: Factory;
+    rtcClient: WebRTC;
+    localMediaStream: MediaStream;
+    Slug: string;
+    participants: Map<string, AppParticipant>;
+    shareContainer: any;
+    fullScreenVideo: HTMLVideoElement;
+    peerId: any;
+    numOfChatMessagesUnread: number;
+    userSettings: UserSettings;
+    mediaStreamBlender: MediaStreamBlender;
 
+    /**
+     *
+     *
+     * @memberof App
+     */
     testCameraResolutions() {
         let parent = document.querySelector("#sel-video-res");
         parent.innerHTML = "";
@@ -36,10 +54,14 @@ export class App {
         parent.removeAttribute("disabled");
     }
 
-    // Create a an AppDomain of kollokvium;
-
+    /**
+     *
+     *
+     * @param {MediaStreamConstraints} constraints
+     * @param {Function} cb
+     * @memberof App
+     */
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
-
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
 
             cb(mediaStream);
@@ -49,20 +71,6 @@ export class App {
         });
 
     }
-    shareFile: HTMLElement;
-    factory: Factory;
-    rtcClient: WebRTC;
-    localMediaStream: MediaStream;
-    Slug: string;
-    participants: Map<string, AppParticipant>;
-    shareContainer: any;
-    fullScreenVideo: HTMLVideoElement;
-    peerId: any;
-    numOfChatMessagesUnread: number;
-
-    userSettings: UserSettings;
-
-    mediaStreamBlender: MediaStreamBlender;
 
     /**
      * Adds a fileshare message to chat, when someone shared a file...
@@ -164,6 +172,56 @@ export class App {
     }
 
 
+
+    isRecording:boolean;
+    /**
+     *
+     *
+     * @param {string} id
+     * @param {MediaStream} mediaStream
+     * @memberof App
+     */
+    recordSinglestream(id: string, mediaStream: MediaStream) {
+        if (!this.isRecording) {
+            this.singleStreamRecorder = new MediaStreamRecorder(mediaStream.getTracks());
+            this.singleStreamRecorder.start(10);
+             this.isRecording = true;
+        } else {
+            document.querySelector("i.is-recordig").classList.remove("flash");
+            this.isRecording = false;
+            this.singleStreamRecorder.stop();
+            this.singleStreamRecorder.flush().then((blobUrl: string) => {
+                this.displayRecording(blobUrl);
+            });
+        }
+    }
+
+    /**
+     *
+     *
+     * @param {string} blobUrl
+     * @memberof App
+     */
+    displayRecording(blobUrl: string) {
+        let p = document.createElement("p");
+
+        const download = document.createElement("a");
+        download.setAttribute("href", blobUrl);
+        download.textContent = "Your recording has ended, here is the file. ( click to download )";
+        download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
+
+        p.append(download);
+
+        document.querySelector("#recorder-download").append(p);
+
+        $("#recorder-result").modal("show");
+        
+       
+
+            
+
+    }
+
     /**
      * Add a local media stream to the UI
      *
@@ -249,15 +307,27 @@ export class App {
         }
         let videoTools = document.createElement("div");
 
-        videoTools.classList.add("video-tools");
+        videoTools.classList.add("video-tools", "p2", "darken");
 
         let item = document.createElement("li");
         item.setAttribute("class", "p" + id);
 
         let f = document.createElement("i");
-        f.classList.add("fas", "fa-arrows-alt", "fa-2x", "fullscreen")
+        f.classList.add("fas", "fa-arrows-alt", "fa-2x", "white")
+
+        let r = document.createElement("i");
+        r.classList.add("fas", "fa-circle", "fa-2x", "red")
+
+        r.addEventListener("click", () => {
+            if (!this.isRecording)             
+                r.classList.add("flash","is-recordig");
+
+                this.recordSinglestream(id, mediaStream);
+          
+        });
 
         videoTools.append(f);
+        videoTools.append(r);
 
         item.prepend(videoTools);
 
@@ -290,6 +360,12 @@ export class App {
 
     }
 
+    /**
+     *
+     *
+     * @param {string} key
+     * @memberof App
+     */
     addDungeon(key: string) {
         let d = new DungeonComponent(key);
         this.dungeons.set(key, d);
@@ -359,12 +435,6 @@ export class App {
         }
     }
 
-
-    dungeonFocues() {
-
-    }
-
-
     /**
      * Creates an instance of App - Kollokvium
      * @memberof App
@@ -402,18 +472,7 @@ export class App {
 
         this.mediaStreamBlender.onRecordingEnded = (blobUrl: string) => {
 
-            let p = document.createElement("p");
-
-            const download = document.createElement("a");
-            download.setAttribute("href", blobUrl);
-            download.textContent = "Your recording has ended, here is the file. ( click to download )";
-            download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
-
-            p.append(download);
-
-            document.querySelector("#recorder-download").append(p);
-
-            $("#recorder-result").modal("show");
+            this.displayRecording(blobUrl);
 
         };
 
@@ -429,10 +488,10 @@ export class App {
         this.userSettings = new UserSettings();
 
         //Handle modal quick start early, if its been dismissed hide straight away
-      //  if (this.userSettings.showQuickStart)
-       // (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
-    
-        
+        //  if (this.userSettings.showQuickStart)
+        // (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
+
+
         // Remove screenshare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
             document.querySelector(".only-desktop").classList.add("hide");
@@ -462,7 +521,7 @@ export class App {
         this.lockContext = document.querySelector("#context-lock") as HTMLElement;
 
 
-    
+
         let slug = document.querySelector("#slug") as HTMLInputElement;
         let startButton = document.querySelector("#joinconference") as HTMLInputElement;
         let chatWindow = document.querySelector(".chat") as HTMLElement;
@@ -526,8 +585,8 @@ export class App {
         })
 
         this.lockContext.addEventListener("click", () => {
-       
-            this.factory.GetController("broker").Invoke("lockContext",{});
+
+            this.factory.GetController("broker").Invoke("lockContext", {});
         });
 
 
@@ -706,15 +765,8 @@ export class App {
             $("#share-file").popover("toggle");
         });
 
-        // closeQuickstartButton.addEventListener("click", () => {
-        //     (document.querySelector("#quick-start-container") as HTMLElement).classList.add("hide");
-        //     this.userSettings.showQuickStart = false;
-        //     this.userSettings.saveSetting();
-        // })
-        
         helpButton.addEventListener("click", () => {
             $("#quick-start-container").modal("show");
-            (document.querySelector("#quick-start-container") as HTMLElement).classList.remove("hide");
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         })
@@ -724,7 +776,6 @@ export class App {
                 e.target.textContent = "Done!"
             });
         });
-
 
         if (this.Slug.length >= 6) {
             slug.value = this.Slug;
@@ -752,12 +803,13 @@ export class App {
         });
         if (location.hash.length == 0) {
             $("#random-slug").popover("show");
-        } else {startButton
+        } else {
+            startButton
             startButton.textContent = "JOIN";
         }
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
-                this.factory.GetController("broker").Invoke("isRoomLocked",this.appDomain.getSlug(slug.value));
+                this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
 
             } else {
                 startButton.disabled = true;
@@ -770,19 +822,14 @@ export class App {
         });
 
 
-        // chatNick.value = this.userSettings.nickname;
-
-        // chatNick.addEventListener("click", () => {
-        //     chatNick.value = "";
-        // });
-
+      
         startButton.addEventListener("click", () => {
 
             this.videoGrid.classList.add("d-flex");
 
             this.lockContext.classList.remove("hide");
 
-            
+
 
             document.querySelector(".fa-dungeon").classList.toggle("hide");
             document.querySelector(".top-bar").classList.remove("d-none");
@@ -828,11 +875,11 @@ export class App {
                 this.fileReceived(fileinfo, arrayBuffer)
             });
 
-            broker.On("lockContext",() => {
-                
+            broker.On("lockContext", () => {
+
                 this.lockContext.classList.toggle("fa-lock-open");
                 this.lockContext.classList.toggle("fa-lock");
-            } );
+            });
 
             // hook up dungeon functions
 
@@ -840,12 +887,12 @@ export class App {
             broker.On("isRoomLocked", (data: any) => {
 
 
-                    startButton.disabled = data.state;
-                    if(data.state){
-                        slug.classList.add("is-invalid");
-                    }else{
-                        slug.classList.remove("is-invalid");
-                    }
+                startButton.disabled = data.state;
+                if (data.state) {
+                    slug.classList.add("is-invalid");
+                } else {
+                    slug.classList.remove("is-invalid");
+                }
 
             });
 
@@ -977,8 +1024,8 @@ export class App {
             broker.OnOpen = (ci: any) => {
 
 
-                if(slug.value.length >=6 ) {
-                    this.factory.GetController("broker").Invoke("isRoomLocked",this.appDomain.getSlug(slug.value));
+                if (slug.value.length >= 6) {
+                    this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
                 }
 
                 this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
@@ -1007,6 +1054,6 @@ export class App {
 */
 document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
-     App.getInstance();
-    
+    App.getInstance();
+
 });
