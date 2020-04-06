@@ -4,15 +4,16 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "build": "concurrently \"npm run build-client\" \"npm run build-server\"",
+    "build-client": "webpack --config webpack.config.js",
+    "build-server": "webpack --config webpack.server.js",
+    "build-electron": "electron build",
     "start": "node server.js",
     "run-electron": "electron electron-launch.js",
     "pack-electron": "",
-    "dist-electron": "build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "team kollokvium",
-
-
   "build": {
     "appId": "Kollokvium",
     "category": "",
@@ -41,7 +42,6 @@
       "icon": "build/icon.ico"
     }
   },
-
   "license": "MIT",
   "dependencies": {
     "@types/bootstrap": "^4.3.1",
@@ -56,7 +56,13 @@
   },
   "devDependencies": {
     "electron": "^8.2.0",
-    "electron-packager": "^14.2.1"
+    "electron-packager": "^14.2.1",
+    "concurrently": "^5.1.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "html-webpack-plugin": "^4.0.4",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   }
-
 }

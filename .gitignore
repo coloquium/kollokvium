@@ -90,7 +90,8 @@ typings/
 
 # temp & local junk
 
-lab
-node_modules
+lab/
+node_modules/
+dist/
 
 
