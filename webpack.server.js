@@ -5,10 +5,7 @@ module.exports = {
   mode: "production",
   target: "node",
   watch: false,
-  entry: {
-    server : Path.resolve(__dirname, sourceFolder, 'backend', 'server.ts'),
-  },
-  externals: ['utf-8-validate', 'bufferutil'],
+  entry: Path.resolve(__dirname, sourceFolder, 'backend', 'server.ts'),
   module: {
     rules: [
       {
@@ -26,7 +23,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   output: {
-    path: Path.resolve(__dirname, 'dist', 'backend'),
-    filename: '[name].js'
+    path: Path.resolve(__dirname, 'dist'),
+    filename: 'server.js'
   },
 }

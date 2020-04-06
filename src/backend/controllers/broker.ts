@@ -6,10 +6,10 @@ import {
     ControllerBase,
     Signal,
 } from 'thor-io.vnext'
+
 import { ChatMessageModel } from '../Models/ChatMessageModel';
 import { DungeonModel } from '../Models/DungeonModel';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
-
 
 @ControllerProperties("broker", false, 5 * 1000)
 export class Broker extends ControllerBase {

@@ -1,7 +1,7 @@
 {
     "domain": "Kollokvium",
-    "host": "http://localhost:1337",
+    "host": "www.kollokvium.se",
     "contextPrefix": "kollokvium",
-    "serverUrl": "ws://localhost:1337",
+    "serverUrl": "wss.kollokvium.se",
     "version": "1.2.0"
 }

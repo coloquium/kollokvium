@@ -19,10 +19,10 @@
     contextPrefix:string;
     constructor(){
     
-        this.host = appConfig.host;
+        this.host = "https://" + (appConfig.host || window.location.hostname);
         this.domain = appConfig.domain;
         this.contextPrefix = appConfig.contextPrefix;
-        this.serverUrl = appConfig.serverUrl;
+        this.serverUrl = "wss://" + (appConfig.serverUrl || window.location.hostname);
         this.version = appConfig.version;
        
     }
