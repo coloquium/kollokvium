@@ -25,7 +25,6 @@ export class Broker extends ControllerBase {
 
     @CanInvoke(true)
     lockContext() {
-
         this.peer.locked = !this.peer.locked;
         this.getExtendedPeerConnections(this.peer).forEach((c: Broker) => {
             c.peer.locked = this.peer.locked;
@@ -94,11 +93,20 @@ export class Broker extends ControllerBase {
     setNickname(name: string) {
         this.nickname = name;
     }
+
+    /**
+     *  Not used as we use dataChannels for the text chat
+     *
+     * @param {ChatMessageModel} data
+     * @param {string} topic
+     * @param {string} controller
+     * @memberof Broker
+     */
     @CanInvoke(true)
-    chatMessage(data: ChatMessageModel, topic: string, controller: string) {
+    chatMessage(data: ChatMessageModel, topic: string, controller: string) {        
+        return;
         let expression;
         let mentions = data.text.match(/\B@[a-z0-9_-]+/gi) as Array<string>;
-
         // has mentions, then target only thoose ..
         if (!mentions) {
             data.hasMentions = false;

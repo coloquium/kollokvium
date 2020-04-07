@@ -1,5 +1,5 @@
 import adapter from 'webrtc-adapter';
-import { Factory, WebRTC, BinaryMessage, Message } from 'thor-io.client-vnext'
+import { Factory, WebRTC, BinaryMessage, Message, DataChannel } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
@@ -32,6 +32,9 @@ export class App {
     numOfChatMessagesUnread: number;
     userSettings: UserSettings;
     mediaStreamBlender: MediaStreamBlender;
+    dataChannel: DataChannel;
+    chatWindow: HTMLElement;
+    unreadBadge: HTMLElement;
     /**
      *
      *
@@ -49,7 +52,6 @@ export class App {
         });
         parent.removeAttribute("disabled");        
     }
-
     /**
      *
      *
@@ -67,13 +69,13 @@ export class App {
         });
     }
     /**
-     * Adds a fileshare message to chat, when someone shared a file...
+     * Adds a fileshare message to chat windw
      *
      * @param {*} fileinfo
      * @param {ArrayBuffer} arrayBuffer
      * @memberof App
      */
-    fileReceived(fileinfo: any, arrayBuffer: ArrayBuffer) {
+    displayReceivedFile(fileinfo: any, arrayBuffer: ArrayBuffer) {
         const p = document.createElement("p");
         p.textContent = "Hey,here is shared file, click to download.. ";
         const blobUrl = window.URL.createObjectURL( new Blob([arrayBuffer], {
@@ -85,20 +87,36 @@ export class App {
         download.setAttribute("download", fileinfo.name);
         p.append(download);
         DOMUtils.get("#chatmessages").prepend(p);
-
-
     }
 
-
     /**
-     * Send a file to all in conference
+     * Add a chat messge to the chat window
+     *
+     * @param {*} im
+     * @memberof App
+     */
+    displayChatMessage(im:any){
+        let chatMessages = DOMUtils.get("#chatmessages") as HTMLElement;   
+        this.numOfChatMessagesUnread++;
+        let message = document.createElement("p");
+        let sender = document.createElement("mark");
+        message.textContent = im.text;
+        sender.textContent = im.from;
+        message.prepend(sender);
+        chatMessages.prepend(message);
+        if (this.chatWindow.classList.contains("d-none")) {
+            this.unreadBadge.classList.remove("d-none");
+            this.unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
+        }
+    }
+    /**
+     * Send a file to all in conference (room)
      *
      * @param {*} fileInfo
      * @param {ArrayBuffer} buffer
      * @memberof App
      */
     sendFile(fileInfo: any, buffer: ArrayBuffer) {
-
         var message = new Message("fileShare",
             fileInfo, "broker", buffer);
         let bm = new BinaryMessage(message.toString(), buffer);
@@ -157,9 +175,6 @@ export class App {
 
         });
     }
-
-
-
     isRecording:boolean;
     /**
      *
@@ -184,7 +199,7 @@ export class App {
     }
 
     /**
-     *
+     * Display recording results
      *
      * @param {string} blobUrl
      * @memberof App
@@ -202,10 +217,6 @@ export class App {
         DOMUtils.get("#recorder-download").append(p);
 
         $("#recorder-result").modal("show");
-        
-       
-
-            
 
     }
 
@@ -260,9 +271,15 @@ export class App {
             from: sender
         }
 
-        this.factory.GetController("broker").Invoke("chatMessage",
-            data
-        );
+        this.dataChannel.Invoke("chatMessage",data);
+
+        // also display to self..
+
+        this.displayChatMessage(data);
+
+        // this.factory.GetController("broker").Invoke("chatMessage",
+        //     data
+        // );
     }
 
     /**
@@ -285,8 +302,6 @@ export class App {
      * @memberof App
      */
     addRemoteVideo(id: string, mediaStream: MediaStream) {
-
-        console.log("addRemoteVideo",id,mediaStream);
 
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
@@ -326,7 +341,6 @@ export class App {
         video.autoplay = true;
 
         item.append(video);
-
 
         // listener for fulscreen view of a participants video
         f.addEventListener("click", (e) => {
@@ -468,7 +482,6 @@ export class App {
         }
 
         this.numOfChatMessagesUnread = 0;
-
         this.participants = new Map<string, AppParticipant>();
         this.dungeons = new Map<string, DungeonComponent>();
 
@@ -477,23 +490,20 @@ export class App {
         this.fullScreenVideo = DOMUtils.get(".full") as HTMLVideoElement;
         this.shareContainer = DOMUtils.get("#share-container");
         this.shareFile = DOMUtils.get("#share-file") as HTMLElement;
-
         this.videoGrid = DOMUtils.get("#video-grid") as HTMLElement;
-
-
+        this.chatWindow = DOMUtils.get(".chat") as HTMLElement;   
         this.audioNode = DOMUtils.get("#remtote-audio-node audio") as HTMLAudioElement;
-
-
-
         this.lockContext = DOMUtils.get("#context-lock") as HTMLElement;
+        this.unreadBadge = DOMUtils.get("#unread-messages") as HTMLElement;
+
 
 
 
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
         let startButton = DOMUtils.get("#joinconference") as HTMLInputElement;
-        let chatWindow = DOMUtils.get(".chat") as HTMLElement;
+     
         let chatMessage = DOMUtils.get("#chat-message") as HTMLInputElement;
-        let chatMessages = DOMUtils.get("#chatmessages") as HTMLElement;
+    
 
         let muteAudio = DOMUtils.get("#mute-local-audio") as HTMLElement;
         let muteVideo = DOMUtils.get("#mute-local-video") as HTMLElement;
@@ -505,7 +515,6 @@ export class App {
         let settings = DOMUtils.get("#settings") as HTMLElement;
         let saveSettings = DOMUtils.get("#save-settings") as HTMLElement;
 
-        let unreadBadge = DOMUtils.get("#unread-messages") as HTMLElement;
 
         let generateSlug = DOMUtils.get("#generate-slug") as HTMLHtmlElement
 
@@ -754,17 +763,17 @@ export class App {
         }
 
         DOMUtils.get("#close-chat").addEventListener("click", () => {
-            chatWindow.classList.toggle("d-none");
-            unreadBadge.classList.add("d-none");
+            this.chatWindow.classList.toggle("d-none");
+            this.unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
-            unreadBadge.textContent = "0";
+            this.unreadBadge.textContent = "0";
 
         });
         DOMUtils.get("#show-chat").addEventListener("click", () => {
-            chatWindow.classList.toggle("d-none");
-            unreadBadge.classList.add("d-none");
+            this.chatWindow.classList.toggle("d-none");
+            this.unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
-            unreadBadge.textContent = "0";
+            this.unreadBadge.textContent = "0";
         });
 
         slug.addEventListener("click", () => {
@@ -796,10 +805,7 @@ export class App {
         startButton.addEventListener("click", () => {
 
             this.videoGrid.classList.add("d-flex");
-
             this.lockContext.classList.remove("hide");
-
-
 
             DOMUtils.get(".fa-dungeon").classList.toggle("hide");
             DOMUtils.get(".top-bar").classList.remove("d-none");
@@ -822,11 +828,7 @@ export class App {
             this.userSettings.slugHistory.addToHistory(slug.value);
 
             this.userSettings.saveSetting();
-
-
-
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
-
 
         });
 
@@ -837,8 +839,8 @@ export class App {
                 chatMessage.value = "";
             }
         });
-     
     
+        
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
         }
@@ -846,8 +848,22 @@ export class App {
 
             this.rtcClient = new WebRTC(broker, this.rtcConfig);
 
+            // set up peer dataChannels 
+            this.dataChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`)        
+            
+            this.dataChannel.Invoke
+            
+            this.dataChannel.On("chatMessage",(data:any) => {
+                this.displayChatMessage(data);
+                console.log("got a chatMessage on datachannel ",data);
+            });
+
+            this.dataChannel.OnOpen = (e,peerId) => {
+                    console.log("now we have an open dataChannel")
+            };
+
             broker.On("fileShare", (fileinfo: any, arrayBuffer: ArrayBuffer) => {
-                this.fileReceived(fileinfo, arrayBuffer)
+                this.displayReceivedFile(fileinfo, arrayBuffer)
             });
 
             broker.On("lockContext", () => {
@@ -902,20 +918,8 @@ export class App {
                 }
             });
            
-            broker.On("chatMessage", (im: any) => {
-                this.numOfChatMessagesUnread++;
-                let message = document.createElement("p");
-                let sender = document.createElement("mark");
-                message.textContent = im.text;
-                sender.textContent = im.from;
-
-                message.prepend(sender);
-                chatMessages.prepend(message);
-
-                if (chatWindow.classList.contains("d-none")) {
-                    unreadBadge.classList.remove("d-none");
-                    unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
-                }
+            broker.On("chatMessage", (data: any) => {
+               this.displayChatMessage(data);
             });
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {

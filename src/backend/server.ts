@@ -1,4 +1,4 @@
-import Path from 'path';
+import path from 'path';
 import { ThorIO } from 'thor-io.vnext';
 import { Broker } from './controllers/broker';
 
@@ -6,7 +6,6 @@ console.clear();
 
 let express = require("express");
 let app = express();
-
 
 let RTC = new ThorIO(
     [
@@ -16,7 +15,9 @@ let RTC = new ThorIO(
 
 require("express-ws")(app);
 
-app.use(express.static('./client'));
+
+app.use("/",express.static(path.join(process.cwd(),"/dist/client"))); 
+
 app.ws("/", function (ws, req) {
     RTC.addWebSocket(ws, req);
 });
