@@ -34,5 +34,6 @@ export class AppDomain {
         this.contextPrefix = appConfig.contextPrefix;
         this.serverUrl = this.getServerUrl()
         this.version = appConfig.version;
+
     }
 }
