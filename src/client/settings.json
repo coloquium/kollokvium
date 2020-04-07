@@ -1,7 +1,5 @@
 {
     "domain": "Kollokvium",
-    "host": "", 
     "contextPrefix": "kollokvium",
-    "serverUrl": "",
     "version": "1.2.0"
 }
