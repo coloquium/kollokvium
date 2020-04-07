@@ -1,7 +1,7 @@
 {
     "domain": "Kollokvium",
-    "host": "kollokvium.herokuapp.com", 
+    "host": "", 
     "contextPrefix": "kollokvium",
-    "serverUrl": "kollokvium.herokuapp.com",
+    "serverUrl": "",
     "version": "1.2.0"
 }
