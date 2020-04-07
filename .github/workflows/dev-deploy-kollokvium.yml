@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - dev-kollokvium
+name: Build and deploy dev branch
 
 on:
   push:
@@ -39,5 +39,4 @@ jobs:
       with:
         enabled-static-website: 'true'
         folder: 'dist/client'
-        connection-string: ${{ secrets.DEV_STATIC_SITE_CONNECTION_STRING }}
-
+        connection-string: ${{ secrets.AzureStorage_Connection_String_dev_kollokvium }}
