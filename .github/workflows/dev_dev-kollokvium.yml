@@ -38,6 +38,6 @@ jobs:
       uses: tibor19/Azure-Storage-Action@master
       with:
         enabled-static-website: 'true'
-        folder: './dist/client'
+        folder: 'dist/client'
         connection-string: ${{ secrets.DEV_STATIC_SITE_CONNECTION_STRING }}
 
