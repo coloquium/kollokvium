@@ -32,4 +32,4 @@ jobs:
         app-name: 'dev-kollokvium'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_09ac084a69d0494795610ba9d953afb0 }}
-        package: .
+        package: './dist'
