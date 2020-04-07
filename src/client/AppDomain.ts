@@ -22,6 +22,9 @@ export class AppDomain {
         return result;
     }
     getServerUrl() {
+        if(appConfig.serverUrl && appConfig.serverUrl.includes("://")){
+            return appConfig.serverUrl;
+        }
         const port = window.location.port;
         const host = (appConfig.serverUrl || window.location.hostname);
         const scheme =  location.protocol.includes("https:") ? "wss://" : "ws://";

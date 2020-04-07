@@ -747,8 +747,8 @@ export class App {
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         })
+ 
 
-    
 
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
             navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
@@ -826,7 +826,8 @@ export class App {
             DOMUtils.get(".join").classList.add("d-none");
 
             this.userSettings.slugHistory.addToHistory(slug.value);
-
+            window.history.pushState({}, window.document.title, `#${slug.value}`);
+            
             this.userSettings.saveSetting();
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
 

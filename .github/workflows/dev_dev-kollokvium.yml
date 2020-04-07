@@ -31,5 +31,13 @@ jobs:
       with:
         app-name: 'dev-kollokvium'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_09ac084a69d0494795610ba9d953afb0 }}
-        package: './dist'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_dev_kollokvium }}
+        package: './dist/server.js'
+
+    - name: 'Deploy to Azure Storage'
+      uses: tibor19/Azure-Storage-Action@master
+      with:
+        enabled-static-website: 'true'
+        folder: 'dist/client'
+        connection-string: ${{ secrets.DEV_STATIC_SITE_CONNECTION_STRING }}
+
