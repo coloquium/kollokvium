@@ -385,9 +385,7 @@ export class App {
 
         DOMUtils.get("#dungeon-" + key).addEventListener("click", () => {
             DOMUtils.get(".video-grid").classList.add("blur");
-
             this.audioNode.muted = true;
-
             DOMUtils.get(".dungeons-header").classList.add("flash");
 
 
