@@ -15,7 +15,7 @@ let RTC = new ThorIO(
 
 require("express-ws")(app);
 
-app.use("/",express.static(path.join(process.cwd(),"/dist/client"))); 
+app.use("/",express.static("./client")); 
 
 app.ws("/", function (ws, req) {
     RTC.addWebSocket(ws, req);
