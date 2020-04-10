@@ -2,6 +2,6 @@
     "domain": "Kollokvium",
     "host": "", 
     "contextPrefix": "kollokvium",
-    "serverUrl": "",
+    "serverUrl": "wss://wss.kollokvium.se",
     "version": "1.5.0"
 }
