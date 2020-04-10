@@ -31,7 +31,7 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 ## install 
 
-TBD
+Clone the repository and run npm install & npm run build & npm start
 
 ## Quick deploy guides.
 
