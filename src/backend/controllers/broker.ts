@@ -47,6 +47,14 @@ export class Broker extends ControllerBase {
         this.peer = new ExtendedPeerConnection(ControllerBase.newGuid(), this.connection.id);
         this.invoke(this.peer, "contextCreated", this.alias);
     }
+
+    @CanInvoke(true)
+    leaveContext() {     
+        this.peer = new ExtendedPeerConnection(ControllerBase.newGuid(), this.connection.id);
+        this.invoke(this.peer, "leaveContext", this.alias);
+
+    }
+
     @CanInvoke(true)
     changeContext(change: ExtendedPeerConnection) {
         let match = this.getExtendedPeerConnections(this.peer).find((pre: Broker) => {

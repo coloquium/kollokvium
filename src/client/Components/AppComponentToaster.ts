@@ -1,14 +1,14 @@
 import { AppComponent } from './AppComponent';
 export class AppComponentToaster extends AppComponent {
-    /**
-     * 
-     *
-     * @static
-     * @returns {HTMLElement}
-     * @memberof AppComponentToaster
-     */
-    static dungeonToaster(caption:string,message:string): DocumentFragment {
-        let p = `
+  /**
+   * 
+   *
+   * @static
+   * @returns {HTMLElement}
+   * @memberof AppComponentToaster
+   */
+  static dungeonToaster(caption: string, message: string): DocumentFragment {
+    let p = `
         <div role="alert" aria-live="assertive" aria-atomic="true" class="toast" data-autohide="false">
         <div class="toast-header">
             <i class="fas fa-info-circle"></i>&nbsp;
@@ -24,6 +24,8 @@ export class AppComponentToaster extends AppComponent {
         </div>
       </div>
     `;
-        return this.toDOM(p);
-    }
+    console.log("rendering");
+    return this.toDOM(p);
+  }
 }
+

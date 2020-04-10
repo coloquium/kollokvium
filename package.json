@@ -48,6 +48,7 @@
     "@types/jquery": "^3.3.33",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
+    "greenscreenstream": "^1.0.0-beta.3",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",
     "thor-io.client-vnext": "^2.0.2-beta.2",

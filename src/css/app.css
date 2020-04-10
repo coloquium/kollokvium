@@ -2,6 +2,11 @@ body {
     font-family: 'Nanum Gothic', sans-serif;
 }
 
+
+.right{
+    float: right;
+}
+
 main {
     position: relative;
     background-image: url(../img/background.jpg);
@@ -68,6 +73,7 @@ main .overlay {
     position: absolute;
     bottom: 80px;
     right: 1rem;
+    z-index: 2000;
 }
 
 .local video {
@@ -75,8 +81,18 @@ main .overlay {
     float: left;
     margin: 1rem;
     max-height: 100px;
-    border: 2px solid #fff;
+    border: 2px solid #333;
+    cursor: pointer;
 }
+.local video:hover {
+    right: 0;
+    float: left;
+    margin: 1rem;
+    max-height: 100px;
+    border: 2px solid #eee;
+    cursor: pointer;
+}
+
 
 .local:first-child {
     transform: rotateY(180deg);
@@ -144,6 +160,7 @@ main .overlay {
 .top-bar i {
     color: #fff;
     margin-right: 16px;
+    cursor: pointer;
 }
 
 #file-form {
@@ -185,53 +202,53 @@ main .overlay {
     /* % of current element */
 }
 
-li:first-child:nth-last-child(1) {
+.video-grid li:first-child:nth-last-child(1) {
     /* -or- li:only-child { */
     width: 100%;
 }
 
 /* two items */
 
-li:first-child:nth-last-child(2), li:first-child:nth-last-child(2)~li {
+.video-grid li:first-child:nth-last-child(2), .video-grid li:first-child:nth-last-child(2)~li {
     width: 50%;
     height: 100%;
 }
 
 /* three items */
 
-li:first-child:nth-last-child(3), li:first-child:nth-last-child(3)~li {
+.video-grid li:first-child:nth-last-child(3), .video-grid li:first-child:nth-last-child(3)~li {
     width: 50%;
     height: 50%;
 }
 
 /* four items */
 
-li:first-child:nth-last-child(4), li:first-child:nth-last-child(4)~li {
+.video-grid li:first-child:nth-last-child(4), .video-grid li:first-child:nth-last-child(4)~li {
     width: 50%;
     height: 50%;
 }
 
-li:first-child:nth-last-child(5), li:first-child:nth-last-child(5)~li {
+.video-grid li:first-child:nth-last-child(5), .video-grid li:first-child:nth-last-child(5)~li {
     width: 50%;
     height: 33%;
 }
 
-li:first-child:nth-last-child(6) li:first-child:nth-last-child(6)~li {
+.video-grid li:first-child:nth-last-child(6).video-grid  li:first-child:nth-last-child(6)~li {
     width: 50%;
     height: 33%;
 }
 
-li:first-child:nth-last-child(7), li:first-child:nth-last-child(7)~li {
+.video-grid li:first-child:nth-last-child(7),.video-grid  li:first-child:nth-last-child(7)~li {
     width: 33%;
     height: 33%
 }
 
-li:first-child:nth-last-child(8), li:first-child:nth-last-child(8)~li {
+.video-grid li:first-child:nth-last-child(8), .video-grid li:first-child:nth-last-child(8)~li {
     width: 33%;
     height: 33%
 }
 
-li:first-child:nth-last-child(9), li:first-child:nth-last-child(9)~li {
+.video-grid li:first-child:nth-last-child(9), .video-grid li:first-child:nth-last-child(9)~li {
     width: 33%;
     height: 33%
 }
@@ -255,6 +272,10 @@ li:first-child:nth-last-child(9), li:first-child:nth-last-child(9)~li {
 
 .red,.record {
     color: #ff0000;
+}
+
+i.fa-lock {
+    color:#ff0000;
 }
 
 .flash {
@@ -342,7 +363,7 @@ li:first-child:nth-last-child(9), li:first-child:nth-last-child(9)~li {
     z-index: 10000
 }
 
-.modal-box {
+#quick-start-containe.modal-box {
     position: absolute !important;
     left: 50%;
     top: 50%;
@@ -350,4 +371,24 @@ li:first-child:nth-last-child(9), li:first-child:nth-last-child(9)~li {
     background-color: transparent;
     z-index: 99999;
     padding: 50px;
+}
+
+
+.greenscreen-option
+{
+    max-width: 100%;
+}
+
+#palette{
+    font-size: 1.2rem;
+    color: #000;
+}
+
+.detected-color {
+    cursor: pointer;
+}
+
+.greenscreen-optimal{
+    background-color:#009933;
+    color:#fff;
 }

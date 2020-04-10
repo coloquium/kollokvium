@@ -17,16 +17,6 @@
     <link rel="icon" type="image/png" sizes="96x96" href="img/favicons/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicons/favicon-16x16.png">
     <meta name="theme-color" content="#ffffff">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
-    <!-- remove GA ,if you customize, host by yourself -->
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'UA-160656421-1');
-    </script>
-    <!-- remove GA, if you customize, host by yourself -->
     <script src="https://kit.fontawesome.com/3aa27899ac.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -35,6 +25,8 @@
 </head>
 
 <body>
+
+    <div id="comps"></div>
 
     <div class="toasters">
     </div>
@@ -53,13 +45,18 @@
     <div class="top-bar">
         <i id="help" class="fa fa-question-circle fa-2x" style="cursor:pointer;" aria-hidden="true"></i>
         <i class="fas fa-volume-up fa-2x" title="mute all audio" id="mute-speakers" style="cursor:pointer;"></i>
-        <!-- <i class="fas fa-share-alt fa-2x" id="share-slug" data-container="body" data-toggle="popover"
-        data-placement="bottom" data-trigger="click" data-content="Yor room link is now in the clipboard"></i> -->
+        <i class="fas fa-share-alt fa-2x hide" id="share-slug" data-container="body" data-toggle="popover"
+        data-placement="bottom" data-trigger="click" data-content="Your room link is now in the clipboard"></i>
         <div class="hide">
             <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
         </div>
         <i class="fas fa-lock-open fa-2x hide" id="context-lock"></i>
         <!-- <span id="dungeon-messages" class="badge badge-danger style=" float:right">beta</span> -->
+
+        <i class="fas fa-door-open fa-2x right hide" id="leave-context">
+
+        </i>
+
     </div>
 
     <div class="modal" tabindex="-1" role="dialog" id="quick-start-container">
@@ -201,7 +198,7 @@
 
                         <input list="slug-history" type="text" id="slug" placeholder="Enter any room name..." value=""
                             class="form-control form-control-lg" data-container="body" data-toggle="popover"
-                            data-placement="top"
+                            data-placement="top" data-trigger="none"
                             data-content="Ohoy! your room name is six chars minimum, it can be many things such as company name, meeting occasion or whatever you want.. Have a nice day!">
 
                         <datalist id="slug-history">
