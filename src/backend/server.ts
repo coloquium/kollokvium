@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import { ThorIO } from 'thor-io.vnext';
 import { Broker } from './controllers/broker';
 
@@ -13,9 +14,13 @@ let RTC = new ThorIO(
     ]
 );
 
-require("express-ws")(app);
+let root = path.resolve('.');
+if (fs.existsSync(path.join(root, 'dist'))) {
+    root = path.join(root, 'dist');
+}
 
-app.use("/",express.static("./client")); 
+require("express-ws")(app);
+app.use("/", express.static(path.join(root, "client")));
 
 app.ws("/", function (ws, req) {
     RTC.addWebSocket(ws, req);
@@ -23,3 +28,4 @@ app.ws("/", function (ws, req) {
 var port = process.env.PORT || 1337;
 app.listen(port);
 console.log("thor-io is serving on", port.toString());
+

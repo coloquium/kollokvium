@@ -6,11 +6,13 @@ import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './Helpers/ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
-import { MediaStreamBlender, MediaStreamRecorder } from 'mediastreamblender'
+import { MediaStreamBlender, MediaStreamRecorder, StreamSource } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
 import { AppComponentToaster } from './Components/AppComponentToaster';
 import { DungeonComponent } from './Components/DungeonComponent';
-import {DOMUtils} from './Helpers/DOMUtils';
+import { DOMUtils } from './Helpers/DOMUtils';
+import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
+import { GreenScreenComponent } from './Components/GreenScreenComponent';
 
 
 
@@ -35,6 +37,10 @@ export class App {
     dataChannel: DataChannel;
     chatWindow: HTMLElement;
     unreadBadge: HTMLElement;
+    leaveCotext: HTMLElement;
+    startButton: HTMLInputElement;
+    shareSlug: HTMLElement;
+    gss: GreenScreenComponent;
     /**
      *
      *
@@ -50,7 +56,7 @@ export class App {
             option.value = result.label;
             parent.append(option);
         });
-        parent.removeAttribute("disabled");        
+        parent.removeAttribute("disabled");
     }
     /**
      *
@@ -61,7 +67,7 @@ export class App {
      */
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
-
+        
             cb(mediaStream);
 
         }).catch(err => {
@@ -78,7 +84,7 @@ export class App {
     displayReceivedFile(fileinfo: any, arrayBuffer: ArrayBuffer) {
         const p = document.createElement("p");
         p.textContent = "Hey,here is shared file, click to download.. ";
-        const blobUrl = window.URL.createObjectURL( new Blob([arrayBuffer], {
+        const blobUrl = window.URL.createObjectURL(new Blob([arrayBuffer], {
             type: fileinfo.mimeType
         }));
         const download = document.createElement("a");
@@ -95,8 +101,8 @@ export class App {
      * @param {*} im
      * @memberof App
      */
-    displayChatMessage(im:any){
-        let chatMessages = DOMUtils.get("#chatmessages") as HTMLElement;   
+    displayChatMessage(im: any) {
+        let chatMessages = DOMUtils.get("#chatmessages") as HTMLElement;
         this.numOfChatMessagesUnread++;
         let message = document.createElement("p");
         let sender = document.createElement("mark");
@@ -138,7 +144,7 @@ export class App {
             stream.getVideoTracks().forEach((t: MediaStreamTrack) => {
                 this.rtcClient.LocalStreams[0].addTrack(t);
             });
-            this.addLocalVideo(stream);
+            this.addLocalVideo(stream, false);
             DOMUtils.get("#share-screen").classList.add("hide")
         }).catch(err => console.error)
     }
@@ -175,7 +181,7 @@ export class App {
 
         });
     }
-    isRecording:boolean;
+    isRecording: boolean;
     /**
      *
      *
@@ -187,7 +193,7 @@ export class App {
         if (!this.isRecording) {
             this.singleStreamRecorder = new MediaStreamRecorder(mediaStream.getTracks());
             this.singleStreamRecorder.start(10);
-             this.isRecording = true;
+            this.isRecording = true;
         } else {
             DOMUtils.get("i.is-recordig").classList.remove("flash");
             this.isRecording = false;
@@ -226,18 +232,27 @@ export class App {
      * @param {MediaStream} mediaStream
      * @memberof App
      */
-    addLocalVideo(mediaStream: MediaStream) {
+    addLocalVideo(mediaStream: MediaStream, isCam: boolean) {
         let video = document.createElement("video") as HTMLVideoElement;
         video.autoplay = true;
         video.muted = true;
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
+
+        if(isCam) video.classList.add("local-cam");
+
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
+        if(isCam){
 
-        // and local stream to mixer / blender;
+        
+        video.addEventListener("click", () => {
+            this.gss.setMediaTrack(mediaStream.getVideoTracks()[0]);            
+            $("#gss").modal("show");
+        });
+        }
+        
         this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
-
     }
 
     /**
@@ -271,7 +286,7 @@ export class App {
             from: sender
         }
 
-        this.dataChannel.Invoke("chatMessage",data);
+        this.dataChannel.Invoke("chatMessage", data);
 
         // also display to self..
 
@@ -320,11 +335,11 @@ export class App {
         r.classList.add("fas", "fa-circle", "fa-2x", "red")
 
         r.addEventListener("click", () => {
-            if (!this.isRecording)             
-                r.classList.add("flash","is-recordig");
+            if (!this.isRecording)
+                r.classList.add("flash", "is-recordig");
 
-                this.recordSinglestream(id, mediaStream);
-          
+            this.recordSinglestream(id, mediaStream);
+
         });
 
         videoTools.append(f);
@@ -429,6 +444,80 @@ export class App {
             return p;
         }
     }
+
+
+    disableConfrenceElements() {
+        location.hash = "";
+
+        let slug = DOMUtils.get("#slug") as HTMLInputElement;
+
+        slug.value = "";
+
+        DOMUtils.get("#random-slug").classList.remove("d-none");
+
+
+        this.videoGrid.classList.remove("d-flex");
+        this.lockContext.classList.add("hide");
+        this.leaveCotext.classList.add("hide");
+
+        this.startButton.disabled = true;
+        this.startButton.classList.remove("hide");
+        this.shareSlug.classList.add("hide");
+
+
+
+        DOMUtils.get(".fa-dungeon").classList.add("hide");
+        DOMUtils.get(".top-bar").classList.add("d-none");
+
+        DOMUtils.get("#record").classList.add("d-none");
+
+
+        DOMUtils.get("#share-file").classList.toggle("hide");
+        // Utils.$("#share-screen").classList.toggle("d-none");
+        DOMUtils.get("#show-chat").classList.toggle("d-none");
+
+        DOMUtils.get(".remote").classList.add("hide");
+
+        DOMUtils.get(".overlay").classList.remove("d-none");
+        DOMUtils.get(".join").classList.remove("d-none");
+        DOMUtils.get(".our-brand").classList.toggle("hide");
+
+    }
+
+
+    enableConerenceElements() {
+        this.startButton.classList.add("hide");
+
+        this.shareSlug.classList.remove("hide");
+
+
+        this.startButton.classList.remove("hide");
+        this.videoGrid.classList.add("d-flex");
+
+        this.lockContext.classList.remove("hide");
+
+        this.leaveCotext.classList.remove("hide");
+
+        DOMUtils.get(".fa-dungeon").classList.toggle("hide");
+        DOMUtils.get(".top-bar").classList.remove("d-none");
+
+        DOMUtils.get("#record").classList.remove("d-none");
+
+        $("#random-slug").popover("hide");
+
+        DOMUtils.get("#share-file").classList.toggle("hide");
+        // Utils.$("#share-screen").classList.toggle("d-none");
+        DOMUtils.get("#show-chat").classList.toggle("d-none");
+        DOMUtils.get(".our-brand").classList.toggle("hide");
+
+        $("#slug").popover('hide');
+
+        DOMUtils.get(".remote").classList.remove("hide");
+
+        DOMUtils.get(".overlay").classList.add("d-none");
+        DOMUtils.get(".join").classList.add("d-none");
+    }
+
     /**
      * Creates an instance of App - Kollokvium
      * @memberof App
@@ -448,7 +537,7 @@ export class App {
         this.factory = this.connectToServer(this.appDomain.serverUrl, {})
 
         let blenderWaterMark = DOMUtils.get("#watermark") as HTMLImageElement;
-        this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {  
+        this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
             ctx.save();
             ctx.filter = "invert()";
             ctx.drawImage(blenderWaterMark, 10, 10, 100, 100);
@@ -468,6 +557,21 @@ export class App {
             this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
             this.mediaStreamBlender.refreshCanvas();
         }
+
+        this.gss = new GreenScreenComponent("gss");
+        this.gss.onApply = (mediaStream) => {
+               
+            let a = this.localMediaStream.getVideoTracks()[0];
+           
+            this.localMediaStream.removeTrack(a);
+            this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
+          
+    
+        };
+
+        DOMUtils.get("#comps").append(this.gss.render());
+
+
 
         //Handle modal quick start early, if its been dismissed hide straight away
         //  if (this.userSettings.showQuickStart)
@@ -489,19 +593,25 @@ export class App {
         this.shareContainer = DOMUtils.get("#share-container");
         this.shareFile = DOMUtils.get("#share-file") as HTMLElement;
         this.videoGrid = DOMUtils.get("#video-grid") as HTMLElement;
-        this.chatWindow = DOMUtils.get(".chat") as HTMLElement;   
+        this.chatWindow = DOMUtils.get(".chat") as HTMLElement;
         this.audioNode = DOMUtils.get("#remtote-audio-node audio") as HTMLAudioElement;
         this.lockContext = DOMUtils.get("#context-lock") as HTMLElement;
         this.unreadBadge = DOMUtils.get("#unread-messages") as HTMLElement;
 
 
+        this.leaveCotext = DOMUtils.get("#leave-context");
+        this.startButton = DOMUtils.get("#joinconference") as HTMLInputElement;
+
+        this.shareSlug = DOMUtils.get("#share-slug");
+
+
 
 
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
-        let startButton = DOMUtils.get("#joinconference") as HTMLInputElement;
-     
+
+
         let chatMessage = DOMUtils.get("#chat-message") as HTMLInputElement;
-    
+
 
         let muteAudio = DOMUtils.get("#mute-local-audio") as HTMLElement;
         let muteVideo = DOMUtils.get("#mute-local-video") as HTMLElement;
@@ -549,8 +659,8 @@ export class App {
 
         toogleRecord.addEventListener("click", () => {
             toogleRecord.classList.toggle("flash");
-    
-            
+
+
             this.mediaStreamBlender.render(25);
             this.mediaStreamBlender.record();
 
@@ -631,7 +741,6 @@ export class App {
         });
 
         settings.addEventListener("click", () => {
-            console.log("!");
             $("#settings-modal").modal("toggle");
         })
 
@@ -711,7 +820,7 @@ export class App {
 
         generateSlug.addEventListener("click", () => {
             slug.value = Math.random().toString(36).substring(2).toLocaleLowerCase();
-            startButton.disabled = false;
+            this.startButton.disabled = false;
             $("#random-slug").popover("hide");
         });
 
@@ -722,6 +831,14 @@ export class App {
             muteSpeakers.classList.toggle("fa-volume-up");
 
             this.audioNode.muted = !this.audioNode.muted;
+            
+            // temp fix,
+            Array.from(this.mediaStreamBlender.audioSources.values()).forEach ( (s:StreamSource) => {
+                s.source.muted = !s.source.muted;
+            });         
+
+          
+           
 
         });
 
@@ -745,7 +862,7 @@ export class App {
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         })
- 
+
 
 
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
@@ -754,9 +871,21 @@ export class App {
             });
         });
 
+        this.shareSlug.addEventListener("click", () => {
+            navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
+                $("#share-slug").popover("show");
+                setTimeout(() => {
+                    $("#share-slug").popover("hide");
+                }, 5000);
+            });
+
+
+        });
+
+
         if (this.slug.length >= 6) {
             slug.value = this.slug;
-            startButton.disabled = false;
+            this.startButton.disabled = false;
             DOMUtils.get("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
         }
 
@@ -781,15 +910,15 @@ export class App {
         if (location.hash.length == 0) {
             $("#random-slug").popover("show");
         } else {
-            startButton
-            startButton.textContent = "JOIN";
+
+            this.startButton.textContent = "JOIN";
         }
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
 
             } else {
-                startButton.disabled = true;
+                this.startButton.disabled = true;
             }
         });
 
@@ -799,34 +928,21 @@ export class App {
         });
 
 
-      
-        startButton.addEventListener("click", () => {
 
-            this.videoGrid.classList.add("d-flex");
-            this.lockContext.classList.remove("hide");
+        this.leaveCotext.addEventListener("click", () => {
+            this.factory.GetController("broker").Invoke("leaveContext", {})
+        })
 
-            DOMUtils.get(".fa-dungeon").classList.toggle("hide");
-            DOMUtils.get(".top-bar").classList.remove("d-none");
+        this.startButton.addEventListener("click", () => {
 
-            DOMUtils.get("#record").classList.remove("d-none");
-
-            $("#random-slug").popover("hide");
-
-            DOMUtils.get("#share-file").classList.toggle("hide");
-            // Utils.$("#share-screen").classList.toggle("d-none");
-            DOMUtils.get("#show-chat").classList.toggle("d-none");
-            DOMUtils.get(".our-brand").remove();
-            $("#slug").popover('hide');
-            startButton.classList.add("hide");
-            DOMUtils.get(".remote").classList.remove("hide");
-
-            DOMUtils.get(".overlay").classList.add("d-none");
-            DOMUtils.get(".join").classList.add("d-none");
+            this.enableConerenceElements();
 
             this.userSettings.slugHistory.addToHistory(slug.value);
             window.history.pushState({}, window.document.title, `#${slug.value}`);
-            
+
             this.userSettings.saveSetting();
+
+
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
 
         });
@@ -838,8 +954,8 @@ export class App {
                 chatMessage.value = "";
             }
         });
-    
-        
+
+
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
         }
@@ -848,18 +964,39 @@ export class App {
             this.rtcClient = new WebRTC(broker, this.rtcConfig);
 
             // set up peer dataChannels 
-            this.dataChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`)        
-            
-            this.dataChannel.Invoke
-            
-            this.dataChannel.On("chatMessage",(data:any) => {
+            this.dataChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`)
+
+
+
+
+
+            this.dataChannel.On("chatMessage", (data: any) => {
                 this.displayChatMessage(data);
-                console.log("got a chatMessage on datachannel ",data);
+                console.log("got a chatMessage on datachannel ", data);
             });
 
-            this.dataChannel.OnOpen = (e,peerId) => {
-                    console.log("now we have an open dataChannel")
+            this.dataChannel.OnOpen = (e, peerId) => {
+                console.log("now we have an open dataChannel")
             };
+
+            broker.On("leaveContext", (data: any) => {
+
+
+
+                this.rtcClient.Peers.forEach((connection: WebRTCConnection) => {
+                    connection.RTCPeer.close();
+                });
+
+                this.participants.clear();
+
+
+                DOMUtils.get("#remote-videos").innerHTML = "";
+
+
+
+                this.disableConfrenceElements();
+            });
+
 
             broker.On("fileShare", (fileinfo: any, arrayBuffer: ArrayBuffer) => {
                 this.displayReceivedFile(fileinfo, arrayBuffer)
@@ -868,10 +1005,12 @@ export class App {
             broker.On("lockContext", () => {
                 this.lockContext.classList.toggle("fa-lock-open");
                 this.lockContext.classList.toggle("fa-lock");
+
+
             });
 
             broker.On("isRoomLocked", (data: any) => {
-                startButton.disabled = data.state;
+                this.startButton.disabled = data.state;
                 if (data.state) {
                     slug.classList.add("is-invalid");
                 } else {
@@ -916,9 +1055,9 @@ export class App {
                     console.log(e);
                 }
             });
-           
+
             broker.On("chatMessage", (data: any) => {
-               this.displayChatMessage(data);
+                this.displayChatMessage(data);
             });
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
@@ -975,8 +1114,8 @@ export class App {
                     UserSettings.defaultConstraints,
                     (mediaStream: MediaStream) => {
                         this.localMediaStream = mediaStream;
-                        this.rtcClient.AddLocalStream(mediaStream);
-                        this.addLocalVideo(mediaStream);
+                        this.rtcClient.AddLocalStream(this.localMediaStream);
+                        this.addLocalVideo(this.localMediaStream, true);
                     });
 
 
@@ -993,11 +1132,13 @@ export class App {
     Launch the application
 */
 document.addEventListener("DOMContentLoaded", () => {
-  
-    if(!(location.href.includes("file://"))){ // temp hack for electron
+
+    if (!(location.href.includes("file://"))) { // temp hack for electron
         if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
     }
 
-    App.getInstance();
+    let instance = App.getInstance();
+
+    window["kollo"] = instance;
 
 });
