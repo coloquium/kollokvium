@@ -39,7 +39,7 @@ To run the application locally run npm start and then browse to localhost:1337
 
 ### Azure deploy
 
-Comming soon
+Comming soon!
 
 ### Heroku apps
 
