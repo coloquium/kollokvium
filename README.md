@@ -35,7 +35,7 @@ Clone the repository and run npm install & npm run build & npm start
 
 ## Quick deploy guides.
 
-TBD
+To run the application locally run npm start and then browse to localhost:1337 
 
 ### Azure deploy
 
