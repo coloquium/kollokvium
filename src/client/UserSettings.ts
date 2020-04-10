@@ -6,7 +6,8 @@ export class UserSettings {
        
                 video: {
                     width: { min: 640, ideal: 1280 },
-                    height: { min: 400, ideal: 720 }
+                    height: { min: 400, ideal: 720 },
+                    frameRate:25
                 }, audio: true,
     };    
 
