@@ -35,8 +35,10 @@ jobs:
         package: './dist'
 
     - name: 'Deploy to Azure Storage'
-      uses: tibor19/Azure-Storage-Action@master
+      uses: tibor19/Azure-Storage-Action@node-only
       with:
         enabled-static-website: 'true'
+        remove-existing-files: 'true'
+        index-file: 'index.html'
         folder: 'dist/client'
         connection-string: ${{ secrets.AzureStorage_Connection_String_dev_kollokvium }}

@@ -31,15 +31,15 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 ## install 
 
-TBD
+Clone the repository and run npm install & npm run build & npm start
 
 ## Quick deploy guides.
 
-TBD
+To run the application locally run npm start and then browse to localhost:1337 
 
 ### Azure deploy
 
-TBD
+Comming soon!
 
 ### Heroku apps
 

@@ -191,6 +191,7 @@ export class App {
      */
     recordSinglestream(id: string, mediaStream: MediaStream) {
         if (!this.isRecording) {
+    
             this.singleStreamRecorder = new MediaStreamRecorder(mediaStream.getTracks());
             this.singleStreamRecorder.start(10);
             this.isRecording = true;
@@ -638,7 +639,7 @@ export class App {
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
-        let toogleRecord = DOMUtils.get(".record") as HTMLAudioElement;
+        let toogleRecord = DOMUtils.get("#record-all") as HTMLAudioElement;
 
         let testResolutions = DOMUtils.get("#test-resolutions") as HTMLButtonElement;
 
@@ -659,8 +660,6 @@ export class App {
 
         toogleRecord.addEventListener("click", () => {
             toogleRecord.classList.toggle("flash");
-
-
             this.mediaStreamBlender.render(25);
             this.mediaStreamBlender.record();
 
