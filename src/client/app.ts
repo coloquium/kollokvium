@@ -82,8 +82,21 @@ export class App {
      * @memberof App
      */
     displayReceivedFile(fileinfo: any, arrayBuffer: ArrayBuffer) {
-        const p = document.createElement("p");
-        p.textContent = "Hey,here is shared file, click to download.. ";
+        
+
+        
+        let message = document.createElement("div");
+        let sender = document.createElement("mark");
+        let time = document.createElement("time");
+        time.textContent =`(${(new Date()).toLocaleTimeString().substr(0,5)})`;
+        let messageText = document.createElement("span");
+        messageText.innerHTML = DOMUtils.linkify("Hey,the file is ready to download, click to download ");
+        
+        sender.textContent = "Kollokvium";
+        message.prepend(time);
+        message.prepend(sender);
+        message.append(messageText);
+
         const blobUrl = window.URL.createObjectURL(new Blob([arrayBuffer], {
             type: fileinfo.mimeType
         }));
@@ -91,24 +104,37 @@ export class App {
         download.setAttribute("href", blobUrl);
         download.textContent = fileinfo.name;
         download.setAttribute("download", fileinfo.name);
-        p.append(download);
-        DOMUtils.get("#chatmessages").prepend(p);
+        
+        messageText.append(download);
+
+
+
+
+        DOMUtils.get("#chatmessages").prepend(message);
     }
 
     /**
      * Add a chat messge to the chat window
      *
-     * @param {*} im
+     * @param {*} msg
      * @memberof App
      */
-    displayChatMessage(im: any) {
+    displayChatMessage(msg: any) {
         let chatMessages = DOMUtils.get("#chatmessages") as HTMLElement;
         this.numOfChatMessagesUnread++;
-        let message = document.createElement("p");
+        let message = document.createElement("div");
         let sender = document.createElement("mark");
-        message.textContent = im.text;
-        sender.textContent = im.from;
+        let time = document.createElement("time");
+        time.textContent =`(${(new Date()).toLocaleTimeString().substr(0,5)})`;
+        let messageText = document.createElement("span");
+        messageText.innerHTML = DOMUtils.linkify(msg.text);
+
+        
+        sender.textContent = msg.from;
+        message.prepend(time);
         message.prepend(sender);
+        message.append(messageText);
+        
         chatMessages.prepend(message);
         if (this.chatWindow.classList.contains("d-none")) {
             this.unreadBadge.classList.remove("d-none");

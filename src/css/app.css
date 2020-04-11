@@ -130,9 +130,23 @@ main .overlay {
     cursor: pointer;
 }
 
-#chatmessages mark {
-    margin-right: 1rem;
+#chatmessges div {
+    padding: 0.5rem;
 }
+#chatmessages div mark {
+    padding: 0.5rem;
+}
+
+
+#chatmessages div time {
+
+    padding: 0.5rem;
+}
+
+#chatmessages div span {
+    padding: 0.5rem;
+}
+
 
 .custom-heading {
     font-family: 'Nanum Gothic', sans-serif;

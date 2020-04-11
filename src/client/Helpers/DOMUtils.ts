@@ -19,6 +19,14 @@ export class DOMUtils {
             });
         }
         return node;
-    }  
+    }
+    
+    static linkify(text:string) {
+        const regex =/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+        return text.replace(regex, (url:string) => {
+            return `<a href="${url}" target="_blank">${url}</a>`;
+        });
+    }
+  
 }
 
