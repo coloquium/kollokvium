@@ -5,7 +5,10 @@ module.exports = {
   mode: "production",
   target: "node",
   watch: false,
-  entry: Path.resolve(__dirname, sourceFolder, 'backend', 'server.ts'),
+  entry: {
+    server: Path.resolve(__dirname, sourceFolder, 'backend', 'server.ts'),
+    localserver: Path.resolve(__dirname, sourceFolder, 'backend', 'localserver.ts')
+  },
   module: {
     rules: [
       {
@@ -19,11 +22,16 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new CopyPlugin([
+      { from : Path.join(sourceFolder, 'cert'), to: 'cert' }
+    ])
+  ],
   resolve: {
     extensions: ['.ts', '.js'],
   },
   output: {
     path: Path.resolve(__dirname, 'dist'),
-    filename: 'server.js'
+    filename: '[name].js'
   },
 }

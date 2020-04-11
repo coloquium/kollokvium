@@ -1,33 +1,9 @@
-import path from 'path';
 import fs from 'fs';
-
+import path from 'path';
 import https from 'https';
 
-import { ThorIO } from 'thor-io.vnext';
-import { Broker } from './controllers/broker';
+import {app, rootPath} from './common';
 
-console.clear();
-
-let express = require("express");
-let app = express();
-
-let RTC = new ThorIO(
-    [
-        Broker,
-    ]
-);
-
-require("express-ws")(app);
-let rootFolder = path.resolve('.');
-if(fs.existsSync(path.join(rootFolder, 'dist'))){
-    rootFolder = path.join(rootFolder, 'dist');
-}
-
-app.use("/",express.static(path.join(rootFolder, "client"))); 
-
-app.ws("/", function (ws, req) {
-    RTC.addWebSocket(ws, req);
-});
 let port = process.env.PORT || 4433;
 
 /*
@@ -38,20 +14,18 @@ let port = process.env.PORT || 4433;
 */
 
 
-let key = fs.readFileSync(rootFolder+ '/selfsigned.key');
-
+let key = fs.readFileSync(path.join(rootPath, 'cert', 'selfsigned.key'));
+let cert = fs.readFileSync(path.join(rootPath, 'cert', '/selfsigned.crt'));
 
 console.log("key",key);
 
-let cert = fs.readFileSync(rootFolder + '/selfsigned.crt');
-
 let options = {
   key: key,
-  cert: cert
+  cert: cert,
+  rejectUnauthorized: false,
+  agent: false
 };
 
-
-https.createServer(options, app)
-.listen(port);
+https.createServer(options, app).listen(port);
 
 console.log("thor-io is serving on", port.toString());
