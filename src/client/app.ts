@@ -1,5 +1,5 @@
 import adapter from 'webrtc-adapter';
-import { Factory, WebRTC, BinaryMessage, Message, DataChannel } from 'thor-io.client-vnext'
+import { Factory, WebRTC, BinaryMessage, Message, DataChannel, PeerChannel } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
@@ -14,12 +14,40 @@ import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
+import { TextMessage } from 'thor-io.client-vnext/src/Messages/TextMessage';
 
 
+
+
+export class FileReceiver {
+    receiveBuffer: Array<any>;
+    receivedSize: number;
+    constructor(public name: string, public size: number, public mimeType: string, private sender: string, private cb: any) {
+        this.receiveBuffer = new Array<any>();
+        this.receivedSize = 0;
+    }
+    appendChunk(data: any) {
+        this.receiveBuffer.push(data);
+        this.receivedSize += data.byteLength;
+        if (this.receivedSize == this.size) {
+            const received = new Blob(this.receiveBuffer, {
+                type: this.mimeType
+            });
+            this.cb(
+                {
+                    name: this.name,
+                    size: this.size,
+                    mimeType: this.mimeType,
+                    sender: this.sender
+                }, received);
+        }
+    }
+
+}
 
 
 export class App {
-   
+
     appDomain: AppDomain;
     videoGrid: HTMLElement;
 
@@ -39,7 +67,7 @@ export class App {
     numOfChatMessagesUnread: number;
     userSettings: UserSettings;
     mediaStreamBlender: MediaStreamBlender;
-    dataChannel: DataChannel;
+    chatChannel: DataChannel;
     chatWindow: HTMLElement;
     unreadBadge: HTMLElement;
     leaveCotext: HTMLElement;
@@ -48,6 +76,8 @@ export class App {
     greenScreen: GreenScreenComponent;
 
     audioNodes: AudioNodes;
+    fileChannel: DataChannel;
+    filerecevier: FileReceiver;
     /**
      *
      *
@@ -88,7 +118,7 @@ export class App {
      * @param {ArrayBuffer} arrayBuffer
      * @memberof App
      */
-    displayReceivedFile(fileinfo: any, arrayBuffer: ArrayBuffer) {
+    displayReceivedFile(fileinfo: any, blob: Blob) {
 
         let message = document.createElement("div");
         let sender = document.createElement("mark");
@@ -97,14 +127,13 @@ export class App {
         let messageText = document.createElement("span");
         messageText.innerHTML = DOMUtils.linkify("Hey,the file is ready to download, click to download ");
 
-        sender.textContent = "Kollokvium";
+        sender.textContent = fileinfo.sender;
         message.prepend(time);
         message.prepend(sender);
         message.append(messageText);
 
-        const blobUrl = window.URL.createObjectURL(new Blob([arrayBuffer], {
-            type: fileinfo.mimeType
-        }));
+        const blobUrl = window.URL.createObjectURL(blob);
+
         const download = document.createElement("a");
         download.setAttribute("href", blobUrl);
         download.textContent = fileinfo.name;
@@ -153,11 +182,53 @@ export class App {
      * @param {ArrayBuffer} buffer
      * @memberof App
      */
-    sendFile(fileInfo: any, buffer: ArrayBuffer) {
-        var message = new Message("fileShare",
-            fileInfo, "broker", buffer);
-        let bm = new BinaryMessage(message.toString(), buffer);
-        this.factory.GetController("broker").InvokeBinary(bm.Buffer);
+    sendFile(file: any) {
+
+        if (!file) return;
+
+
+        let sendprogress = document.querySelector(".progress-bar");
+
+        sendprogress.setAttribute("aria-valuenow","0")
+
+        sendprogress.setAttribute("aria-valuemax",file.siz)
+
+
+        let meta = {
+            name: file.name,
+            size: file.size,
+            mimeType: file.type,
+            sender: this.userSettings.nickname
+        };
+
+
+
+        this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
+            pc.dataChannel.send(JSON.stringify(meta));
+        });
+
+        let bytesSent = 0;
+        ReadFile.readChunks(file, (data, bytes) => {
+            bytesSent += bytes;
+
+            this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
+                pc.dataChannel.send(data);
+
+            });
+            sendprogress.setAttribute("aria-valuenow",bytesSent.toString());
+
+
+            if (bytesSent === file.size) {
+                setTimeout(() => {
+                    $("#share-file").popover("hide");
+                }, 2000);
+            }
+
+        });
+
+
+
+        //this.factory.GetController("broker").InvokeBinary(bm.Buffer);
     }
     /**
      * Prompt user for a screen , tab, window.
@@ -237,27 +308,27 @@ export class App {
     }
 
     recordAllStreams() {
-        if(!this.mediaStreamBlender.isRecording){
+        if (!this.mediaStreamBlender.isRecording) {
 
-               // clear al prior tracks
-                // temp fix due to mediaStreamBlender missing method
+            // clear al prior tracks
+            // temp fix due to mediaStreamBlender missing method
 
-                this.mediaStreamBlender.audioSources.clear();
-                this.mediaStreamBlender.videosSources.clear();
+            this.mediaStreamBlender.audioSources.clear();
+            this.mediaStreamBlender.videosSources.clear();
 
-                Array.from(this.participants.values()).forEach ( (p:AppParticipant) => {
-                    this.mediaStreamBlender.addTracks(p.id,p.videoTracks.concat(p.audioTracks),false);
-                }) ;
-                this.mediaStreamBlender.addTracks("self",this.localMediaStream.getTracks(),true)
+            Array.from(this.participants.values()).forEach((p: AppParticipant) => {
+                this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
+            });
+            this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
 
-                this.mediaStreamBlender.refreshCanvas();
-                this.mediaStreamBlender.render(25);
-                this.mediaStreamBlender.record();
-        
+            this.mediaStreamBlender.refreshCanvas();
+            this.mediaStreamBlender.render(25);
+            this.mediaStreamBlender.record();
 
-        }else {
+
+        } else {
             this.mediaStreamBlender.render(0);
-            this.mediaStreamBlender.record();    
+            this.mediaStreamBlender.record();
         }
     }
 
@@ -342,8 +413,11 @@ export class App {
             text: message,
             from: sender
         }
+        this.rtcClient.DataChannels.get(`chat-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
+            pc.dataChannel.send(new TextMessage("chatMessage", data, pc.label).toString());
+        });
 
-        this.dataChannel.Invoke("chatMessage", data);
+        //this.chatChannel.Invoke("chatMessage", data);
 
         // also display to self..
 
@@ -582,6 +656,8 @@ export class App {
         this.userSettings = new UserSettings();
 
 
+
+
         DOMUtils.get("#appDomain").textContent = this.appDomain.domain;
         DOMUtils.get("#appVersion").textContent = this.appDomain.version;
 
@@ -759,16 +835,10 @@ export class App {
         }).on("inserted.bs.popover", (e) => {
             $(".file-selected").on("change", (evt: any) => {
                 const file = evt.target.files[0];
-                ReadFile.read(file).then((result) => {
-                    this.sendFile({
-                        name: result.tf.name,
-                        size: result.tf.size,
-                        mimeType: result.tf.type
-                    }, result.buffer);
-                    $("#share-file").popover("hide");
-                });
+                this.sendFile(file);
             });
         });
+
 
 
 
@@ -835,10 +905,10 @@ export class App {
             this.muteVideo(e)
         });
 
-        toogleRecord.addEventListener("click",() => {
+        toogleRecord.addEventListener("click", () => {
             toogleRecord.classList.toggle("flash");
             this.recordAllStreams();
-            
+
         });
 
         startScreenShare.addEventListener("click", () => {
@@ -899,7 +969,7 @@ export class App {
             $("#random-slug").popover("hide");
         });
 
-        if (location.hash.length >=6 ) {     
+        if (location.hash.length >= 6) {
             this.startButton.textContent = "JOIN";
         }
 
@@ -952,15 +1022,38 @@ export class App {
             this.rtcClient = new WebRTC(broker, this.rtcConfig);
 
             // set up peer dataChannels 
-            this.dataChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`)
+            this.chatChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`);
+            this.fileChannel = this.rtcClient.CreateDataChannel(`file-${this.appDomain.contextPrefix}-dc`);
 
 
+            // due to bugs on multiplxed DC 
+            this.fileChannel.onMessage = (e: MessageEvent) => {
 
-            this.dataChannel.On("chatMessage", (data: any) => {
+                let target = e.target as RTCDataChannel;
+                if (target.label === `chat-${this.appDomain.contextPrefix}-dc`) {
+                    let msg = JSON.parse(e.data);
+                    this.displayChatMessage(JSON.parse(msg.D));
+                } else if (`file-${this.appDomain.contextPrefix}-dc`) {
+                    if (typeof (e.data) === "string") {
+                        const meta = JSON.parse(e.data);
+                        this.filerecevier = new FileReceiver(meta.name, meta.size, meta.mimeType,
+                            meta.sender, (a, b: Blob) => {
+                                this.displayReceivedFile(a, b);
+                                DOMUtils.get("#show-chat").click();
+
+                            });
+                    } else {
+                        this.filerecevier.appendChunk(e.data);
+                    }
+                }
+            }
+
+
+            this.chatChannel.On("chatMessage", (data: any) => {
                 this.displayChatMessage(data);
             });
 
-            this.dataChannel.OnOpen = (e, peerId) => {
+            this.chatChannel.OnOpen = (e, peerId) => {
             };
 
             broker.On("leaveContext", (data: any) => {
@@ -973,9 +1066,9 @@ export class App {
             });
 
 
-            broker.On("fileShare", (fileinfo: any, arrayBuffer: ArrayBuffer) => {
-                this.displayReceivedFile(fileinfo, arrayBuffer)
-            });
+            // broker.On("fileShare", (fileinfo: any, arrayBuffer: ArrayBuffer) => {
+            //     this.displayReceivedFile(fileinfo, arrayBuffer)
+            // });
 
             broker.On("lockContext", () => {
                 this.lockContext.classList.toggle("fa-lock-open");
@@ -1072,14 +1165,14 @@ export class App {
                     UserSettings.defaultConstraints,
                     (mediaStream: MediaStream) => {
                         DOMUtils.get("#await-streams").classList.toggle("hide");
-                        DOMUtils.get("#has-streams").classList.toggle("hide");                       
+                        DOMUtils.get("#has-streams").classList.toggle("hide");
                         this.localMediaStream = mediaStream;
                         this.rtcClient.AddLocalStream(this.localMediaStream);
                         this.addLocalVideo(this.localMediaStream, true);
 
-                        if(location.hash.length <= 6)                       
-                                $("#random-slug").popover("show");
-                       
+                        if (location.hash.length <= 6)
+                            $("#random-slug").popover("show");
+
                     });
 
 
