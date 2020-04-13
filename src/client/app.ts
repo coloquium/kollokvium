@@ -13,13 +13,18 @@ import { DungeonComponent } from './Components/DungeonComponent';
 import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
+import { AudioNodes } from './Audio/AudioNodes';
+
 
 
 
 export class App {
+   
     appDomain: AppDomain;
     videoGrid: HTMLElement;
-    audioNode: HTMLAudioElement;
+
+
+
     dungeons: Map<string, DungeonComponent>;
     lockContext: HTMLElement;
     singleStreamRecorder: MediaStreamRecorder
@@ -40,7 +45,9 @@ export class App {
     leaveCotext: HTMLElement;
     startButton: HTMLInputElement;
     shareSlug: HTMLElement;
-    gss: GreenScreenComponent;
+    greenScreen: GreenScreenComponent;
+
+    audioNodes: AudioNodes;
     /**
      *
      *
@@ -67,7 +74,7 @@ export class App {
      */
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
-        
+
             cb(mediaStream);
 
         }).catch(err => {
@@ -82,16 +89,14 @@ export class App {
      * @memberof App
      */
     displayReceivedFile(fileinfo: any, arrayBuffer: ArrayBuffer) {
-        
 
-        
         let message = document.createElement("div");
         let sender = document.createElement("mark");
         let time = document.createElement("time");
-        time.textContent =`(${(new Date()).toLocaleTimeString().substr(0,5)})`;
+        time.textContent = `(${(new Date()).toLocaleTimeString().substr(0, 5)})`;
         let messageText = document.createElement("span");
         messageText.innerHTML = DOMUtils.linkify("Hey,the file is ready to download, click to download ");
-        
+
         sender.textContent = "Kollokvium";
         message.prepend(time);
         message.prepend(sender);
@@ -104,7 +109,7 @@ export class App {
         download.setAttribute("href", blobUrl);
         download.textContent = fileinfo.name;
         download.setAttribute("download", fileinfo.name);
-        
+
         messageText.append(download);
 
 
@@ -125,16 +130,16 @@ export class App {
         let message = document.createElement("div");
         let sender = document.createElement("mark");
         let time = document.createElement("time");
-        time.textContent =`(${(new Date()).toLocaleTimeString().substr(0,5)})`;
+        time.textContent = `(${(new Date()).toLocaleTimeString().substr(0, 5)})`;
         let messageText = document.createElement("span");
         messageText.innerHTML = DOMUtils.linkify(msg.text);
 
-        
+
         sender.textContent = msg.from;
         message.prepend(time);
         message.prepend(sender);
         message.append(messageText);
-        
+
         chatMessages.prepend(message);
         if (this.chatWindow.classList.contains("d-none")) {
             this.unreadBadge.classList.remove("d-none");
@@ -215,10 +220,10 @@ export class App {
      * @param {MediaStream} mediaStream
      * @memberof App
      */
-    recordSinglestream(id: string, mediaStream: MediaStream) {
+    recordSingleStream(id: string) {
         if (!this.isRecording) {
-    
-            this.singleStreamRecorder = new MediaStreamRecorder(mediaStream.getTracks());
+            let tracks = this.participants.get(id).getTracks();
+            this.singleStreamRecorder = new MediaStreamRecorder(tracks);
             this.singleStreamRecorder.start(10);
             this.isRecording = true;
         } else {
@@ -228,6 +233,31 @@ export class App {
             this.singleStreamRecorder.flush().then((blobUrl: string) => {
                 this.displayRecording(blobUrl);
             });
+        }
+    }
+
+    recordAllStreams() {
+        if(!this.mediaStreamBlender.isRecording){
+
+               // clear al prior tracks
+                // temp fix due to mediaStreamBlender missing method
+
+                this.mediaStreamBlender.audioSources.clear();
+                this.mediaStreamBlender.videosSources.clear();
+
+                Array.from(this.participants.values()).forEach ( (p:AppParticipant) => {
+                    this.mediaStreamBlender.addTracks(p.id,p.videoTracks.concat(p.audioTracks),false);
+                }) ;
+                this.mediaStreamBlender.addTracks("self",this.localMediaStream.getTracks(),true)
+
+                this.mediaStreamBlender.refreshCanvas();
+                this.mediaStreamBlender.render(25);
+                this.mediaStreamBlender.record();
+        
+
+        }else {
+            this.mediaStreamBlender.render(0);
+            this.mediaStreamBlender.record();    
         }
     }
 
@@ -266,20 +296,20 @@ export class App {
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
 
-        if(isCam) video.classList.add("local-cam");
+        if (isCam) video.classList.add("local-cam");
 
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
-        if(isCam){
-
-        
-        video.addEventListener("click", () => {
-            this.gss.setMediaTrack(mediaStream.getVideoTracks()[0]);            
-            $("#gss").modal("show");
-        });
+        if (isCam) {
+            video.addEventListener("click", () => {
+                this.greenScreen.setMediaTrack(mediaStream.getVideoTracks()[0]);
+                $("#gss").modal("show");
+            });
         }
-        
-        this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
+
+        //this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
+
+
     }
 
     /**
@@ -349,41 +379,28 @@ export class App {
             this.shareContainer.classList.add("hide");
         }
         let videoTools = document.createElement("div");
-
         videoTools.classList.add("video-tools", "p2", "darken");
-
         let item = document.createElement("li");
         item.setAttribute("class", "p" + id);
-
         let f = document.createElement("i");
         f.classList.add("fas", "fa-arrows-alt", "fa-2x", "white")
-
         let r = document.createElement("i");
         r.classList.add("fas", "fa-circle", "fa-2x", "red")
-
         r.addEventListener("click", () => {
             if (!this.isRecording)
                 r.classList.add("flash", "is-recordig");
-
-            this.recordSinglestream(id, mediaStream);
-
+            this.recordSingleStream(id);
         });
-
         videoTools.append(f);
         videoTools.append(r);
-
         item.prepend(videoTools);
 
         let video = document.createElement("video");
-
         video.srcObject = mediaStream;
-
         video.width = 1280;
         video.height = 720;
         video.autoplay = true;
-
         item.append(video);
-
         // listener for fulscreen view of a participants video
         f.addEventListener("click", (e) => {
             let elem = video;
@@ -395,11 +412,7 @@ export class App {
                 document.exitFullscreen();
             }
         });
-
-
         DOMUtils.get("#remote-videos").append(item);
-
-
     }
 
     /**
@@ -427,7 +440,9 @@ export class App {
 
         DOMUtils.get("#dungeon-" + key).addEventListener("click", () => {
             DOMUtils.get(".video-grid").classList.add("blur");
-            this.audioNode.muted = true;
+
+            //this.audioNode.muted = true;
+
             DOMUtils.get(".dungeons-header").classList.add("flash");
 
 
@@ -465,17 +480,27 @@ export class App {
             this.participants.set(id, new AppParticipant(id));
             let p = this.participants.get(id);
             p.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
-                this.mediaStreamBlender.addTracks(id, [mediaStreamTrack], false);
                 this.addRemoteVideo(id, mediaStream);
+            }
+            p.onAudioTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
+                this.audioNodes.add(id, mediaStream);
+            };
+            p.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
+                let p = DOMUtils.get(".p" + id);
+                if (p) p.remove();
+            }
+            p.onAudioTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
+                this.audioNodes.remove(id);
             }
             return p;
         }
     }
 
 
+
+
     disableConfrenceElements() {
         location.hash = "";
-
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
 
         slug.value = "";
@@ -530,8 +555,6 @@ export class App {
 
         DOMUtils.get("#record").classList.remove("d-none");
 
-        $("#random-slug").popover("hide");
-
         DOMUtils.get("#share-file").classList.toggle("hide");
         // Utils.$("#share-screen").classList.toggle("d-none");
         DOMUtils.get("#show-chat").classList.toggle("d-none");
@@ -551,17 +574,27 @@ export class App {
      */
     constructor() {
 
+        this.appDomain = new AppDomain();
+
+        this.factory = this.connectToServer(this.appDomain.serverUrl, {})
+
+
         this.userSettings = new UserSettings();
 
-        // see settings.json
-        this.appDomain = new AppDomain();
 
         DOMUtils.get("#appDomain").textContent = this.appDomain.domain;
         DOMUtils.get("#appVersion").textContent = this.appDomain.version;
 
+        // Remove screenshare on tables / mobile hack..
+        if (typeof window.orientation !== 'undefined') {
+            DOMUtils.get(".only-desktop").classList.add("hide");
+        }
+
+
+        this.audioNodes = new AudioNodes();
 
         this.mediaStreamBlender = new MediaStreamBlender();
-        this.factory = this.connectToServer(this.appDomain.serverUrl, {})
+
 
         let blenderWaterMark = DOMUtils.get("#watermark") as HTMLImageElement;
         this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
@@ -571,7 +604,7 @@ export class App {
             ctx.restore();
         }
         this.mediaStreamBlender.onTrack = () => {
-            this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
+            // this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
         }
         this.mediaStreamBlender.onRecordingStart = () => {
             this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
@@ -579,36 +612,18 @@ export class App {
         this.mediaStreamBlender.onRecordingEnded = (blobUrl: string) => {
             this.displayRecording(blobUrl);
         };
-
         this.mediaStreamBlender.onTrackEnded = () => {
-            this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
             this.mediaStreamBlender.refreshCanvas();
         }
 
-        this.gss = new GreenScreenComponent("gss");
-        this.gss.onApply = (mediaStream) => {
-               
+        this.greenScreen = new GreenScreenComponent("gss");
+        this.greenScreen.onApply = (mediaStream) => {
             let a = this.localMediaStream.getVideoTracks()[0];
-           
             this.localMediaStream.removeTrack(a);
             this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
-          
-    
         };
 
-        DOMUtils.get("#comps").append(this.gss.render());
-
-
-
-        //Handle modal quick start early, if its been dismissed hide straight away
-        //  if (this.userSettings.showQuickStart)
-        // (Utils.$("#quick-start-container") as HTMLElement).classList.remove("hide");
-
-
-        // Remove screenshare on tables / mobile hack..
-        if (typeof window.orientation !== 'undefined') {
-            DOMUtils.get(".only-desktop").classList.add("hide");
-        }
+        DOMUtils.get("#components").append(this.greenScreen.render());
 
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map<string, AppParticipant>();
@@ -621,45 +636,30 @@ export class App {
         this.shareFile = DOMUtils.get("#share-file") as HTMLElement;
         this.videoGrid = DOMUtils.get("#video-grid") as HTMLElement;
         this.chatWindow = DOMUtils.get(".chat") as HTMLElement;
-        this.audioNode = DOMUtils.get("#remtote-audio-node audio") as HTMLAudioElement;
+
         this.lockContext = DOMUtils.get("#context-lock") as HTMLElement;
         this.unreadBadge = DOMUtils.get("#unread-messages") as HTMLElement;
-
-
         this.leaveCotext = DOMUtils.get("#leave-context");
         this.startButton = DOMUtils.get("#joinconference") as HTMLInputElement;
-
         this.shareSlug = DOMUtils.get("#share-slug");
 
 
 
 
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
-
-
         let chatMessage = DOMUtils.get("#chat-message") as HTMLInputElement;
-
-
         let muteAudio = DOMUtils.get("#mute-local-audio") as HTMLElement;
         let muteVideo = DOMUtils.get("#mute-local-video") as HTMLElement;
-
         let muteSpeakers = DOMUtils.get("#mute-speakers") as HTMLElement;
-
         let startScreenShare = DOMUtils.get("#share-screen") as HTMLElement;
-
         let settings = DOMUtils.get("#settings") as HTMLElement;
         let saveSettings = DOMUtils.get("#save-settings") as HTMLElement;
-
-
         let generateSlug = DOMUtils.get("#generate-slug") as HTMLHtmlElement
-
         let nickname = DOMUtils.get("#txt-nick") as HTMLInputElement;
-
         let videoDevice = DOMUtils.get("#sel-video") as HTMLInputElement;
         let audioDevice = DOMUtils.get("#sel-audio") as HTMLInputElement;
         let videoResolution = DOMUtils.get("#sel-video-res") as HTMLInputElement;
         // just set the value to saved key, as user needs to scan..
-
         let closeQuickstartButton = DOMUtils.get("#close-quick-start") as HTMLInputElement;
         let helpButton = DOMUtils.get("#help") as HTMLInputElement;
 
@@ -673,46 +673,30 @@ export class App {
         nickname.value = this.userSettings.nickname;
 
 
+
         this.videoGrid.addEventListener("click", () => {
             this.videoGrid.classList.remove("blur");
 
-
-
-            this.audioNode.muted = !this.audioNode.muted;
-
-
         });
 
-
-        toogleRecord.addEventListener("click", () => {
-            toogleRecord.classList.toggle("flash");
-            this.mediaStreamBlender.render(25);
-            this.mediaStreamBlender.record();
-
-        });
 
         testResolutions.addEventListener("click", () => {
             this.testCameraResolutions();
         })
 
         this.lockContext.addEventListener("click", () => {
-
             this.factory.GetController("broker").Invoke("lockContext", {});
         });
 
 
-
         this.getMediaDevices().then((devices: Array<MediaDeviceInfo>) => {
-
             let inputOnly = devices.filter(((d: MediaDeviceInfo) => {
                 return d.kind.indexOf("input") > 0
             }));
             inputOnly.forEach((d: MediaDeviceInfo, index: number) => {
-
                 let option = document.createElement("option");
                 option.textContent = d.label || `Device #${index} (name unknown)`;
                 option.value = d.deviceId;
-
                 if (d.kind == "videoinput") {
                     if (option.value == this.userSettings.videoDevice) option.selected = true;
                     DOMUtils.get("#sel-video").append(option);
@@ -720,9 +704,7 @@ export class App {
                     if (option.value == this.userSettings.audioDevice) option.selected = true;
                     DOMUtils.get("#sel-audio").append(option);
                 }
-
             });
-
             devices.filter(((d: MediaDeviceInfo) => {
                 return d.kind.indexOf("output") > 0
             })).forEach(((d: MediaDeviceInfo) => {
@@ -731,9 +713,6 @@ export class App {
                 option.setAttribute("value", d.deviceId);
                 DOMUtils.get("#sel-audio-out").append(option);
             }));
-
-
-
             videoDevice.value = this.userSettings.videoDevice;
             audioDevice.value = this.userSettings.audioDevice;
             // get the media devices 
@@ -741,8 +720,6 @@ export class App {
         }).catch(console.error);
 
         saveSettings.addEventListener("click", () => {
-
-
 
             this.userSettings.nickname = nickname.value;
             this.userSettings.audioDevice = audioDevice.value;
@@ -753,18 +730,14 @@ export class App {
 
             let constraints = this.userSettings.createConstraints(this.userSettings.videoResolution);
 
-
             this.localMediaStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
                 track.applyConstraints(constraints["video"] as MediaTrackConstraints).then(() => {
-                }).catch(() => {
-                    console.log("error");
+                }).catch((e) => {
+                    console.error(e);
                 });
             });
 
-
-
         });
-
         settings.addEventListener("click", () => {
             $("#settings-modal").modal("toggle");
         })
@@ -833,7 +806,6 @@ export class App {
                 key: key,
                 context: this.rtcClient.Context
             });
-
         });
 
 
@@ -851,20 +823,9 @@ export class App {
 
 
         muteSpeakers.addEventListener("click", () => {
-
             muteSpeakers.classList.toggle("fa-volume-mute");
             muteSpeakers.classList.toggle("fa-volume-up");
-
-            this.audioNode.muted = !this.audioNode.muted;
-            
-            // temp fix,
-            Array.from(this.mediaStreamBlender.audioSources.values()).forEach ( (s:StreamSource) => {
-                s.source.muted = !s.source.muted;
-            });         
-
-          
-           
-
+            this.audioNodes.toggleMuteAll();
         });
 
         muteAudio.addEventListener("click", (e) => {
@@ -872,6 +833,12 @@ export class App {
         });
         muteVideo.addEventListener("click", (e) => {
             this.muteVideo(e)
+        });
+
+        toogleRecord.addEventListener("click",() => {
+            toogleRecord.classList.toggle("flash");
+            this.recordAllStreams();
+            
         });
 
         startScreenShare.addEventListener("click", () => {
@@ -887,7 +854,6 @@ export class App {
             this.userSettings.showQuickStart = true;
             this.userSettings.saveSetting();
         })
-
 
 
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
@@ -932,12 +898,11 @@ export class App {
             $("#slug").popover('show');
             $("#random-slug").popover("hide");
         });
-        if (location.hash.length == 0) {
-            $("#random-slug").popover("show");
-        } else {
 
+        if (location.hash.length >=6 ) {     
             this.startButton.textContent = "JOIN";
         }
+
         slug.addEventListener("keyup", () => {
             if (slug.value.length >= 6) {
                 this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
@@ -951,8 +916,6 @@ export class App {
         nickname.addEventListener("change", () => {
             this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
         });
-
-
 
         this.leaveCotext.addEventListener("click", () => {
             this.factory.GetController("broker").Invoke("leaveContext", {})
@@ -993,32 +956,19 @@ export class App {
 
 
 
-
-
             this.dataChannel.On("chatMessage", (data: any) => {
                 this.displayChatMessage(data);
-                console.log("got a chatMessage on datachannel ", data);
             });
 
             this.dataChannel.OnOpen = (e, peerId) => {
-                console.log("now we have an open dataChannel")
             };
 
             broker.On("leaveContext", (data: any) => {
-
-
-
                 this.rtcClient.Peers.forEach((connection: WebRTCConnection) => {
                     connection.RTCPeer.close();
                 });
-
                 this.participants.clear();
-
-
                 DOMUtils.get("#remote-videos").innerHTML = "";
-
-
-
                 this.disableConfrenceElements();
             });
 
@@ -1030,8 +980,6 @@ export class App {
             broker.On("lockContext", () => {
                 this.lockContext.classList.toggle("fa-lock-open");
                 this.lockContext.classList.toggle("fa-lock");
-
-
             });
 
             broker.On("isRoomLocked", (data: any) => {
@@ -1105,22 +1053,7 @@ export class App {
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
-
-                participant.addTrack(track, (el: HTMLAudioElement) => {
-
-                    this.mediaStreamBlender.addTracks(`audio-${connection.id}`, [track], false);
-
-
-                });
-
-
-                participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
-                    let p = DOMUtils.get(".p" + id);
-                    if (p) p.remove();
-
-                    // todo:  Remove from blender..
-
-                }
+                participant.addTrack(track);
             }
             this.rtcClient.OnContextCreated = function (ctx: PeerConnection) {
                 // noop
@@ -1138,9 +1071,15 @@ export class App {
                 this.getLocalStream(
                     UserSettings.defaultConstraints,
                     (mediaStream: MediaStream) => {
+                        DOMUtils.get("#await-streams").classList.toggle("hide");
+                        DOMUtils.get("#has-streams").classList.toggle("hide");                       
                         this.localMediaStream = mediaStream;
                         this.rtcClient.AddLocalStream(this.localMediaStream);
                         this.addLocalVideo(this.localMediaStream, true);
+
+                        if(location.hash.length <= 6)                       
+                                $("#random-slug").popover("show");
+                       
                     });
 
 

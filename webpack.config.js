@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const sourceFolder = 'src';
 
 module.exports = {
-  mode:"production", 
+  mode:"development", 
   watch: false,
   entry: {    
     kollkovium : Path.resolve(__dirname, sourceFolder, 'client', 'app.ts'),

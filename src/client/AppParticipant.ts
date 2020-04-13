@@ -1,52 +1,64 @@
-import {ImageCapture} from 'image-capture'; 
+import { ImageCapture } from 'image-capture';
 export class AppParticipant {
     audioTracks: Array<MediaStreamTrack>;
     videoTracks: Array<MediaStreamTrack>;
     onVideoTrackLost: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
     onVideoTrackAdded: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
+    onAudioTrackAdded: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
+    onAudioTrackLost: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
+
     constructor(public id: string) {
         this.videoTracks = new Array<MediaStreamTrack>();
         this.audioTracks = new Array<MediaStreamTrack>();
     }
 
-    captureImage(): Promise<ImageBitmap> {
-        let track = this.videoTracks[0];
-       const img = document.createElement('img');
-        let imageCapture = new ImageCapture(track)
-        return new Promise<ImageBitmap>( (resolve,reject ) => {
-            imageCapture.grabFrame()
-            .then(blob => {
-                resolve(blob);
-            })
-            .catch(reject)
-        });       
+    getTracks():Array<MediaStreamTrack>{
+        let tracks = new Array<MediaStreamTrack>();
+        tracks.push(this.videoTracks[0]);
+        tracks.push(this.audioTracks[0]);        
+        return tracks;
     }
 
+    captureImage(): Promise<ImageBitmap> {
+        let track = this.videoTracks[0];
+        const img = document.createElement('img');
+        let imageCapture = new ImageCapture(track)
+        return new Promise<ImageBitmap>((resolve, reject) => {
+            imageCapture.grabFrame()
+                .then(blob => {
+                    resolve(blob);
+                })
+                .catch(reject)
+        });
+    }
     addVideoTrack(t: MediaStreamTrack) {
         this.videoTracks.push(t);
         let stream = new MediaStream([t]);
         t.onended = () => {
             // todo: would be an delagated event
-            this.onVideoTrackLost(this.id, stream, t);
+            if (this.onVideoTrackLost)
+                this.onVideoTrackLost(this.id, stream, t);
 
         };
         this.onVideoTrackAdded(this.id, stream, t);
     }
-    addAudioTrack(t: MediaStreamTrack): HTMLAudioElement {
+    addAudioTrack(t: MediaStreamTrack): void {
         this.audioTracks.push(t);
-        let audio = new Audio();
-        audio.classList.add(".p" + this.id);
-        audio.autoplay = true;
-        audio.srcObject = new MediaStream([t]);
-        return audio;
+        let stream = new MediaStream([t]);
+        t.onended = () => {
+            // todo: would be an delagated event
+            if (this.onAudioTrackLost)
+                this.onAudioTrackLost(this.id, stream, t);
+
+        };
+        this.onAudioTrackAdded(this.id, stream, t);
+
     }
-    addTrack(t: MediaStreamTrack, cb?: Function) {
+    addTrack(t: MediaStreamTrack) {
         if (t.kind == "video") {
             this.addVideoTrack(t)
         } else {
-            let a = this.addAudioTrack(t);
-            if (cb) cb(a);
+            this.addAudioTrack(t);
         }
-        //t.kind == "video" ? this.addVideoTrack(t) : this.addAudioTrack(t);
     }
 }
