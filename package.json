@@ -46,8 +46,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/bootstrap": "^4.3.2",
-    "@types/jquery": "^3.3.34",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "greenscreenstream": "^1.0.0-beta.4",
@@ -55,9 +53,13 @@
     "mediastreamblender": "^1.0.0-beta.4",
     "thor-io.client-vnext": "^2.0.2-beta.2",
     "thor-io.vnext": "^2.0.3-beta.4",
-    "webrtc-adapter": "^7.5.1"
+    "webrtc-adapter": "^7.5.1",
+    "yargs": "^15.3.1"
   },
   "devDependencies": {
+    "@types/bootstrap": "^4.3.1",
+    "@types/jquery": "^3.3.33",
+    "@types/yargs": "^15.0.4",
     "concurrently": "^5.1.0",
     "copy-webpack-plugin": "^5.1.1",
     "electron": "^8.2.2",
