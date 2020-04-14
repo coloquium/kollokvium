@@ -7,7 +7,7 @@ const sourceFolder = 'src';
 console.log(process.env.WSS_SERVER_URL);
 
 module.exports = {
-  mode:"development", 
+  mode:"production", 
   watch: false,
   entry: {    
     kollkovium : Path.resolve(__dirname, sourceFolder, 'client', 'app.ts'),

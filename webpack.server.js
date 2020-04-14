@@ -8,8 +8,7 @@ module.exports = {
   target: "node",
   watch: false,
   entry: {
-    server: Path.resolve(__dirname, sourceFolder, 'backend', 'server.ts'),
-    localserver: Path.resolve(__dirname, sourceFolder, 'backend', 'localserver.ts')
+    server: Path.resolve(__dirname, sourceFolder, 'backend', 'server.ts')
   },
   module: {
     rules: [
