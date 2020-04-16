@@ -1,5 +1,5 @@
 import adapter from 'webrtc-adapter';
-import { Factory, WebRTC, BinaryMessage, Message, DataChannel, PeerChannel } from 'thor-io.client-vnext'
+import { Factory, WebRTC, BinaryMessage, Message, DataChannel, PeerChannel, Utils } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipant } from './AppParticipant';
 import { PeerConnection } from 'thor-io.vnext';
@@ -14,41 +14,10 @@ import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
-import { TextMessage } from 'thor-io.client-vnext/src/Messages/TextMessage';
-
-
-export class FileReceiver {
-    receiveBuffer: Array<any>;
-    receivedSize: number;
-    constructor(public name: string, public size: number, public mimeType: string, private sender: string, private cb: any) {
-        this.receiveBuffer = new Array<any>();
-        this.receivedSize = 0;
-    }
-    appendChunk(data: any) {
-        this.receiveBuffer.push(data);
-        this.receivedSize += data.byteLength;
-        if (this.receivedSize == this.size) {
-            const received = new Blob(this.receiveBuffer, {
-                type: this.mimeType
-            });
-            this.cb(
-                {
-                    name: this.name,
-                    size: this.size,
-                    mimeType: this.mimeType,
-                    sender: this.sender
-                }, received);
-        }
-    }
-
-}
-
 export class App {
 
     appDomain: AppDomain;
     videoGrid: HTMLElement;
-
-
 
     dungeons: Map<string, DungeonComponent>;
     lockContext: HTMLElement;
@@ -74,7 +43,6 @@ export class App {
 
     audioNodes: AudioNodes;
     fileChannel: DataChannel;
-    filerecevier: FileReceiver;
     /**
      *
      *
@@ -138,9 +106,6 @@ export class App {
 
         messageText.append(download);
 
-
-
-
         DOMUtils.get("#chatmessages").prepend(message);
     }
 
@@ -200,34 +165,20 @@ export class App {
 
 
 
-        this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
-            if(pc.dataChannel.readyState === "open")  // fix to WebRTC.ts clean up bug
-                 pc.dataChannel.send(JSON.stringify(meta));
-        });
-
-        let bytesSent = 0;
-        ReadFile.readChunks(file, (data, bytes) => {
-            bytesSent += bytes;
-
-            this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
-                if(pc.dataChannel.readyState === "open") // fix to WebRTC.ts clean up bug
-                      pc.dataChannel.send(data);
-
-            });
-            sendprogress.setAttribute("aria-valuenow",bytesSent.toString());
-
-
-            if (bytesSent === file.size) {
+        // this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
+        //     if(pc.dataChannel.readyState === "open")  // fix to WebRTC.ts clean up bug
+        //          pc.dataChannel.send(JSON.stringify(meta));
+        // });
+        const shareId = Utils.newGuid();
+        ReadFile.readChunks(file, (data, bytes,isFinal) => {      
+            this.fileChannel.InvokeBinary("fileShare",meta,data,isFinal,shareId);
+            if (isFinal) {
                 setTimeout(() => {
                     $("#share-file").popover("hide");
                 }, 2000);
             }
 
         });
-
-
-
-        //this.factory.GetController("broker").InvokeBinary(bm.Buffer);
     }
     /**
      * Prompt user for a screen , tab, window.
@@ -419,12 +370,12 @@ export class App {
             text: message,
             from: sender
         }
-        this.rtcClient.DataChannels.get(`chat-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
-            if(pc.dataChannel.readyState === "open")
-                pc.dataChannel.send(new TextMessage("chatMessage", data, pc.label).toString());
-        });
+        // this.rtcClient.DataChannels.get(`chat-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
+        //     if(pc.dataChannel.readyState === "open")
+        //         pc.dataChannel.send(new TextMessage("chatMessage", data, pc.label).toString());
+        // });
 
-        //this.chatChannel.Invoke("chatMessage", data);
+        this.chatChannel.Invoke("chatMessage", data);
 
         // also display to self..
 
@@ -618,7 +569,7 @@ export class App {
     }
 
 
-    enableConerenceElements() {
+    enableConferenceElements() {
         this.startButton.classList.add("hide");
 
         this.shareSlug.classList.remove("hide");
@@ -754,8 +705,6 @@ export class App {
 
 
         nickname.value = this.userSettings.nickname;
-
-
 
         this.videoGrid.addEventListener("click", () => {
             this.videoGrid.classList.remove("blur");
@@ -999,12 +948,9 @@ export class App {
         })
 
         this.startButton.addEventListener("click", () => {
-
-            this.enableConerenceElements();
-
+            this.enableConferenceElements();
             this.userSettings.slugHistory.addToHistory(slug.value);
             window.history.pushState({}, window.document.title, `#${slug.value}`);
-
             this.userSettings.saveSetting();
 
 
@@ -1033,28 +979,11 @@ export class App {
             this.fileChannel = this.rtcClient.CreateDataChannel(`file-${this.appDomain.contextPrefix}-dc`);
 
 
-            // due to bugs on multiplxed DC 
-            this.fileChannel.onMessage = (e: MessageEvent) => {
-
-                let target = e.target as RTCDataChannel;
-                if (target.label === `chat-${this.appDomain.contextPrefix}-dc`) {
-                    let msg = JSON.parse(e.data);
-                    this.displayChatMessage(JSON.parse(msg.D));
-                } else if (`file-${this.appDomain.contextPrefix}-dc`) {
-                    if (typeof (e.data) === "string") {
-                        const meta = JSON.parse(e.data);
-                        this.filerecevier = new FileReceiver(meta.name, meta.size, meta.mimeType,
-                            meta.sender, (a, b: Blob) => {
-                                this.displayReceivedFile(a, b);
-                                DOMUtils.get("#show-chat").click();
-
-                            });
-                    } else {
-                        this.filerecevier.appendChunk(e.data);
-                    }
-                }
-            }
-
+            this.fileChannel.On("fileShare",(fileinfo:any,arrayBuffer:ArrayBuffer) => {
+                this.displayReceivedFile(fileinfo, new Blob([arrayBuffer], {
+                    type: fileinfo.mimeType
+                }));
+            });
 
             this.chatChannel.On("chatMessage", (data: any) => {
                 this.displayChatMessage(data);

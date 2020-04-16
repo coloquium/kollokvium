@@ -10,6 +10,7 @@ import {
 import { ChatMessageModel } from '../Models/ChatMessageModel';
 import { DungeonModel } from '../Models/DungeonModel';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
+import { Utils } from 'thor-io.client-vnext';
 
 @ControllerProperties("broker", false, 5 * 1000)
 export class Broker extends ControllerBase {
@@ -44,13 +45,13 @@ export class Broker extends ControllerBase {
 
     }
     onopen() {
-        this.peer = new ExtendedPeerConnection(ControllerBase.newGuid(), this.connection.id);
+        this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
         this.invoke(this.peer, "contextCreated", this.alias);
     }
 
     @CanInvoke(true)
     leaveContext() {     
-        this.peer = new ExtendedPeerConnection(ControllerBase.newGuid(), this.connection.id);
+        this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
         this.invoke(this.peer, "leaveContext", this.alias);
 
     }
