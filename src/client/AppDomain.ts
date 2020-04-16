@@ -39,6 +39,6 @@ export class AppDomain {
         this.domain = appConfig.domain;
         this.contextPrefix = appConfig.contextPrefix;
         this.serverUrl = this.getServerUrl()
-        this.version = appConfig.version;
+        this.version = process.env.KOLLOKVIUM_VERSION || appConfig.version;
     }
 }
