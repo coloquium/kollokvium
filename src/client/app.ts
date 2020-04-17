@@ -17,8 +17,6 @@ import { AudioNodes } from './Audio/AudioNodes';
 import { TextMessage } from 'thor-io.client-vnext/src/Messages/TextMessage';
 
 
-
-
 export class FileReceiver {
     receiveBuffer: Array<any>;
     receivedSize: number;
@@ -44,7 +42,6 @@ export class FileReceiver {
     }
 
 }
-
 
 export class App {
 
@@ -204,7 +201,8 @@ export class App {
 
 
         this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
-            pc.dataChannel.send(JSON.stringify(meta));
+            if(pc.dataChannel.readyState === "open")  // fix to WebRTC.ts clean up bug
+                 pc.dataChannel.send(JSON.stringify(meta));
         });
 
         let bytesSent = 0;
@@ -212,7 +210,8 @@ export class App {
             bytesSent += bytes;
 
             this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
-                pc.dataChannel.send(data);
+                if(pc.dataChannel.readyState === "open") // fix to WebRTC.ts clean up bug
+                      pc.dataChannel.send(data);
 
             });
             sendprogress.setAttribute("aria-valuenow",bytesSent.toString());
@@ -362,6 +361,7 @@ export class App {
      */
     addLocalVideo(mediaStream: MediaStream, isCam: boolean) {
         let video = document.createElement("video") as HTMLVideoElement;
+
         video.autoplay = true;
         video.muted = true;
         video.classList.add("l-" + mediaStream.id);
@@ -373,7 +373,13 @@ export class App {
         container.append(video);
         if (isCam) {
             video.addEventListener("click", () => {
-                this.greenScreen.setMediaTrack(mediaStream.getVideoTracks()[0]);
+
+                
+                const track = mediaStream.getVideoTracks()[0] 
+
+                track.applyConstraints({width:800,height:450});
+
+                this.greenScreen.setMediaTrack(track);
                 $("#gss").modal("show");
             });
         }
@@ -414,7 +420,8 @@ export class App {
             from: sender
         }
         this.rtcClient.DataChannels.get(`chat-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
-            pc.dataChannel.send(new TextMessage("chatMessage", data, pc.label).toString());
+            if(pc.dataChannel.readyState === "open")
+                pc.dataChannel.send(new TextMessage("chatMessage", data, pc.label).toString());
         });
 
         //this.chatChannel.Invoke("chatMessage", data);

@@ -27,40 +27,29 @@ export class GreenScreenComponent extends AppComponent {
     }
 
     start(src: string) {
-        this.gss = new GreenScreenStream(src);
+        this.gss = new GreenScreenStream(true,src);
         this.gss.addVideoTrack(this.mediaTrack);
         let v = document.querySelector("video#preview") as HTMLVideoElement;
         v.srcObject = this.getMediaStream();
 
-
-        this.handle = window.setInterval(() => {
-
-            $("span.detected-color").remove(); // hack
-
-            this.gss.getColorsFromStream().palette.forEach((color: Array<number>, index: number) => {
-
-                let span = document.createElement("span");
-                span.classList.add("badge", "detected-color", "mr-2");
-                span.textContent = (6-index).toString();
-
-                span.style.background = `rgb(${color[0]},${color[1]},${color[2]})`;
-
-                span.addEventListener("click", () => {
-                    this.gss.setChromaKey(color[0] / 255, color[1] / 255, color[2] / 255);
-                });
-
-                document.querySelector("#palette").append(span);
-
-
-            });
-
-        }, 2000);
-
+        // this.handle = window.setInterval(() => {
+        //     //$("span.detected-color").remove(); // hack
+        //     this.gss.getColorsFromStream().palette.forEach((color: Array<number>, index: number) => {
+        //         let span = document.createElement("span");
+        //         span.classList.add("badge", "detected-color", "mr-2");
+        //         span.textContent = (6-index).toString();
+        //         span.style.background = `rgb(${color[0]},${color[1]},${color[2]})`;
+        //         span.addEventListener("click", () => {
+        //             this.gss.setChromaKey(color[0] / 255, color[1] / 255, color[2] / 255);
+        //         });
+        //         document.querySelector("#palette").append(span);
+        //     });
+        // }, 2000);
 
     }
 
     stop() {
-        clearInterval(this.handle);
+        //clearInterval(this.handle);
 
         let v = document.querySelector("video#preview") as HTMLVideoElement;
         v.pause();
@@ -91,7 +80,7 @@ export class GreenScreenComponent extends AppComponent {
     render(el?: HTMLElement) {
         let html = `
         <div class="modal" tabindex="-1" role="dialog" id="${this.id}">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title">Green screen settings <span class="ml-2 badge badge-primary">Beta</span></h5>
@@ -101,22 +90,18 @@ export class GreenScreenComponent extends AppComponent {
             </div>
             <div class="modal-body">
                 <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                <h5>Backgrounds</h5>
                 <ul class="list-unstyled">
                      ${this.renderImages()}
                 </ul>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-9">
                 <h5>Preview</h5>
-                <video id="preview" autoplay muted class="img-thumbnail greenscreen-preview -mt-2"
+                <video width="800" height="450" id="preview" autoplay muted class="img-thumbnail greenscreen-preview -mt-2"
                 poster="https://via.placeholder.com/800x450.png?text=Select an image to start...">
                 </video>
-                <h5>Settings</h5>
-                <p><code>Optimal</code> describes the perfect background. Other colors detects each 5 seconds Click palette colors to test.</p>
-                <div id="palette">
-                <span class="badge greenscreen-optimal mr-2">Optimal</span>
-
-                </div>
+             
                 </div>
             </div>
 
@@ -144,7 +129,9 @@ export class GreenScreenComponent extends AppComponent {
         DOMUtils.get(".btn-primary", dom).addEventListener("click", () => {
             this.onApply(this.capturedStream);
         });
-
+        DOMUtils.get(".btn-secondary", dom).addEventListener("click", () => {
+            this.stop();
+        });
         return dom;
 
 
