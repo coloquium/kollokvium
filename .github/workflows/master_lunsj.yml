@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy master branch
+name: Build and deploy Node.js app to Azure Web App - lunsj
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
 
     - name: 'Install dependencies, and build'
       env:
-        WSS_SERVER_URL: 'wss://wss.kollokvium.se'
+        WSS_SERVER_URL: 'wss://lunsj.kollokvium.net'
       run: |
         npm install
         npm run build --if-present
@@ -30,14 +30,7 @@ jobs:
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v1
       with:
-        app-name: 'kollokvium'
+        app-name: 'lunsj'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_master_kollokvium }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_lunsj }}
         package: './dist'
-
-    - name: 'Deploy to Azure Storage'
-      uses: tibor19/static-website-deploy@v1
-      with:
-        enabled-static-website: 'true'
-        folder: 'dist/client'
-        connection-string: ${{ secrets.AzureStorage_Connection_String_master_kollokvium }}

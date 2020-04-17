@@ -19,15 +19,16 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 ## feature list
 
-1. 1-many participants
-2. Instanet messages (chat)
-3. Share files
-4. Screen sharing (tab, desktop or window )
+1. 1-many participants ( P2P Streams )
+2. Instanet messages/Chat  (P2P DataChannels) 
+3. Share files (P2P DataChannels)
+4. Screen sharing, ya tab, desktop or window. (P2P Streams)
 5. Random room generator or user defined room names
 6. No login and registration required
-7. Multiple stream recording ( record the meeting )
+7. Multiple stream recording ( record the meeting  or single participant ) , Recording done locally.
 8. Dungeons ( comming soon)
 9. Lock / unlock rooms
+10. Voting ( Ask a question )
 
 ## install 
 
@@ -39,7 +40,7 @@ To run the application locally run npm start and then browse to localhost:1337
 
 ### Azure deploy
 
-Comming soon!
+To deploy to Azure you need an Azure account, and you need to create an Azure Wep Application
 
 ### Heroku apps
 
