@@ -40,7 +40,7 @@ To run the application locally run npm start and then browse to localhost:1337
 
 ### Azure deploy
 
-To deploy to Azure you need an Azure account, and you need to create an Azure Wep Application
+To deploy to Azure you need an Azure account, and you need to create an Azure Wep Application, and a storage account to host the Static Website
 
 ### Heroku apps
 
