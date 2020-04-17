@@ -13,20 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
 
     - name: Set up Node.js version
       uses: actions/setup-node@v1
       with:
         node-version: '12.x'
 
-    - name: npm install, build, and test
+    - name: 'Install dependencies, and build'
       env:
         WSS_SERVER_URL: 'wss://lunsj.kollokvium.net'
       run: |
         npm install
         npm run build --if-present
-        npm run test --if-present
 
     - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v1
