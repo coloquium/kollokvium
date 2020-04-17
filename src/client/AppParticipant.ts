@@ -34,6 +34,7 @@ export class AppParticipant {
     addVideoTrack(t: MediaStreamTrack) {
         this.videoTracks.push(t);
         let stream = new MediaStream([t]);
+
         t.onended = () => {
             // todo: would be an delagated event
             if (this.onVideoTrackLost)

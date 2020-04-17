@@ -47,6 +47,11 @@ export class Broker extends ControllerBase {
     onopen() {
         this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
         this.invoke(this.peer, "contextCreated", this.alias);
+
+        setInterval(() => {
+            this.invoke({ts:Date.now()},"ping");
+        },15*1000);;
+
     }
 
     @CanInvoke(true)

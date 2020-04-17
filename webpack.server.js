@@ -1,19 +1,24 @@
-var Path = require('path');
+const Path = require('path');
+const Webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 
-const sourceFolder = 'src';
+const sourceFolder = Path.resolve(__dirname, 'src');
+const outFolder = Path.resolve(__dirname, 'dist');
+const assetFolders = ['cert'];
+
+const package = require('./package.json');
 
 module.exports = {
   mode: "production",
   target: "node",
   watch: false,
   entry: {
-    server: Path.resolve(__dirname, sourceFolder, 'backend', 'server.ts')
+    server: Path.join(sourceFolder, 'backend', 'server.ts')
   },
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.ts$/,
         use: {
           loader: 'ts-loader',
           options: {
@@ -24,15 +29,16 @@ module.exports = {
     ],
   },
   plugins: [
-    new CopyPlugin([
-      { from : Path.join(sourceFolder, 'cert'), to: 'cert' }
-    ])
+    new CopyPlugin(assetFolders.map(folder => new Object({ from : Path.join(sourceFolder, folder), to: folder}))),
+    new Webpack.DefinePlugin({
+      'process.env.KOLLOKVIUM_VERSION': JSON.stringify(process.env.KOLLOKVIUM_VERSION || package.version)
+    })
   ],
   resolve: {
     extensions: ['.ts', '.js'],
   },
   output: {
-    path: Path.resolve(__dirname, 'dist'),
+    path: outFolder,
     filename: '[name].js'
   },
 }

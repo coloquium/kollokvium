@@ -17,32 +17,34 @@ import { AudioNodes } from './Audio/AudioNodes';
 export class App {
 
     appDomain: AppDomain;
-    videoGrid: HTMLElement;
+    userSettings: UserSettings;
+    greenScreen: GreenScreenComponent;
+    mediaStreamBlender: MediaStreamBlender;
+    audioNodes: AudioNodes;
+    fileChannel: DataChannel;
+    arbitraryChannel: DataChannel;
 
     dungeons: Map<string, DungeonComponent>;
-    lockContext: HTMLElement;
     singleStreamRecorder: MediaStreamRecorder
-    shareFile: HTMLElement;
     factory: Factory;
     rtcClient: WebRTC;
     localMediaStream: MediaStream;
     slug: string;
     participants: Map<string, AppParticipant>;
-    shareContainer: any;
-    fullScreenVideo: HTMLVideoElement;
+    isRecording: boolean;
+
     numOfChatMessagesUnread: number;
-    userSettings: UserSettings;
-    mediaStreamBlender: MediaStreamBlender;
-    chatChannel: DataChannel;
+
+    shareContainer: HTMLElement;
+    videoGrid: HTMLElement;
+    fullScreenVideo: HTMLVideoElement;
+    shareFile: HTMLElement;
     chatWindow: HTMLElement;
     unreadBadge: HTMLElement;
     leaveCotext: HTMLElement;
     startButton: HTMLInputElement;
     shareSlug: HTMLElement;
-    greenScreen: GreenScreenComponent;
-
-    audioNodes: AudioNodes;
-    fileChannel: DataChannel;
+    lockContext: HTMLElement;
     /**
      *
      *
@@ -84,14 +86,12 @@ export class App {
      * @memberof App
      */
     displayReceivedFile(fileinfo: any, blob: Blob) {
-
         let message = document.createElement("div");
         let sender = document.createElement("mark");
         let time = document.createElement("time");
         time.textContent = `(${(new Date()).toLocaleTimeString().substr(0, 5)})`;
         let messageText = document.createElement("span");
         messageText.innerHTML = DOMUtils.linkify("Hey,the file is ready to download, click to download ");
-
         sender.textContent = fileinfo.sender;
         message.prepend(time);
         message.prepend(sender);
@@ -145,39 +145,24 @@ export class App {
      * @memberof App
      */
     sendFile(file: any) {
-
         if (!file) return;
-
-
         let sendprogress = document.querySelector(".progress-bar");
-
-        sendprogress.setAttribute("aria-valuenow","0")
-
-        sendprogress.setAttribute("aria-valuemax",file.siz)
-
-
+        sendprogress.setAttribute("aria-valuenow", "0")
+        sendprogress.setAttribute("aria-valuemax", file.siz)
         let meta = {
             name: file.name,
             size: file.size,
             mimeType: file.type,
             sender: this.userSettings.nickname
         };
-
-
-
-        // this.rtcClient.DataChannels.get(`file-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
-        //     if(pc.dataChannel.readyState === "open")  // fix to WebRTC.ts clean up bug
-        //          pc.dataChannel.send(JSON.stringify(meta));
-        // });
         const shareId = Utils.newGuid();
-        ReadFile.readChunks(file, (data, bytes,isFinal) => {      
-            this.fileChannel.InvokeBinary("fileShare",meta,data,isFinal,shareId);
+        ReadFile.readChunks(file, (data, bytes, isFinal) => {
+            this.fileChannel.InvokeBinary("fileShare", meta, data, isFinal, shareId);
             if (isFinal) {
                 setTimeout(() => {
                     $("#share-file").popover("hide");
                 }, 2000);
             }
-
         });
     }
     /**
@@ -195,9 +180,9 @@ export class App {
         navigator.mediaDevices["getDisplayMedia"](gdmOptions).then((stream: MediaStream) => {
             stream.getVideoTracks().forEach((t: MediaStreamTrack) => {
                 this.rtcClient.LocalStreams[0].addTrack(t);
+                this.rtcClient.addTrackToPeers(t);
             });
             this.addLocalVideo(stream, false);
-            DOMUtils.get("#share-screen").classList.add("hide")
         }).catch(err => console.error)
     }
 
@@ -216,7 +201,6 @@ export class App {
             track.enabled = !track.enabled;
         });
     }
-
     /**
      * Mute local video ( self )
      *
@@ -233,7 +217,6 @@ export class App {
 
         });
     }
-    isRecording: boolean;
     /**
      *
      *
@@ -318,18 +301,19 @@ export class App {
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
 
+        mediaStream.getVideoTracks()[0].onended = () => {
+            this.arbitraryChannel.Invoke("streamChange", { id: mediaStream.getVideoTracks()[0].id });
+            DOMUtils.get(".l-" + mediaStream.id).remove();
+        }
+
         if (isCam) video.classList.add("local-cam");
 
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
         if (isCam) {
             video.addEventListener("click", () => {
-
-                
-                const track = mediaStream.getVideoTracks()[0] 
-
-                track.applyConstraints({width:800,height:450});
-
+                const track = mediaStream.getVideoTracks()[0]
+                track.applyConstraints({ width: 800, height: 450 });
                 this.greenScreen.setMediaTrack(track);
                 $("#gss").modal("show");
             });
@@ -375,7 +359,7 @@ export class App {
         //         pc.dataChannel.send(new TextMessage("chatMessage", data, pc.label).toString());
         // });
 
-        this.chatChannel.Invoke("chatMessage", data);
+        this.arbitraryChannel.Invoke("chatMessage", data);
 
         // also display to self..
 
@@ -405,7 +389,7 @@ export class App {
      * @param {MediaStream} mediaStream
      * @memberof App
      */
-    addRemoteVideo(id: string, mediaStream: MediaStream) {
+    addRemoteVideo(id: string, mediaStream: MediaStream, trackId: string) {
 
         if (!this.shareContainer.classList.contains("hide")) {
             this.shareContainer.classList.add("hide");
@@ -413,7 +397,11 @@ export class App {
         let videoTools = document.createElement("div");
         videoTools.classList.add("video-tools", "p2", "darken");
         let item = document.createElement("li");
-        item.setAttribute("class", "p" + id);
+
+        item.classList.add("p" + id);
+
+        item.classList.add("s" + trackId);
+
         let f = document.createElement("i");
         f.classList.add("fas", "fa-arrows-alt", "fa-2x", "white")
         let r = document.createElement("i");
@@ -432,6 +420,9 @@ export class App {
         video.width = 1280;
         video.height = 720;
         video.autoplay = true;
+
+
+
         item.append(video);
         // listener for fulscreen view of a participants video
         f.addEventListener("click", (e) => {
@@ -512,7 +503,7 @@ export class App {
             this.participants.set(id, new AppParticipant(id));
             let p = this.participants.get(id);
             p.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
-                this.addRemoteVideo(id, mediaStream);
+                this.addRemoteVideo(id, mediaStream, mediaStreamTrack.id);
             }
             p.onAudioTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
                 this.audioNodes.add(id, mediaStream);
@@ -975,21 +966,27 @@ export class App {
             this.rtcClient = new WebRTC(broker, this.rtcConfig);
 
             // set up peer dataChannels 
-            this.chatChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`);
+            this.arbitraryChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`);
             this.fileChannel = this.rtcClient.CreateDataChannel(`file-${this.appDomain.contextPrefix}-dc`);
 
 
-            this.fileChannel.On("fileShare",(fileinfo:any,arrayBuffer:ArrayBuffer) => {
+            this.fileChannel.On("fileShare", (fileinfo: any, arrayBuffer: ArrayBuffer) => {
                 this.displayReceivedFile(fileinfo, new Blob([arrayBuffer], {
                     type: fileinfo.mimeType
                 }));
             });
 
-            this.chatChannel.On("chatMessage", (data: any) => {
+            this.arbitraryChannel.On("streamChange", (data: any) => {
+                let el = DOMUtils.get(".s" + data.id);
+                if (el) el.remove();
+            });
+
+
+            this.arbitraryChannel.On("chatMessage", (data: any) => {
                 this.displayChatMessage(data);
             });
 
-            this.chatChannel.OnOpen = (e, peerId) => {
+            this.arbitraryChannel.OnOpen = (e, peerId) => {
             };
 
             broker.On("leaveContext", (data: any) => {

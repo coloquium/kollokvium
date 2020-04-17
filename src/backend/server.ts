@@ -22,16 +22,18 @@ let RTC = new ThorIO(
 );
 
 let rootPath = path.resolve('.');
-let clientPath = path.join(rootPath, "client");
-
 if (fs.existsSync(path.join(rootPath, 'dist'))) {
     rootPath = path.join(rootPath, 'dist');
 }
 
+let clientPath = path.join(rootPath, "client");
+
 if(fs.existsSync(clientPath)){
+    console.log(`Serving client files from ${clientPath}.`);
     app.use("/", express.static(clientPath));
 }
 else {
+    console.log(`Serving no client files.`);
     app.get("/", (_, res) => res.send('Kollokvium WebSocket Server is running'));
 }
 
@@ -65,4 +67,4 @@ else {
     app.listen(port);
 }
 
-console.log("thor-io is serving on", port.toString());
+console.log(`Kollokvium version ${process.env.KOLLOKVIUM_VERSION} is listening on ${port}`);
