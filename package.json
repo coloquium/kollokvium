@@ -77,11 +77,8 @@
     "@types/bootstrap": "^4.3.1",
     "@types/jquery": "^3.3.35",
     "@types/yargs": "^15.0.4",
-<<<<<<< HEAD
-=======
     "electron": "^8.2.0",
     "electron-packager": "^14.2.1",
->>>>>>> 31a4b0e00bffd860aa3eb5c28802ac51eb98947c
     "concurrently": "^5.1.0",
     "copy-webpack-plugin": "^5.1.1",
     "html-webpack-plugin": "^4.0.4",
