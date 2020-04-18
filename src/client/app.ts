@@ -47,6 +47,7 @@ export class App {
     shareSlug: HTMLElement;
     lockContext: HTMLElement;
     generateSubtitles: HTMLElement;
+    transcriber: Subtitles;
     /**
      *
      *
@@ -568,6 +569,7 @@ export class App {
 
     enableConferenceElements() {
         this.startButton.classList.add("hide");
+        this.generateSubtitles.classList.toggle("hide");
 
         this.shareSlug.classList.remove("hide");
 
@@ -848,35 +850,25 @@ export class App {
 
 
         this.generateSubtitles.addEventListener("click", () => {
-
             this.generateSubtitles.classList.toggle("flash");
-
-
-            const transcriber = new Subtitles(this.rtcClient.LocalPeerId,
-                new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks())
-            );
-
-
-
-            transcriber.onFinal = (peerId, result, lang) => {
-                this.arbitraryChannel.Invoke("transcript", {
-                    peerId: peerId,
-                    text: result,
-                    lang: lang
-                });
+            if (!this.transcriber) {
+                this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
+                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks())
+                );
+                this.transcriber.onFinal = (peerId, result, lang) => {
+                    this.arbitraryChannel.Invoke("transcript", {
+                        peerId: peerId,
+                        text: result,
+                        lang: lang
+                    });
+                }
+                this.transcriber.start();
+                this.transcriber.onIdle = () => {
+                    this.transcriber.start();
+                }
+            } else {
+                this.transcriber = null;
             }
-
-
-            transcriber.start();
-            transcriber.onIdle = () => {
-                console.log("was idle");
-                transcriber.start();
-            }
-
-
-
-
-
         });
 
 
@@ -1028,7 +1020,7 @@ export class App {
 
 
                 DOMUtils.get(`.subs${data.peerId}`).textContent = text;
-                
+
             });
 
             this.arbitraryChannel.On("streamChange", (data: any) => {
