@@ -14,6 +14,7 @@ import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
+import { Subtitles } from './Audio/Subtitles';
 export class App {
 
     appDomain: AppDomain;
@@ -45,6 +46,7 @@ export class App {
     startButton: HTMLInputElement;
     shareSlug: HTMLElement;
     lockContext: HTMLElement;
+    generateSubtitles: HTMLElement;
     /**
      *
      *
@@ -421,7 +423,11 @@ export class App {
         video.height = 720;
         video.autoplay = true;
 
+        let subs = document.createElement("div");
+        subs.classList.add("subtitles");
+        subs.classList.add("subs" + id);
 
+        item.append(subs);
 
         item.append(video);
         // listener for fulscreen view of a participants video
@@ -656,6 +662,8 @@ export class App {
 
         this.slug = location.hash.replace("#", "");
 
+        this.generateSubtitles = DOMUtils.get("#subtitles") as HTMLElement;
+
         this.fullScreenVideo = DOMUtils.get(".full") as HTMLVideoElement;
         this.shareContainer = DOMUtils.get("#share-container");
         this.shareFile = DOMUtils.get("#share-file") as HTMLElement;
@@ -839,6 +847,39 @@ export class App {
         });
 
 
+        this.generateSubtitles.addEventListener("click", () => {
+
+            this.generateSubtitles.classList.toggle("flash");
+
+
+            const transcriber = new Subtitles(this.rtcClient.LocalPeerId,
+                new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks())
+            );
+
+
+
+            transcriber.onFinal = (peerId, result, lang) => {
+                this.arbitraryChannel.Invoke("transcript", {
+                    peerId: peerId,
+                    text: result,
+                    lang: lang
+                });
+            }
+
+
+            transcriber.start();
+            transcriber.onIdle = () => {
+                console.log("was idle");
+                transcriber.start();
+            }
+
+
+
+
+
+        });
+
+
         muteSpeakers.addEventListener("click", () => {
             muteSpeakers.classList.toggle("fa-volume-mute");
             muteSpeakers.classList.toggle("fa-volume-up");
@@ -974,6 +1015,20 @@ export class App {
                 this.displayReceivedFile(fileinfo, new Blob([arrayBuffer], {
                     type: fileinfo.mimeType
                 }));
+            });
+
+
+            this.arbitraryChannel.On("transcript", (data: any) => {
+
+
+                let text = data.text;
+                let lang = data.lang; // source language 
+
+                // make call to translate api
+
+
+                DOMUtils.get(`.subs${data.peerId}`).textContent = text;
+                
             });
 
             this.arbitraryChannel.On("streamChange", (data: any) => {

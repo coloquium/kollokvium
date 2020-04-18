@@ -406,3 +406,21 @@ i.fa-lock {
     background-color:#009933;
     color:#fff;
 }
+
+.subtitles{
+    background: #000;
+    bottom: 100px;
+    /* width: 300px; */
+    /* height: 40; */
+    position: absolute;
+    z-index: 40000;
+    color: #fff;
+    opacity: 0.8;
+    padding: 20px;
+    left: 20px;
+    font-weight: 400;
+}
+
+.subtitles:first-letter {
+    text-transform: capitalize
+  }
