@@ -16,7 +16,7 @@ export class UserSettings {
     audioDevice: string;
     videoResolution: string;
     showQuickStart: boolean;
-
+    language: string;
     nickname: string;
     saveSetting() {
         const data = {
@@ -26,6 +26,7 @@ export class UserSettings {
             videoResolution: this.videoResolution,
             nickname: this.nickname,
             showQuickStart: this.showQuickStart,
+            language: this.language
         };
         localStorage.setItem("settings", JSON.stringify(data));
     }
@@ -60,7 +61,6 @@ export class UserSettings {
             constraints.video["deviceId"] = this.videoDevice
         }
 
-        console.log(constraints);
 
         return constraints;
     }
@@ -75,6 +75,7 @@ export class UserSettings {
             this.nickname = settings.nickname;
             this.slugHistory.history = settings.slugHistory;
             this.showQuickStart = settings.showQuickStart;
+            this.language = settings.language || "";
         }
         else {
             this.slugHistory.history = new Array<string>();
@@ -82,6 +83,7 @@ export class UserSettings {
             this.audioDevice = ""; this.videoDevice = "";
             this.videoResolution = "";
             this.showQuickStart = true;
+            this.language = ""
         }
     }
 }

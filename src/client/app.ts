@@ -33,6 +33,8 @@ export class App {
     slug: string;
     participants: Map<string, AppParticipant>;
     isRecording: boolean;
+    transcriber: Subtitles;
+    preferedLanguage: string;
 
     numOfChatMessagesUnread: number;
 
@@ -47,7 +49,8 @@ export class App {
     shareSlug: HTMLElement;
     lockContext: HTMLElement;
     generateSubtitles: HTMLElement;
-    transcriber: Subtitles;
+   
+    languagePicker: HTMLInputElement;
     /**
      *
      *
@@ -424,12 +427,11 @@ export class App {
         video.height = 720;
         video.autoplay = true;
 
-        let subs = document.createElement("div");
-        subs.classList.add("subtitles");
-        subs.classList.add("subs" + id);
-
-        item.append(subs);
-
+        let subtitles = document.createElement("div");
+        subtitles.classList.add("subtitles");
+        subtitles.classList.add("subs" + id);
+        
+        item.append(subtitles);
         item.append(video);
         // listener for fulscreen view of a participants video
         f.addEventListener("click", (e) => {
@@ -527,7 +529,16 @@ export class App {
     }
 
 
-
+    addSubtitles(parent: HTMLElement, text: string, lang) {
+        if (parent) {
+            let p = document.createElement("p");
+            p.onanimationend = () => {
+                p.remove();
+            };
+            p.textContent = text;
+            parent.append(p);
+        }
+    }
 
     disableConfrenceElements() {
         location.hash = "";
@@ -612,6 +623,10 @@ export class App {
 
         this.userSettings = new UserSettings();
 
+        // add language options to UserSettings 
+
+        DOMUtils.get("#langaues").append(Subtitles.getlanguagePicker());
+
 
 
 
@@ -637,7 +652,7 @@ export class App {
             ctx.restore();
         }
         this.mediaStreamBlender.onTrack = () => {
-            // this.audioNode.srcObject = this.mediaStreamBlender.getRemoteAudioStream();
+            // this.audioNode.srcObject = this.mediaStreamBlend"transer.getRemoteAudioStream();
         }
         this.mediaStreamBlender.onRecordingStart = () => {
             this.sendMessage(this.userSettings.nickname, "I'm now recording the session.");
@@ -657,6 +672,7 @@ export class App {
         };
 
         DOMUtils.get("#components").append(this.greenScreen.render());
+   
 
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map<string, AppParticipant>();
@@ -678,6 +694,7 @@ export class App {
         this.startButton = DOMUtils.get("#joinconference") as HTMLInputElement;
         this.shareSlug = DOMUtils.get("#share-slug");
 
+        this.languagePicker = DOMUtils.get(".selected-language") as HTMLInputElement;
 
 
 
@@ -704,9 +721,10 @@ export class App {
 
         let testResolutions = DOMUtils.get("#test-resolutions") as HTMLButtonElement;
 
-
         nickname.value = this.userSettings.nickname;
+        this.languagePicker.value = this.userSettings.language;
 
+        
         this.videoGrid.addEventListener("click", () => {
             this.videoGrid.classList.remove("blur");
 
@@ -769,6 +787,8 @@ export class App {
                     console.error(e);
                 });
             });
+
+            $("#settings-modal").modal("toggle");
 
         });
         settings.addEventListener("click", () => {
@@ -853,7 +873,7 @@ export class App {
             this.generateSubtitles.classList.toggle("flash");
             if (!this.transcriber) {
                 this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
-                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks())
+                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()),this.preferedLanguage
                 );
                 this.transcriber.onFinal = (peerId, result, lang) => {
                     this.arbitraryChannel.Invoke("transcript", {
@@ -943,6 +963,19 @@ export class App {
             this.numOfChatMessagesUnread = 0;
             this.unreadBadge.textContent = "0";
         });
+        
+       
+        this.languagePicker.addEventListener("change",() => {
+
+            this.userSettings.language = this.languagePicker.value;
+
+            this.userSettings.saveSetting();
+
+            this.preferedLanguage = this.userSettings.language;
+
+           
+        });
+
 
         slug.addEventListener("click", () => {
             $("#slug").popover('show');
@@ -1010,16 +1043,16 @@ export class App {
             });
 
 
+
+
+
+
             this.arbitraryChannel.On("transcript", (data: any) => {
 
 
-                let text = data.text;
-                let lang = data.lang; // source language 
-
-                // make call to translate api
+                this.addSubtitles(DOMUtils.get(`.subs${data.peerId}`), data.text, data.lang);
 
 
-                DOMUtils.get(`.subs${data.peerId}`).textContent = text;
 
             });
 

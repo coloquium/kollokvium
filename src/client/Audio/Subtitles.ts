@@ -140,11 +140,21 @@ export class Subtitles {
       //  }
     }
 
-    getlanguagePicker(): HTMLElement {
+    static getlanguagePicker(): HTMLElement {
 
 
         let select_language = document.createElement("select");
-        select_language.classList.add("select-languge");
+        select_language.classList.add("selected-language","form-control");
+
+        // Not set option
+
+        let notset = document.createElement("option");
+        notset.value = "";
+        notset.textContent = "Not set (use browser language)";
+    
+        select_language.append(notset);
+
+
 
         Subtitles.languages.forEach((entry: any) => {
             let country = entry[0];
@@ -157,8 +167,6 @@ export class Subtitles {
                 let option = document.createElement("option");
                 option.value = dialects[0];
                 option.textContent = `${country} (${dialects[0]})`;
-
-
                 select_language.append(option);
 
 

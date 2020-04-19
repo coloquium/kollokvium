@@ -407,11 +407,10 @@ i.fa-lock {
     color:#fff;
 }
 
-.subtitles{
-    background: #000;
+.subtitles {
+    position: absolute;
+
     bottom: 100px;
-    /* width: 300px; */
-    /* height: 40; */
     position: absolute;
     z-index: 40000;
     color: #fff;
@@ -419,8 +418,26 @@ i.fa-lock {
     padding: 20px;
     left: 20px;
     font-weight: 400;
+
 }
 
-.subtitles:first-letter {
-    text-transform: capitalize
-  }
+.subtitles p {
+    background: black;
+    opacity: 0.9;
+    padding: 5px;
+    color: #fff;
+    animation: fadeOut 2s forwards;
+    animation-delay: 10s;
+    
+}
+.subtitles p:first-letter{
+    text-transform:uppercase;
+}
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
