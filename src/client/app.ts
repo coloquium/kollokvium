@@ -49,7 +49,7 @@ export class App {
     shareSlug: HTMLElement;
     lockContext: HTMLElement;
     generateSubtitles: HTMLElement;
-   
+
     languagePicker: HTMLInputElement;
     /**
      *
@@ -316,7 +316,7 @@ export class App {
 
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
-        
+
 
 
     }
@@ -421,7 +421,7 @@ export class App {
         let subtitles = document.createElement("div");
         subtitles.classList.add("subtitles");
         subtitles.classList.add("subs" + id);
-        
+
         item.append(subtitles);
         item.append(video);
         // listener for fulscreen view of a participants video
@@ -659,11 +659,11 @@ export class App {
             this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
             DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
             DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
-            
+
         };
 
         DOMUtils.get("#components").append(this.greenScreen.render());
-   
+
 
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map<string, AppParticipant>();
@@ -708,22 +708,22 @@ export class App {
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
-        DOMUtils.get("#apply-virtualbg").addEventListener("click",() => {
+        DOMUtils.get("#apply-virtualbg").addEventListener("click", () => {
             $("#settings-modal").modal("toggle");
             const track = this.localMediaStream.getVideoTracks()[0]
             track.applyConstraints({ width: 800, height: 450 });
             this.greenScreen.setMediaTrack(track);
-            $("#gss").modal("toggle");           
+            $("#gss").modal("toggle");
         });
 
-        DOMUtils.get("#remove-virtualbg").addEventListener("click",() => {
-            this.getLocalStream(UserSettings.defaultConstraints,(mediaStream:MediaStream) => {
-                    const track = this.localMediaStream.getVideoTracks()[0];
-                    this.localMediaStream.removeTrack(track);
-                    this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
-                    DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
-                    DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
-                    this.greenScreen.stop();
+        DOMUtils.get("#remove-virtualbg").addEventListener("click", () => {
+            this.getLocalStream(UserSettings.defaultConstraints, (mediaStream: MediaStream) => {
+                const track = this.localMediaStream.getVideoTracks()[0];
+                this.localMediaStream.removeTrack(track);
+                this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
+                DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
+                DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
+                this.greenScreen.stop();
             });
         });
 
@@ -736,7 +736,7 @@ export class App {
         nickname.value = this.userSettings.nickname;
         this.languagePicker.value = this.userSettings.language;
 
-        
+
         this.videoGrid.addEventListener("click", () => {
             this.videoGrid.classList.remove("blur");
         });
@@ -878,10 +878,10 @@ export class App {
 
         this.generateSubtitles.addEventListener("click", () => {
             this.generateSubtitles.classList.toggle("flash");
-            
+
             if (!this.transcriber) {
                 this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
-                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()),this.preferedLanguage
+                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.preferedLanguage
                 );
                 this.transcriber.onFinal = (peerId, result, lang) => {
                     this.arbitraryChannel.Invoke("transcript", {
@@ -891,10 +891,12 @@ export class App {
                     });
                 }
                 this.transcriber.start();
-                this.transcriber.onIdle = () => {
-                    this.transcriber.start();
+                this.transcriber.onIdle = () => {              
                 }
             } else {
+                if (this.transcriber)
+
+                    this.transcriber.stop();
                 this.transcriber = null;
             }
         });
@@ -971,9 +973,9 @@ export class App {
             this.numOfChatMessagesUnread = 0;
             this.unreadBadge.textContent = "0";
         });
-        
-       
-        this.languagePicker.addEventListener("change",() => {
+
+
+        this.languagePicker.addEventListener("change", () => {
 
             this.userSettings.language = this.languagePicker.value;
 
@@ -981,7 +983,7 @@ export class App {
 
             this.preferedLanguage = this.userSettings.language;
 
-           
+
         });
 
 

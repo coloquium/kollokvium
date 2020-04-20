@@ -2,20 +2,16 @@ declare var webkitSpeechRecognition: any;
 
 export class Subtitles {
     recognition: SpeechRecognition;
-    isRunning:true;
+    isRunning: boolean;
 
-    onFinal: (peerId: string, result: string,lang:string) => void;
-    onInterim: (peerId: string, result: string,lang:string) => void;
+    onFinal: (peerId: string, result: string, lang: string) => void;
+    onInterim: (peerId: string, result: string, lang: string) => void;
 
     onReady: (event: any) => void;
     onIdle: (event: any) => void;
     onError: (event: any) => void;
     start: () => void;
     stop: () => void;
-
-
-    
-
 
     static languages =
         [
@@ -82,19 +78,23 @@ export class Subtitles {
             ['日本語', ['ja-JP']],
             ['Lingua latīna', ['la']]];
 
-    constructor(public peeId: string,mediaStream:MediaStream, public lang?: string) {
+    constructor(public peeId: string, mediaStream: MediaStream, public lang?: string) {
 
         this.recognition = new webkitSpeechRecognition();
         this.recognition.continuous = true;
         this.recognition.interimResults = true;
 
-        if(this.lang){
+        if (this.lang) {
             this.recognition.lang = lang;
         }
-       
+        this.recognition.onspeechend = (event: any) => {
+            this.isRunning = false;
+            this.onIdle(event);
+        };
+        this.recognition.onspeechstart = () => {
+        };
+
         this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-
-
             let interim = '';
             let final = "";
             for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -105,14 +105,15 @@ export class Subtitles {
                 }
             }
             if (final.length > 0 && this.onFinal) {
-                this.onFinal(this.peeId, final,this.lang || navigator.language)
+                this.onFinal(this.peeId, final, this.lang || navigator.language)
             }
             if (interim.length > 0 && this.onInterim) {
-                this.onInterim(this.peeId, interim,this.lang || navigator.language)
+                this.onInterim(this.peeId, interim, this.lang || navigator.language)
             }
         };
 
         this.recognition.onerror = (event: any) => {
+
             if (this.onError) this.onError(event);
         }
 
@@ -120,44 +121,41 @@ export class Subtitles {
         }
 
         this.recognition.onaudioend = e => {
-            if(this.isRunning)
-            this.stop();
-                if (this.onIdle) this.onIdle(event);
+
+        }
+
+        this.recognition.onstart = () => {
+            this.isRunning = true;
         }
 
         this.stop = () => {
-            if(this.isRunning)
-             this.recognition.stop();
+            if (this.isRunning) {
+                this.isRunning = false;
+                this.recognition.stop();
+            }
         };
-
-
-
         this.start = () => {
-          if(!this.isRunning)
-            this.recognition.start();
+            if (!this.isRunning) {
+                this.recognition.start();
+            }
+
         };
+        if (this.onReady) this.onReady(this);
 
-
-
-
-    //
-            if (this.onReady) this.onReady(this);
-
-      //  }
     }
 
     static getlanguagePicker(): HTMLElement {
 
 
         let select_language = document.createElement("select");
-        select_language.classList.add("selected-language","form-control");
+        select_language.classList.add("selected-language", "form-control");
 
         // Not set option
 
         let notset = document.createElement("option");
         notset.value = "";
         notset.textContent = "Not set (use browser language)";
-    
+
         select_language.append(notset);
 
 
