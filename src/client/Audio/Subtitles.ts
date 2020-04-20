@@ -2,6 +2,8 @@ declare var webkitSpeechRecognition: any;
 
 export class Subtitles {
     recognition: SpeechRecognition;
+    isRunning:true;
+
     onFinal: (peerId: string, result: string,lang:string) => void;
     onInterim: (peerId: string, result: string,lang:string) => void;
 
@@ -11,6 +13,8 @@ export class Subtitles {
     start: () => void;
     stop: () => void;
 
+
+    
 
 
     static languages =
@@ -116,18 +120,20 @@ export class Subtitles {
         }
 
         this.recognition.onaudioend = e => {
+            if(this.isRunning)
             this.stop();
-            if (this.onIdle) this.onIdle(event);
+                if (this.onIdle) this.onIdle(event);
         }
 
         this.stop = () => {
-            this.recognition.stop();
+            if(this.isRunning)
+             this.recognition.stop();
         };
 
 
 
         this.start = () => {
-          
+          if(!this.isRunning)
             this.recognition.start();
         };
 

@@ -878,6 +878,7 @@ export class App {
 
         this.generateSubtitles.addEventListener("click", () => {
             this.generateSubtitles.classList.toggle("flash");
+            
             if (!this.transcriber) {
                 this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
                     new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()),this.preferedLanguage
