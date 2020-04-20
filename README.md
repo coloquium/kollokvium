@@ -28,7 +28,9 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 7. Multiple stream recording ( record the meeting  or single participant ) , Recording done locally.
 8. Dungeons ( comming soon)
 9. Lock / unlock rooms
-10. Voting ( Ask a question )
+10. Voting ( omming soo )
+11. Subtitles / captions ( speech recognition)
+12. Auto translate of Subtitles / captions ( from source to prefered langugee )
 
 ## install 
 
