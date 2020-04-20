@@ -74,6 +74,7 @@ main .overlay {
     bottom: 80px;
     right: 1rem;
     z-index: 2000;
+    cursor: move;
 }
 
 .local video {
@@ -82,7 +83,6 @@ main .overlay {
     margin: 1rem;
     max-height: 100px;
     border: 2px solid #333;
-    cursor: pointer;
 }
 .local video:hover {
     right: 0;
@@ -90,7 +90,6 @@ main .overlay {
     margin: 1rem;
     max-height: 100px;
     border: 2px solid #eee;
-    cursor: pointer;
 }
 
 

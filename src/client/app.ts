@@ -316,16 +316,7 @@ export class App {
 
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
-        if (isCam) {
-            video.addEventListener("click", () => {
-                const track = mediaStream.getVideoTracks()[0]
-                track.applyConstraints({ width: 800, height: 450 });
-                this.greenScreen.setMediaTrack(track);
-                $("#gss").modal("show");
-            });
-        }
-
-        //this.mediaStreamBlender.addTracks(mediaStream.id, mediaStream.getTracks(), true);
+        
 
 
     }
@@ -472,11 +463,7 @@ export class App {
 
         DOMUtils.get("#dungeon-" + key).addEventListener("click", () => {
             DOMUtils.get(".video-grid").classList.add("blur");
-
-            //this.audioNode.muted = true;
-
             DOMUtils.get(".dungeons-header").classList.add("flash");
-
 
         });
         if (DOMUtils.get(".dungeons").classList.contains("d-none")) {
@@ -666,9 +653,13 @@ export class App {
 
         this.greenScreen = new GreenScreenComponent("gss");
         this.greenScreen.onApply = (mediaStream) => {
+            DOMUtils.get("video#preview").remove()
             let a = this.localMediaStream.getVideoTracks()[0];
             this.localMediaStream.removeTrack(a);
             this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
+            DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
+            DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
+            
         };
 
         DOMUtils.get("#components").append(this.greenScreen.render());
@@ -717,6 +708,27 @@ export class App {
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
+        DOMUtils.get("#apply-virtualbg").addEventListener("click",() => {
+            $("#settings-modal").modal("toggle");
+            const track = this.localMediaStream.getVideoTracks()[0]
+            track.applyConstraints({ width: 800, height: 450 });
+            this.greenScreen.setMediaTrack(track);
+            $("#gss").modal("toggle");           
+        });
+
+        DOMUtils.get("#remove-virtualbg").addEventListener("click",() => {
+            this.getLocalStream(UserSettings.defaultConstraints,(mediaStream:MediaStream) => {
+                    const track = this.localMediaStream.getVideoTracks()[0];
+                    this.localMediaStream.removeTrack(track);
+                    this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
+                    DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
+                    DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
+                    this.greenScreen.stop();
+            });
+        });
+
+        DOMUtils.makeDragable(DOMUtils.get(".local"));
+
         let toogleRecord = DOMUtils.get("#record-all") as HTMLAudioElement;
 
         let testResolutions = DOMUtils.get("#test-resolutions") as HTMLButtonElement;
@@ -727,7 +739,6 @@ export class App {
         
         this.videoGrid.addEventListener("click", () => {
             this.videoGrid.classList.remove("blur");
-
         });
 
 
@@ -816,9 +827,6 @@ export class App {
             });
         });
 
-
-
-
         DOMUtils.get("#create-dungeon").addEventListener("click", () => {
             $("#modal-dungeon").modal("toggle");
             let container = DOMUtils.get(".dungeon-thumbs");
@@ -854,7 +862,6 @@ export class App {
                 context: this.rtcClient.Context
             });
         });
-
 
         this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
             const option = document.createElement("option");
@@ -1208,7 +1215,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     let instance = App.getInstance();
-
-    window["kollo"] = instance;
 
 });

@@ -28,38 +28,61 @@ export class GreenScreenComponent extends AppComponent {
 
     start(src: string) {
         this.gss = new GreenScreenStream(true,src);
+       
+        this.gss.bufferVert =`
+        uniform float time;
+        uniform vec2 resolution;   
+        uniform sampler2D webcam;
+        uniform sampler2D background;
+        uniform vec4 chromaKey; 
+        uniform vec2 maskRange;
+        out vec4 fragColor;
+
+        void mainImage( out vec4 fragColor, in vec2 fragCoord )
+            {
+                vec2 q = 1. -fragCoord.xy / resolution.xy;
+                
+                vec3 bg = texture( background, q ).xyz;
+                vec3 fg = texture( webcam, q ).xyz;
+                
+                vec3 dom = vec3(0,1.0,0);
+                
+                float maxrb = max( fg.r, fg.b );
+                
+                float k = clamp( (fg.g-maxrb)*5.0, 0.0, 1.0 );
+                
+
+                float dg = fg.g; 
+                
+                fg.g = min( fg.g, maxrb*0.8 ); 
+                
+                fg += dg - fg.g;
+
+                fragColor = vec4( mix(fg, bg, k), 1.0 );
+            }
+
+            void main(){    
+                mainImage(fragColor,gl_FragCoord.xy);      
+            }        
+        `;
+       
         this.gss.addVideoTrack(this.mediaTrack);
-        let v = document.querySelector("video#preview") as HTMLVideoElement;
-        v.srcObject = this.getMediaStream();
 
-        // this.handle = window.setInterval(() => {
-        //     //$("span.detected-color").remove(); // hack
-        //     this.gss.getColorsFromStream().palette.forEach((color: Array<number>, index: number) => {
-        //         let span = document.createElement("span");
-        //         span.classList.add("badge", "detected-color", "mr-2");
-        //         span.textContent = (6-index).toString();
-        //         span.style.background = `rgb(${color[0]},${color[1]},${color[2]})`;
-        //         span.addEventListener("click", () => {
-        //             this.gss.setChromaKey(color[0] / 255, color[1] / 255, color[2] / 255);
-        //         });
-        //         document.querySelector("#palette").append(span);
-        //     });
-        // }, 2000);
 
+        this.gss.onReady = () =>
+        {
+            let v = document.querySelector("video#preview") as HTMLVideoElement;
+            v.srcObject = this.getMediaStream();   
+        }
     }
 
     stop() {
-        //clearInterval(this.handle);
-
-        let v = document.querySelector("video#preview") as HTMLVideoElement;
-        v.pause();
         this.gss = undefined;
     }
 
     getMediaStream(fps?: number): MediaStream {
         this.gss.render(fps);
         this.capturedStream = this.gss.captureStream(fps)
-
         return this.capturedStream;
     }
 
