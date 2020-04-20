@@ -655,9 +655,12 @@ export class App {
             this.displayRecording(blobUrl);
         };
         this.mediaStreamBlender.onTrackEnded = () => {
-            this.mediaStreamBlender.refreshCanvas();
+            try{
+                this.mediaStreamBlender.refreshCanvas();
+            }catch(err){
+                console.log(err);
+            }           
         }
-
         this.greenScreen = new GreenScreenComponent("gss");
         this.greenScreen.onApply = (mediaStream) => {
             DOMUtils.get("video#preview").remove()
