@@ -49,8 +49,10 @@ export class App {
     shareSlug: HTMLElement;
     lockContext: HTMLElement;
     generateSubtitles: HTMLElement;
-   
+
     languagePicker: HTMLInputElement;
+    pictueInPicture: HTMLElement;
+    pictureInPictureElement: HTMLVideoElement;
     /**
      *
      *
@@ -220,7 +222,6 @@ export class App {
         let mediaTrack = this.localMediaStream.getAudioTracks();
         mediaTrack.forEach((track: MediaStreamTrack) => {
             track.enabled = !track.enabled;
-
         });
     }
     /**
@@ -316,7 +317,7 @@ export class App {
 
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
-        
+
 
 
     }
@@ -421,7 +422,7 @@ export class App {
         let subtitles = document.createElement("div");
         subtitles.classList.add("subtitles");
         subtitles.classList.add("subs" + id);
-        
+
         item.append(subtitles);
         item.append(video);
         // listener for fulscreen view of a participants video
@@ -531,6 +532,9 @@ export class App {
         location.hash = "";
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
 
+        if('pictureInPictureEnabled' in document)
+        this.pictueInPicture.classList.toggle("hide");
+
         slug.value = "";
 
         DOMUtils.get("#random-slug").classList.remove("d-none");
@@ -566,6 +570,9 @@ export class App {
 
 
     enableConferenceElements() {
+
+        if('pictureInPictureEnabled' in document)
+            this.pictueInPicture.classList.toggle("hide");
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
 
@@ -659,11 +666,11 @@ export class App {
             this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
             DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
             DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
-            
+
         };
 
         DOMUtils.get("#components").append(this.greenScreen.render());
-   
+
 
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map<string, AppParticipant>();
@@ -688,6 +695,8 @@ export class App {
         this.languagePicker = DOMUtils.get(".selected-language") as HTMLInputElement;
 
 
+        this.pictueInPicture = DOMUtils.get("#pip") as HTMLElement;
+
 
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
         let chatMessage = DOMUtils.get("#chat-message") as HTMLInputElement;
@@ -708,22 +717,22 @@ export class App {
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
-        DOMUtils.get("#apply-virtualbg").addEventListener("click",() => {
+        DOMUtils.get("#apply-virtualbg").addEventListener("click", () => {
             $("#settings-modal").modal("toggle");
             const track = this.localMediaStream.getVideoTracks()[0]
             track.applyConstraints({ width: 800, height: 450 });
             this.greenScreen.setMediaTrack(track);
-            $("#gss").modal("toggle");           
+            $("#gss").modal("toggle");
         });
 
-        DOMUtils.get("#remove-virtualbg").addEventListener("click",() => {
-            this.getLocalStream(UserSettings.defaultConstraints,(mediaStream:MediaStream) => {
-                    const track = this.localMediaStream.getVideoTracks()[0];
-                    this.localMediaStream.removeTrack(track);
-                    this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
-                    DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
-                    DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
-                    this.greenScreen.stop();
+        DOMUtils.get("#remove-virtualbg").addEventListener("click", () => {
+            this.getLocalStream(UserSettings.defaultConstraints, (mediaStream: MediaStream) => {
+                const track = this.localMediaStream.getVideoTracks()[0];
+                this.localMediaStream.removeTrack(track);
+                this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
+                DOMUtils.get("#apply-virtualbg").classList.toggle("hide");
+                DOMUtils.get("#remove-virtualbg").classList.toggle("hide");
+                this.greenScreen.stop();
             });
         });
 
@@ -733,10 +742,65 @@ export class App {
 
         let testResolutions = DOMUtils.get("#test-resolutions") as HTMLButtonElement;
 
+        this.pictureInPictureElement = DOMUtils.get("#pip-stream") as HTMLVideoElement;
+
+        this.pictureInPictureElement.addEventListener('enterpictureinpicture', () => {
+            this.pictureInPictureElement.play();
+            this.pictueInPicture.classList.toggle("flash");
+
+           
+        });
+
+        this.pictureInPictureElement.addEventListener('leavepictureinpicture', () => {
+            this.pictueInPicture.classList.toggle("flash");
+            this.mediaStreamBlender.render(0);           
+            this.mediaStreamBlender.audioSources.clear();
+            this.mediaStreamBlender.videosSources.clear();
+            this.pictueInPicture.classList.toggle("flash");
+            this.pictureInPictureElement.pause();
+        });         
+
+        this.pictueInPicture.addEventListener("click", () => {
+
+            if (this.isRecording) return;
+            this.pictueInPicture.classList.toggle("flash");
+
+
+            if (document["pictureInPictureElement"]) {
+                document["exitPictureInPicture"]()
+                    .catch(error => {
+                        // Error handling
+                    })
+            } else {           
+                this.mediaStreamBlender.audioSources.clear();
+                this.mediaStreamBlender.videosSources.clear();
+    
+                Array.from(this.participants.values()).forEach((p: AppParticipant) => {
+                    this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
+                });
+                this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
+
+    
+                this.mediaStreamBlender.refreshCanvas();
+                
+                this.mediaStreamBlender.render(15);
+                this.pictureInPictureElement.onloadeddata = () =>{
+                    this.pictureInPictureElement["requestPictureInPicture"]();
+                }
+                this.pictureInPictureElement.srcObject =  this.mediaStreamBlender.captureStream();
+
+
+        
+            
+              
+
+            }
+        });
+
         nickname.value = this.userSettings.nickname;
         this.languagePicker.value = this.userSettings.language;
 
-        
+
         this.videoGrid.addEventListener("click", () => {
             this.videoGrid.classList.remove("blur");
         });
@@ -880,7 +944,7 @@ export class App {
             this.generateSubtitles.classList.toggle("flash");
             if (!this.transcriber) {
                 this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
-                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()),this.preferedLanguage
+                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.preferedLanguage
                 );
                 this.transcriber.onFinal = (peerId, result, lang) => {
                     this.arbitraryChannel.Invoke("transcript", {
@@ -970,9 +1034,9 @@ export class App {
             this.numOfChatMessagesUnread = 0;
             this.unreadBadge.textContent = "0";
         });
-        
-       
-        this.languagePicker.addEventListener("change",() => {
+
+
+        this.languagePicker.addEventListener("change", () => {
 
             this.userSettings.language = this.languagePicker.value;
 
@@ -980,7 +1044,7 @@ export class App {
 
             this.preferedLanguage = this.userSettings.language;
 
-           
+
         });
 
 
