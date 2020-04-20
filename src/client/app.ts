@@ -51,6 +51,8 @@ export class App {
     generateSubtitles: HTMLElement;
 
     languagePicker: HTMLInputElement;
+    pictueInPicture: HTMLElement;
+    pictureInPictureElement: HTMLVideoElement;
     /**
      *
      *
@@ -220,7 +222,6 @@ export class App {
         let mediaTrack = this.localMediaStream.getAudioTracks();
         mediaTrack.forEach((track: MediaStreamTrack) => {
             track.enabled = !track.enabled;
-
         });
     }
     /**
@@ -531,6 +532,9 @@ export class App {
         location.hash = "";
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
 
+        if('pictureInPictureEnabled' in document)
+        this.pictueInPicture.classList.toggle("hide");
+
         slug.value = "";
 
         DOMUtils.get("#random-slug").classList.remove("d-none");
@@ -566,6 +570,9 @@ export class App {
 
 
     enableConferenceElements() {
+
+        if('pictureInPictureEnabled' in document)
+            this.pictueInPicture.classList.toggle("hide");
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
 
@@ -688,6 +695,8 @@ export class App {
         this.languagePicker = DOMUtils.get(".selected-language") as HTMLInputElement;
 
 
+        this.pictueInPicture = DOMUtils.get("#pip") as HTMLElement;
+
 
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
         let chatMessage = DOMUtils.get("#chat-message") as HTMLInputElement;
@@ -732,6 +741,61 @@ export class App {
         let toogleRecord = DOMUtils.get("#record-all") as HTMLAudioElement;
 
         let testResolutions = DOMUtils.get("#test-resolutions") as HTMLButtonElement;
+
+        this.pictureInPictureElement = DOMUtils.get("#pip-stream") as HTMLVideoElement;
+
+        this.pictureInPictureElement.addEventListener('enterpictureinpicture', () => {
+            this.pictureInPictureElement.play();
+            this.pictueInPicture.classList.toggle("flash");
+
+           
+        });
+
+        this.pictureInPictureElement.addEventListener('leavepictureinpicture', () => {
+            this.pictueInPicture.classList.toggle("flash");
+            this.mediaStreamBlender.render(0);           
+            this.mediaStreamBlender.audioSources.clear();
+            this.mediaStreamBlender.videosSources.clear();
+            this.pictueInPicture.classList.toggle("flash");
+            this.pictureInPictureElement.pause();
+        });         
+
+        this.pictueInPicture.addEventListener("click", () => {
+
+            if (this.isRecording) return;
+            this.pictueInPicture.classList.toggle("flash");
+
+
+            if (document["pictureInPictureElement"]) {
+                document["exitPictureInPicture"]()
+                    .catch(error => {
+                        // Error handling
+                    })
+            } else {           
+                this.mediaStreamBlender.audioSources.clear();
+                this.mediaStreamBlender.videosSources.clear();
+    
+                Array.from(this.participants.values()).forEach((p: AppParticipant) => {
+                    this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
+                });
+                this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
+
+    
+                this.mediaStreamBlender.refreshCanvas();
+                
+                this.mediaStreamBlender.render(15);
+                this.pictureInPictureElement.onloadeddata = () =>{
+                    this.pictureInPictureElement["requestPictureInPicture"]();
+                }
+                this.pictureInPictureElement.srcObject =  this.mediaStreamBlender.captureStream();
+
+
+        
+            
+              
+
+            }
+        });
 
         nickname.value = this.userSettings.nickname;
         this.languagePicker.value = this.userSettings.language;

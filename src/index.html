@@ -26,6 +26,10 @@
 
 <body>
 
+    <video id="pip-stream" class="hide" autoplay>
+
+    </video>
+
     <div id="components"></div>
 
     <div class="toasters">
@@ -44,17 +48,18 @@
 
     <div class="top-bar">
         <i id="help" class="fa fa-question-circle fa-2x" style="cursor:pointer;" aria-hidden="true"></i>
-        <i class="fas fa-volume-up fa-2x" title="mute all audio" id="mute-speakers" style="cursor:pointer;"></i>
+        <i class="fas fa-volume-up fa-2x" title="mute/unmute all audio" id="mute-speakers" style="cursor:pointer;"></i>
         <i class="fas fa-share-alt fa-2x hide" id="share-slug" data-container="body" data-toggle="popover"
         data-placement="bottom" data-trigger="click" data-content="Your room link is now in the clipboard"></i>
         <div class="hide">
             <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
         </div>
-        <i class="fas fa-lock-open fa-2x hide" id="context-lock"></i>
-        <i class="fas fa-closed-captioning fa-2x hide" id="subtitles"></i>
+        <i class="fas fa-lock-open fa-2x hide" id="context-lock" title="Lock / unlock this room "></i>
+        <i class="fas fa-closed-captioning fa-2x hide" id="subtitles" title="Generate captions and send to remote peers"></i>
+        <i class="far fa-minus-square fa-2x hide" id="pip" title="toggle picture-in-picture mode"></i>
         <!-- <span id="dungeon-messages" class="badge badge-danger style=" float:right">beta</span> -->
 
-        <i class="fas fa-door-open fa-2x right hide" id="leave-context">
+        <i class="fas fa-door-open fa-2x right hide" id="leave-context" title="leave this room now!"">
 
         </i>
 

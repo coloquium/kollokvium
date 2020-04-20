@@ -26,12 +26,12 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 5. Random room generator or user defined room names
 6. No login and registration required
 7. Multiple stream recording ( record the meeting  or single participant ) , Recording done locally.
-8. Dungeons ( comming soon)
+8. Dungeons a.ka breakout rooms (comming soon)
 9. Lock / unlock rooms
-10. Voting ( omming soo )
+10. Voting ( comming soon, not prio )
 11. Subtitles / captions ( speech recognition)
 12. Auto translate of Subtitles / captions ( from source to prefered langugee )
-
+13. Picture-In-Picture support (renders alls streams into PiP video element)
 ## install 
 
 Clone the repository and run npm install & npm run build & npm start
@@ -49,7 +49,6 @@ To deploy to Azure you need an Azure account, and you need to create an Azure We
 TBD 
 
 ### Deploy front end only 
-
 If you want to deploy only the front-end as a static site, build the application and copy all the files from dist/client folder to the root of you web application. 
 
 ## Issues & Questions
@@ -58,5 +57,5 @@ Goodluck, and if run into problems, bugs or questions or just have ideas to shar
 
 Regards
 
- Team Kollokvium (colloquium)
+Team Kollokvium (colloquium)
  
