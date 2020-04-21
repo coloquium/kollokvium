@@ -53,6 +53,8 @@ export class App {
     languagePicker: HTMLInputElement;
     pictueInPicture: HTMLElement;
     pictureInPictureElement: HTMLVideoElement;
+    textToSpeech: HTMLInputElement;
+    textToSpeechMessage: HTMLInputElement;
     /**
      *
      *
@@ -214,13 +216,20 @@ export class App {
      * @memberof App
      */
     muteAudio(evt: any): void {
+
+       
         let el = evt.target as HTMLElement;
         el.classList.toggle("fa-microphone");
         el.classList.toggle("fa-microphone-slash")
         let mediaTrack = this.localMediaStream.getAudioTracks();
         mediaTrack.forEach((track: MediaStreamTrack) => {
             track.enabled = !track.enabled;
+
         });
+
+
+      
+
     }
     /**
      *
@@ -548,7 +557,7 @@ export class App {
         this.startButton.classList.remove("hide");
         this.shareSlug.classList.add("hide");
 
-
+        this.textToSpeechMessage.disabled = true;
 
         DOMUtils.get(".fa-dungeon").classList.add("hide");
         DOMUtils.get(".top-bar").classList.add("d-none");
@@ -578,6 +587,8 @@ export class App {
 
         this.shareSlug.classList.remove("hide");
 
+
+        this.textToSpeechMessage.disabled = false;
 
         this.startButton.classList.remove("hide");
         this.videoGrid.classList.add("d-flex");
@@ -699,6 +710,10 @@ export class App {
 
         this.pictueInPicture = DOMUtils.get("#pip") as HTMLElement;
 
+        this.textToSpeech = DOMUtils.get("#show-text-to-speech") as HTMLInputElement;
+        this.textToSpeechMessage = DOMUtils.get("#text-message") as HTMLInputElement;
+
+
 
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
         let chatMessage = DOMUtils.get("#chat-message") as HTMLInputElement;
@@ -716,6 +731,11 @@ export class App {
         // just set the value to saved key, as user needs to scan..
         let closeQuickstartButton = DOMUtils.get("#close-quick-start") as HTMLInputElement;
         let helpButton = DOMUtils.get("#help") as HTMLInputElement;
+
+
+
+
+        
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
@@ -739,6 +759,17 @@ export class App {
         });
 
         DOMUtils.makeDragable(DOMUtils.get(".local"));
+
+
+        this.textToSpeech.addEventListener("click",() => {
+
+                if(this.textToSpeech.checked) {
+                    DOMUtils.get(".text-to-speech").classList.remove("hide");
+                }else{
+                    DOMUtils.get(".text-to-speech").classList.add("hide");
+                }
+
+        });
 
         let toogleRecord = DOMUtils.get("#record-all") as HTMLAudioElement;
 
@@ -856,7 +887,7 @@ export class App {
             this.userSettings.language = this.languagePicker.value;
 
             if(this.transcriber)
-            this.generateSubtitles.click();
+                this.generateSubtitles.click();
 
             this.userSettings.saveSetting();
 
@@ -980,6 +1011,8 @@ export class App {
         });
 
         muteAudio.addEventListener("click", (e) => {
+            if(!this.textToSpeech.checked)
+            DOMUtils.get(".text-to-speech").classList.toggle("hide")
             this.muteAudio(e)
         });
         muteVideo.addEventListener("click", (e) => {
@@ -1097,6 +1130,18 @@ export class App {
             }
         });
 
+        this.textToSpeechMessage.addEventListener("keydown",(e) => {
+            if (e.keyCode == 13) {
+                //this.sendMessage(this.userSettings.nickname, chatMessage.value)
+                this.arbitraryChannel.Invoke("textToSpeech",{
+                    text: this.textToSpeechMessage.value,
+                    peerId: this.rtcClient.LocalPeerId,
+                    lang: this.userSettings.language || navigator.language
+                });
+                this.textToSpeechMessage.value = "";
+            }
+        });
+
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
@@ -1117,9 +1162,30 @@ export class App {
             });
 
 
+            this.arbitraryChannel.On("textToSpeech",(data:any )=> {
+                let targetLanguage =
+                this.userSettings.language
+                || navigator.language;
 
 
+                if (data.lang !== targetLanguage && this.appDomain.translateKey) {
+                    Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                        || navigator.language).then((result) => {
 
+                                console.log(result);
+                            
+                            Subtitles.textToSpeech(result,targetLanguage);
+                           // this.addSubtitles(parent, result, data.lang, data.text);
+
+                        }).catch(() => {
+                            //this.addSubtitles(parent, data.text, data.lang);
+                        });
+
+                    }else
+                    {
+                        Subtitles.textToSpeech(data.text,targetLanguage);
+                    }
+                });
 
             this.arbitraryChannel.On("transcript", (data: any) => {
                 let parent = DOMUtils.get(`.subs${data.peerId}`);
@@ -1136,7 +1202,6 @@ export class App {
                             }).catch(() => {
                                 this.addSubtitles(parent, data.text, data.lang);
                             });
-
                     } else
                         this.addSubtitles(parent, data.text, data.lang);
                 }
@@ -1271,7 +1336,6 @@ export class App {
 
                         if (location.hash.length <= 6)
                             $("#random-slug").popover("show");
-
                     });
 
 

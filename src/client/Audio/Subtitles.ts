@@ -105,7 +105,7 @@ export class Subtitles {
                     interim += event.results[i][0].transcript;
                 }
             }
-            if (final.length > 0 && this.onFinal) {          
+            if (final.length > 0 && this.onFinal) {
                 this.onFinal(this.peeId, final, this.lang || navigator.language)
             }
             if (interim.length > 0 && this.onInterim) {
@@ -145,7 +145,12 @@ export class Subtitles {
 
     }
 
+
+
     static getlanguagePicker(): HTMLElement {
+
+
+
         let selectLanguage = document.createElement("select");
         selectLanguage.classList.add("selected-language", "form-control");
         let notset = document.createElement("option");
@@ -176,26 +181,35 @@ export class Subtitles {
         });
         return selectLanguage;
     }
-     static translateCaptions(key:string,phrase:string,from:string,to:string):Promise<string>{
-            let payload = {
-                source: from.indexOf("-") > -1 ? from.substr(0,2) : from,
-                target: to.indexOf("-") > -1 ? to.substr(0,2) : to,
-                q: phrase            }              
-            return new Promise<string> ( (resolve,reject) =>  {
-            let result = fetch(`https://www.googleapis.com/language/translate/v2/?key=${key}`,{
-                method:"POST",
+
+    static textToSpeech(phrase: string, lang: string) {
+        var speech = new SpeechSynthesisUtterance(phrase);
+        speech.lang = lang;
+        window.speechSynthesis.speak(speech);
+    }
+
+
+    static translateCaptions(key: string, phrase: string, from: string, to: string): Promise<string> {
+        let payload = {
+            source: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
+            target: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
+            q: phrase
+        }
+        return new Promise<string>((resolve, reject) => {
+            let result = fetch(`https://www.googleapis.com/language/translate/v2/?key=${key}`, {
+                method: "POST",
                 body: JSON.stringify(payload)
             });
-            result.then( (response:Response) => {
-                 response.json().then( (result) => {
-                    if(Array.isArray(result.data.translations)){
+            result.then((response: Response) => {
+                response.json().then((result) => {
+                    if (Array.isArray(result.data.translations)) {
                         resolve(result.data.translations[0].translatedText)
-                    }else resolve(phrase);                            
-                 }).catch ( () => {
+                    } else resolve(phrase);
+                }).catch(() => {
                     console.warn("unable to translate");
-                     resolve(phrase); // pass non translated text back
-                 });
-            }).catch ( () => {
+                    resolve(phrase); // pass non translated text back
+                });
+            }).catch(() => {
                 reject(phrase);
                 console.warn("unable to translate");
             })

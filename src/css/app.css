@@ -69,6 +69,23 @@ main .overlay {
     display: none;
 }
 
+.text-to-speech
+{
+    width: 50%;
+    position: absolute;
+    bottom: 80px;
+    left: 1rem;
+    height: 80px;
+    z-index: 2000;
+    background: rgba(255,255,255,0.3);
+}
+
+
+
+
+
+
+
 .local {
     position: absolute;
     bottom: 80px;
