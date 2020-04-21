@@ -1,6 +1,7 @@
 declare var webkitSpeechRecognition: any;
 
 export class Subtitles {
+
     recognition: SpeechRecognition;
     isRunning: boolean;
 
@@ -104,7 +105,7 @@ export class Subtitles {
                     interim += event.results[i][0].transcript;
                 }
             }
-            if (final.length > 0 && this.onFinal) {
+            if (final.length > 0 && this.onFinal) {          
                 this.onFinal(this.peeId, final, this.lang || navigator.language)
             }
             if (interim.length > 0 && this.onInterim) {
@@ -145,61 +146,60 @@ export class Subtitles {
     }
 
     static getlanguagePicker(): HTMLElement {
-
-
-        let select_language = document.createElement("select");
-        select_language.classList.add("selected-language", "form-control");
-
-        // Not set option
-
+        let selectLanguage = document.createElement("select");
+        selectLanguage.classList.add("selected-language", "form-control");
         let notset = document.createElement("option");
         notset.value = "";
         notset.textContent = "Not set (use browser language)";
-
-        select_language.append(notset);
-
-
-
+        selectLanguage.append(notset);
         Subtitles.languages.forEach((entry: any) => {
             let country = entry[0];
             let dialects = entry[1];
-
             if (dialects.length === 1) {
-
-
-
                 let option = document.createElement("option");
                 option.value = dialects[0];
                 option.textContent = `${country} (${dialects[0]})`;
-                select_language.append(option);
-
-
+                selectLanguage.append(option);
             } else {
-
                 let prefix = ""
                 entry.forEach((a: any) => {
-
                     if (!Array.isArray(a)) {
                         prefix = a;
                     } else {
                         let option = document.createElement("option");
                         option.value = a[0];
                         option.textContent = `${prefix} - ${a[1]} (${a[0]})`;
-                        select_language.append(option);
+                        selectLanguage.append(option);
                     }
-
                 });
-
-
-
-
             }
         });
-
-
-
-
-        return select_language;
+        return selectLanguage;
+    }
+     static translateCaptions(key:string,phrase:string,from:string,to:string):Promise<string>{
+            let payload = {
+                source: from.indexOf("-") > -1 ? from.substr(0,2) : from,
+                target: to.indexOf("-") > -1 ? to.substr(0,2) : to,
+                q: phrase            }              
+            return new Promise<string> ( (resolve,reject) =>  {
+            let result = fetch(`https://www.googleapis.com/language/translate/v2/?key=${key}`,{
+                method:"POST",
+                body: JSON.stringify(payload)
+            });
+            result.then( (response:Response) => {
+                 response.json().then( (result) => {
+                    if(Array.isArray(result.data.translations)){
+                        resolve(result.data.translations[0].translatedText)
+                    }else resolve(phrase);                            
+                 }).catch ( () => {
+                    console.warn("unable to translate");
+                     resolve(phrase); // pass non translated text back
+                 });
+            }).catch ( () => {
+                reject(phrase);
+                console.warn("unable to translate");
+            })
+        });
     }
 }
 

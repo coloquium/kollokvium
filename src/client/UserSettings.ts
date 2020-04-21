@@ -2,14 +2,14 @@ import { SlugHistory } from './SlugHistory';
 import { DetectResolutions } from "./Helpers/DetectResolutions";
 export class UserSettings {
 
-    static defaultConstraints:MediaStreamConstraints = {
-       
-                video: {
-                    width: { min: 640, ideal: 1280 },
-                    height: { min: 400, ideal: 720 },
-                    frameRate:25
-                }, audio: true,
-    };    
+    static defaultConstraints: MediaStreamConstraints = {
+
+        video: {
+            width: { min: 640, ideal: 1280 },
+            height: { min: 400, ideal: 720 },
+            frameRate: 25
+        }, audio: true,
+    };
 
     slugHistory: SlugHistory;
     videoDevice: string;
@@ -36,32 +36,27 @@ export class UserSettings {
         if (candidate.length === 0) {
             constraints = {
                 video: {
-                    width: { min: 640, ideal: 1920 },
-                    height: { min: 400, ideal: 1080 }
+                    width: { min: 320, ideal: 1280 },
+                    height: { min: 240, ideal: 720 }
                 }, audio: true,
             };
         } else {
-
             const preferedResolution = DetectResolutions.getCandidate(candidate);
 
             constraints = {
                 audio: true,
                 video: {
-                    width: {exact: preferedResolution.width},   
-                    height: {exact: preferedResolution.height}   
+                    width: { exact: preferedResolution.width },
+                    height: { exact: preferedResolution.height }
                 }
             };
         };
-
-
         if (this.audioDevice.length > 0) {
             constraints.video["deviceId"] = this.audioDevice
         }
         if (this.videoDevice.length > 0) {
             constraints.video["deviceId"] = this.videoDevice
         }
-
-
         return constraints;
     }
     constructor() {

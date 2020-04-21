@@ -79,9 +79,7 @@ export class App {
      */
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
-
             cb(mediaStream);
-
         }).catch(err => {
             console.error(err);
         });
@@ -517,9 +515,11 @@ export class App {
     }
 
 
-    addSubtitles(parent: HTMLElement, text: string, lang) {
+    addSubtitles(parent: HTMLElement, text: string, lang: string, title?: string) {
         if (parent) {
             let p = document.createElement("p");
+            if (title)
+                p.title = title;
             p.onanimationend = () => {
                 p.remove();
             };
@@ -532,8 +532,8 @@ export class App {
         location.hash = "";
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
 
-        if('pictureInPictureEnabled' in document)
-        this.pictueInPicture.classList.toggle("hide");
+        if ('pictureInPictureEnabled' in document)
+            this.pictueInPicture.classList.toggle("hide");
 
         slug.value = "";
 
@@ -571,7 +571,7 @@ export class App {
 
     enableConferenceElements() {
 
-        if('pictureInPictureEnabled' in document)
+        if ('pictureInPictureEnabled' in document)
             this.pictueInPicture.classList.toggle("hide");
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
@@ -632,7 +632,6 @@ export class App {
             DOMUtils.get(".only-desktop").classList.add("hide");
         }
 
-
         this.audioNodes = new AudioNodes();
 
         this.mediaStreamBlender = new MediaStreamBlender();
@@ -655,11 +654,11 @@ export class App {
             this.displayRecording(blobUrl);
         };
         this.mediaStreamBlender.onTrackEnded = () => {
-            try{
+            try {
                 this.mediaStreamBlender.refreshCanvas();
-            }catch(err){
+            } catch (err) {
                 console.log(err);
-            }           
+            }
         }
         this.greenScreen = new GreenScreenComponent("gss");
         this.greenScreen.onApply = (mediaStream) => {
@@ -751,17 +750,17 @@ export class App {
             this.pictureInPictureElement.play();
             this.pictueInPicture.classList.toggle("flash");
 
-           
+
         });
 
         this.pictureInPictureElement.addEventListener('leavepictureinpicture', () => {
             this.pictueInPicture.classList.toggle("flash");
-            this.mediaStreamBlender.render(0);           
+            this.mediaStreamBlender.render(0);
             this.mediaStreamBlender.audioSources.clear();
             this.mediaStreamBlender.videosSources.clear();
             this.pictueInPicture.classList.toggle("flash");
             this.pictureInPictureElement.pause();
-        });         
+        });
 
         this.pictueInPicture.addEventListener("click", () => {
 
@@ -774,28 +773,28 @@ export class App {
                     .catch(error => {
                         // Error handling
                     })
-            } else {           
+            } else {
                 this.mediaStreamBlender.audioSources.clear();
                 this.mediaStreamBlender.videosSources.clear();
-    
+
                 Array.from(this.participants.values()).forEach((p: AppParticipant) => {
                     this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
                 });
                 this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
 
-    
+
                 this.mediaStreamBlender.refreshCanvas();
-                
+
                 this.mediaStreamBlender.render(15);
-                this.pictureInPictureElement.onloadeddata = () =>{
+                this.pictureInPictureElement.onloadeddata = () => {
                     this.pictureInPictureElement["requestPictureInPicture"]();
                 }
-                this.pictureInPictureElement.srcObject =  this.mediaStreamBlender.captureStream();
+                this.pictureInPictureElement.srcObject = this.mediaStreamBlender.captureStream();
 
 
-        
-            
-              
+
+
+
 
             }
         });
@@ -854,6 +853,10 @@ export class App {
             this.userSettings.audioDevice = audioDevice.value;
             this.userSettings.videoDevice = videoDevice.value;
             this.userSettings.videoResolution = videoResolution.value;
+            this.userSettings.language = this.languagePicker.value;
+
+            if(this.transcriber)
+            this.generateSubtitles.click();
 
             this.userSettings.saveSetting();
 
@@ -948,9 +951,10 @@ export class App {
 
             if (!this.transcriber) {
                 this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
-                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.preferedLanguage
+                    new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.userSettings.language
                 );
                 this.transcriber.onFinal = (peerId, result, lang) => {
+                    console.log("sending in ",lang);
                     this.arbitraryChannel.Invoke("transcript", {
                         peerId: peerId,
                         text: result,
@@ -958,7 +962,7 @@ export class App {
                     });
                 }
                 this.transcriber.start();
-                this.transcriber.onIdle = () => {              
+                this.transcriber.onIdle = () => {
                 }
             } else {
                 if (this.transcriber)
@@ -1043,14 +1047,7 @@ export class App {
 
 
         this.languagePicker.addEventListener("change", () => {
-
             this.userSettings.language = this.languagePicker.value;
-
-            this.userSettings.saveSetting();
-
-            this.preferedLanguage = this.userSettings.language;
-
-
         });
 
 
@@ -1125,12 +1122,24 @@ export class App {
 
 
             this.arbitraryChannel.On("transcript", (data: any) => {
+                let parent = DOMUtils.get(`.subs${data.peerId}`);
+                if (parent) {
+                    let targetLanguage =
+                        this.userSettings.language
+                        || navigator.language;
+                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;
+                    if (data.lang !== targetLanguage && this.appDomain.translateKey) {
+                        Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                            || navigator.language).then((result) => {
+                                this.addSubtitles(parent, result, data.lang, data.text);
 
+                            }).catch(() => {
+                                this.addSubtitles(parent, data.text, data.lang);
+                            });
 
-                this.addSubtitles(DOMUtils.get(`.subs${data.peerId}`), data.text, data.lang);
-
-
-
+                    } else
+                        this.addSubtitles(parent, data.text, data.lang);
+                }
             });
 
             this.arbitraryChannel.On("streamChange", (data: any) => {
@@ -1285,5 +1294,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     let instance = App.getInstance();
+
+
+    window["inst"] = instance;
 
 });

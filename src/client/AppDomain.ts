@@ -12,6 +12,7 @@ export class AppDomain {
     domain: string;
     contextPrefix: string;
     host: string;
+    translateKey: any;
     getSlug(value: string): string {
         return `${this.contextPrefix}-${value}`;
     }
@@ -40,5 +41,6 @@ export class AppDomain {
         this.contextPrefix = appConfig.contextPrefix;
         this.serverUrl = this.getServerUrl()
         this.version = process.env.KOLLOKVIUM_VERSION || appConfig.version;
+        this.translateKey = appConfig.translateKey || "";
     }
 }
