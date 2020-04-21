@@ -185,6 +185,7 @@ export class Subtitles {
     static textToSpeech(phrase: string, lang: string) {
         var speech = new SpeechSynthesisUtterance(phrase);
         speech.lang = lang;
+        speech.voice = window.speechSynthesis.getVoices()[1];
         window.speechSynthesis.speak(speech);
     }
 
