@@ -978,14 +978,13 @@ export class App {
 
 
         this.generateSubtitles.addEventListener("click", () => {
-            this.generateSubtitles.classList.toggle("flash");
+         
 
             if (!this.transcriber) {
                 this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
                     new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.userSettings.language
                 );
                 this.transcriber.onFinal = (peerId, result, lang) => {
-                    console.log("sending in ",lang);
                     this.arbitraryChannel.Invoke("transcript", {
                         peerId: peerId,
                         text: result,
@@ -993,13 +992,18 @@ export class App {
                     });
                 }
                 this.transcriber.start();
-                this.transcriber.onIdle = () => {
+                this.generateSubtitles.classList.toggle("flash");
+                this.transcriber.onStop = () => {
+
+                    this.generateSubtitles.classList.remove("flash");
+                    this.transcriber = null;
+                    
                 }
             } else {
                 if (this.transcriber)
 
                     this.transcriber.stop();
-                this.transcriber = null;
+              
             }
         });
 
@@ -1171,16 +1175,11 @@ export class App {
                 if (data.lang !== targetLanguage && this.appDomain.translateKey) {
                     Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                         || navigator.language).then((result) => {
-
-                                console.log(result);
-                            
                             Subtitles.textToSpeech(result,targetLanguage);
                            // this.addSubtitles(parent, result, data.lang, data.text);
-
                         }).catch(() => {
                             //this.addSubtitles(parent, data.text, data.lang);
                         });
-
                     }else
                     {
                         Subtitles.textToSpeech(data.text,targetLanguage);
@@ -1193,7 +1192,7 @@ export class App {
                     let targetLanguage =
                         this.userSettings.language
                         || navigator.language;
-                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;
+                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;                 
                     if (data.lang !== targetLanguage && this.appDomain.translateKey) {
                         Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                             || navigator.language).then((result) => {

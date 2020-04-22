@@ -444,6 +444,8 @@ i.fa-lock {
     color: #fff;
     animation: fadeOut 2s forwards;
     animation-delay: 10s;
+    font-size:1.2rem;
+    
     
 }
 .subtitles p:first-letter{

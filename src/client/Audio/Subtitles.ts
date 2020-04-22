@@ -1,3 +1,4 @@
+import { Utils } from 'thor-io.client-vnext';
 declare var webkitSpeechRecognition: any;
 
 export class Subtitles {
@@ -9,7 +10,7 @@ export class Subtitles {
     onInterim: (peerId: string, result: string, lang: string) => void;
 
     onReady: (event: any) => void;
-    onIdle: (event: any) => void;
+    onStop: (event: any) => void;
     onError: (event: any) => void;
     start: () => void;
     stop: () => void;
@@ -89,9 +90,11 @@ export class Subtitles {
             this.recognition.lang = lang;
         }
         this.recognition.onspeechend = (event: any) => {
+            this.recognition.stop();
             this.isRunning = false;
-            this.onIdle(event);
+            this.onStop(event);
         };
+        this.recognition.onsoundend
         this.recognition.onspeechstart = () => {
         };
 
@@ -146,11 +149,37 @@ export class Subtitles {
     }
 
 
+    static textToSpeech(phrase: string, lang: string) {
+        const chooseVoice = async (l: string) => {
+            const voice = (await this.getVoices()).find(voice => voice.lang == l)
+            return new Promise<SpeechSynthesisVoice>(resolve => {
+                resolve(voice)
+            })
+        }
+        const message = new SpeechSynthesisUtterance(phrase)
+        chooseVoice(lang).then((v: SpeechSynthesisVoice) => {
+            if (v) message.voice = v;
+            speechSynthesis.speak(message)
+        });
+
+    }
+
+    static getVoices(): Promise<Array<SpeechSynthesisVoice>> {
+        return new Promise<Array<SpeechSynthesisVoice>>((resolve) => {
+            let voices = speechSynthesis.getVoices()
+            if (voices.length) {
+                resolve(voices)
+                return
+            }
+            const voiceschanged = () => {
+                voices = speechSynthesis.getVoices()
+                resolve(voices)
+                speechSynthesis.onvoiceschanged = voiceschanged
+            }
+        });
+    }
 
     static getlanguagePicker(): HTMLElement {
-
-
-
         let selectLanguage = document.createElement("select");
         selectLanguage.classList.add("selected-language", "form-control");
         let notset = document.createElement("option");
@@ -182,46 +211,41 @@ export class Subtitles {
         return selectLanguage;
     }
 
-    static textToSpeech(phrase: string, lang: string) {
-        var speech = new SpeechSynthesisUtterance(phrase);
-        speech.lang = lang;
-        speech.voice = window.speechSynthesis.getVoices()[1];
-        window.speechSynthesis.speak(speech);
-    }
-
-
     static translateCaptions(key: string, phrase: string, from: string, to: string): Promise<string> {
+
+
         let payload = {
-            source: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
-            target: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
-            q: phrase
+            from: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
+            to: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
+            text: phrase
         }
         return new Promise<string>((resolve, reject) => {
-            let result = fetch(`https://www.googleapis.com/language/translate/v2/?key=${key}`, {
+            let result = fetch(`https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=${payload.to}&from=${payload.from}`, {
                 method: "POST",
-                body: JSON.stringify(payload)
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Ocp-Apim-Subscription-Region': 'westeurope',
+                    'Ocp-Apim-Subscription-Key': key
+                },
+                body: JSON.stringify([{
+                    text: payload.text
+                }])
+
             });
             result.then((response: Response) => {
                 response.json().then((result) => {
-                    if (Array.isArray(result.data.translations)) {
-                        resolve(result.data.translations[0].translatedText)
-                    } else resolve(phrase);
+                    if (Array.isArray(result)) {
+                        resolve(result[0].translations[0].text)
+                    } else
+                        resolve(phrase);
                 }).catch(() => {
-                    console.warn("unable to translate");
                     resolve(phrase); // pass non translated text back
                 });
             }).catch(() => {
-                reject(phrase);
-                console.warn("unable to translate");
+                resolve(phrase);
             })
         });
+
     }
+
 }
-
-
-
-
-
-
-
-
