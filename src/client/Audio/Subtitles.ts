@@ -215,36 +215,27 @@ export class Subtitles {
 
 
         let payload = {
-            from: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
-            to: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
-            text: phrase
+            source: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
+            target: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
+            q: phrase
         }
         return new Promise<string>((resolve, reject) => {
-            let result = fetch(`https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=${payload.to}&from=${payload.from}`, {
+            let result = fetch(`https://www.googleapis.com/language/translate/v2/?key=${key}`, {
                 method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Ocp-Apim-Subscription-Region': 'westeurope',
-                    'Ocp-Apim-Subscription-Key': key
-                },
-                body: JSON.stringify([{
-                    text: payload.text
-                }])
-
+                body: JSON.stringify(payload)
             });
             result.then((response: Response) => {
                 response.json().then((result) => {
-                    if (Array.isArray(result)) {
-                        resolve(result[0].translations[0].text)
-                    } else
-                        resolve(phrase);
+                    if (Array.isArray(result.data.translations)) {
+                        resolve(result.data.translations[0].translatedText)
+                    } else resolve(phrase);
                 }).catch(() => {
                     resolve(phrase); // pass non translated text back
                 });
             }).catch(() => {
-                resolve(phrase);
+                reject(phrase);
             })
-        });
+        });;
 
     }
 
