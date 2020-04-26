@@ -15,65 +15,8 @@ import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnecti
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
 import { Subtitles } from './Audio/Subtitles';
+import { JournalCompnent } from './Components/JournalComponent';
 
-
-
-export class Journal {
-        data: any[];
-
-
-        constructor(){
-            this.data = new Array<any>();
-        }
-        add(sender:string,text:string,originText:string,language:string){
-            this.data.push({
-                time: new Date().toLocaleTimeString().substr(0, 5),
-                sender:sender,
-                originText:text,
-                text: text,
-                language: language
-            });
-            console.log(this.data);
-        }
-    
-
-        toHtml():HTMLElement{
-            let journal = document.createElement("div");
-            journal.classList.add("journal");
-            this.data.forEach( (entry:any)  => {
-                
-                let line = document.createElement("p");
-
-                let time = document.createElement("time");
-                time.textContent = entry.time;
-
-                line.append(time);
-
-                let sender = document.createElement("mark");
-                sender.textContent = entry.sender;
-
-                line.append(sender);
-
-
-                let text = document.createElement("span");
-                text.textContent = `${entry.text}`;
-
-                line.append(text);
-
-                if(entry.originText.length > 0){
-                        let origin = document.createElement("em");
-                        line.append(origin);
-                }
-
-                journal.append(line);
-
-
-            });
-        
-            return journal;
-        }
-
-}
 
 export class App {
 
@@ -117,7 +60,7 @@ export class App {
     textToSpeechMessage: HTMLInputElement;
 
 
-    journal: Journal;
+    journal: JournalCompnent;
 
 
     /**
@@ -806,13 +749,19 @@ export class App {
 
 
 
-        DOMUtils.get("#show-journal").addEventListener("click",() => {          
+        DOMUtils.get("#show-journal").addEventListener("click",() => {      
+            DOMUtils.get("#generate-journal").textContent = "Copy to clipboard";    
             if(this.journal.data.length > 0)
                 DOMUtils.get("#journal-content div.journal").remove();             
-                DOMUtils.get("#journal-content").append(this.journal.toHtml());
+                DOMUtils.get("#journal-content").append(this.journal.render());
                 $("#meeting-journal").modal("toggle");
         });
 
+        DOMUtils.get("#generate-journal").addEventListener("click", () => {
+
+            this.journal.download();
+         
+        });
         
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
@@ -1208,7 +1157,7 @@ export class App {
         this.startButton.addEventListener("click", () => {
 
 
-            this.journal = new Journal();
+            this.journal = new JournalCompnent();
 
             this.enableConferenceElements();
             this.userSettings.slugHistory.addToHistory(slug.value);
@@ -1299,6 +1248,7 @@ export class App {
 
                             }).catch(() => {
                                 this.addSubtitles(parent, data.text, data.lang);
+                                this.journal.add(data.sender,data.text,"",data.lang);
                             });
                     } else{
                         this.journal.add(data.sender,data.text,"",data.lang);

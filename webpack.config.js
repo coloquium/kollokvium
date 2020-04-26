@@ -10,7 +10,7 @@ const assetFolders = ['css', 'img'];
 const package = require('./package.json');
 
 module.exports = {
-  mode:"development", 
+  mode:"production", 
   watch: false,
   entry: {    
     kollkovium : Path.join(sourceFolder, 'client', 'app'),
