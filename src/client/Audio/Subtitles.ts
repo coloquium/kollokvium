@@ -7,7 +7,7 @@ export class Subtitles {
     isRunning: boolean;
 
     onFinal: (peerId: string, result: string, lang: string) => void;
-    onInterim: (peerId: string, result: string, lang: string) => void;
+    onInterim: (final: string, interim: string, lang: string) => void;
 
     onReady: (event: any) => void;
     onStop: (event: any) => void;
@@ -90,14 +90,25 @@ export class Subtitles {
             this.recognition.lang = lang;
         }
         this.recognition.onspeechend = (event: any) => {
-            this.recognition.stop();
+            if(this.isRunning) this.onStop(event);
             this.isRunning = false;
-            this.onStop(event);
-        };
-        this.recognition.onsoundend
+        }
         this.recognition.onspeechstart = () => {
-        };
-
+        }
+        this.recognition.onaudiostart = (event: any) => {
+        }
+        this.recognition.onaudioend = e => {
+        }
+        this.recognition.onend = (event) => {
+            if(this.isRunning) this.onStop(event);
+            this.isRunning = false;          
+        }
+        this.recognition.onerror = (event: any) => {
+            if (this.onError) this.onError(event);
+        }
+        this.recognition.onstart = () => {
+            this.isRunning = true;
+        }
         this.recognition.onresult = (event: SpeechRecognitionEvent) => {
             let interim = '';
             let final = "";
@@ -109,33 +120,23 @@ export class Subtitles {
                 }
             }
             if (final.length > 0 && this.onFinal) {
+                if(this.onInterim)
+                    this.onInterim(interim, final, this.lang || navigator.language)
+
                 this.onFinal(this.peeId, final, this.lang || navigator.language)
             }
             if (interim.length > 0 && this.onInterim) {
-                this.onInterim(this.peeId, interim, this.lang || navigator.language)
+                this.onInterim(interim, final, this.lang || navigator.language)
             }
         };
 
-        this.recognition.onerror = (event: any) => {
-
-            if (this.onError) this.onError(event);
-        }
-
-        this.recognition.onaudiostart = (event: any) => {
-        }
-
-        this.recognition.onaudioend = e => {
-
-        }
-
-        this.recognition.onstart = () => {
-            this.isRunning = true;
-        }
 
         this.stop = () => {
+
             if (this.isRunning) {
                 this.isRunning = false;
                 this.recognition.stop();
+                this.onStop(event);
             }
         };
         this.start = () => {
@@ -235,7 +236,7 @@ export class Subtitles {
             }).catch(() => {
                 reject(phrase);
             })
-        });;
+        });
 
     }
 

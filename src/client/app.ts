@@ -984,6 +984,13 @@ export class App {
                 this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
                     new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.userSettings.language
                 );
+
+                this.transcriber.onInterim = (interim,final,lang) =>{
+                    DOMUtils.get("#final-result").textContent = final; 
+                    DOMUtils.get("#interim-result").textContent = interim; 
+                
+                }
+
                 this.transcriber.onFinal = (peerId, result, lang) => {
                     this.arbitraryChannel.Invoke("transcript", {
                         peerId: peerId,
@@ -993,8 +1000,9 @@ export class App {
                 }
                 this.transcriber.start();
                 this.generateSubtitles.classList.toggle("flash");
+                DOMUtils.get(".transcript-bar").classList.remove("hide");
                 this.transcriber.onStop = () => {
-
+                    DOMUtils.get(".transcript-bar").classList.add("hide");
                     this.generateSubtitles.classList.remove("flash");
                     this.transcriber = null;
                     

@@ -423,6 +423,35 @@ i.fa-lock {
     color:#fff;
 }
 
+.transcript-bar{
+    position: absolute;
+    top:100px;
+    z-index: 2000;
+    width: 100%;
+    height: 80px;
+}
+
+#transcript-results{
+    background:#fff;
+    opacity: 0.8s;
+
+} 
+
+.final {
+    color:#000
+}
+.final:first-letter{
+    text-transform:uppercase;
+}
+
+.interim{
+    color:gray
+}
+
+.interim:first-letter{
+    text-transform:uppercase;
+}
+
 .subtitles {
     position: absolute;
 
