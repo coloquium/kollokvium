@@ -15,6 +15,66 @@ import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnecti
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
 import { Subtitles } from './Audio/Subtitles';
+
+
+
+export class Journal {
+        data: any[];
+
+
+        constructor(){
+            this.data = new Array<any>();
+        }
+        add(sender:string,text:string,originText:string,language:string){
+            this.data.push({
+                time: new Date().toLocaleTimeString().substr(0, 5),
+                sender:sender,
+                originText:text,
+                text: text,
+                language: language
+            });
+            console.log(this.data);
+        }
+    
+
+        toHtml():HTMLElement{
+            let journal = document.createElement("div");
+            journal.classList.add("journal");
+            this.data.forEach( (entry:any)  => {
+                
+                let line = document.createElement("p");
+
+                let time = document.createElement("time");
+                time.textContent = entry.time;
+
+                line.append(time);
+
+                let sender = document.createElement("mark");
+                sender.textContent = entry.sender;
+
+                line.append(sender);
+
+
+                let text = document.createElement("span");
+                text.textContent = `${entry.text}`;
+
+                line.append(text);
+
+                if(entry.originText.length > 0){
+                        let origin = document.createElement("em");
+                        line.append(origin);
+                }
+
+                journal.append(line);
+
+
+            });
+        
+            return journal;
+        }
+
+}
+
 export class App {
 
     appDomain: AppDomain;
@@ -55,6 +115,11 @@ export class App {
     pictureInPictureElement: HTMLVideoElement;
     textToSpeech: HTMLInputElement;
     textToSpeechMessage: HTMLInputElement;
+
+
+    journal: Journal;
+
+
     /**
      *
      *
@@ -559,6 +624,7 @@ export class App {
 
         this.textToSpeechMessage.disabled = true;
 
+        DOMUtils.get("#show-journal").classList.toggle("hide");
         DOMUtils.get(".fa-dungeon").classList.add("hide");
         DOMUtils.get(".top-bar").classList.add("d-none");
 
@@ -582,8 +648,12 @@ export class App {
 
         if ('pictureInPictureEnabled' in document)
             this.pictueInPicture.classList.toggle("hide");
+
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
+
+
+
 
         this.shareSlug.classList.remove("hide");
 
@@ -597,6 +667,7 @@ export class App {
 
         this.leaveCotext.classList.remove("hide");
 
+        DOMUtils.get("#show-journal").classList.toggle("hide");
         DOMUtils.get(".fa-dungeon").classList.toggle("hide");
         DOMUtils.get(".top-bar").classList.remove("d-none");
 
@@ -734,6 +805,13 @@ export class App {
 
 
 
+
+        DOMUtils.get("#show-journal").addEventListener("click",() => {          
+            if(this.journal.data.length > 0)
+                DOMUtils.get("#journal-content div.journal").remove();             
+                DOMUtils.get("#journal-content").append(this.journal.toHtml());
+                $("#meeting-journal").modal("toggle");
+        });
 
         
 
@@ -995,8 +1073,12 @@ export class App {
                     this.arbitraryChannel.Invoke("transcript", {
                         peerId: peerId,
                         text: result,
-                        lang: lang
+                        lang: lang,
+                        sender: this.userSettings.nickname
                     });
+
+                    this.journal.add(this.userSettings.nickname,result,"",lang);
+
                 }
                 this.transcriber.start();
                 this.generateSubtitles.classList.toggle("flash");
@@ -1124,6 +1206,10 @@ export class App {
         })
 
         this.startButton.addEventListener("click", () => {
+
+
+            this.journal = new Journal();
+
             this.enableConferenceElements();
             this.userSettings.slugHistory.addToHistory(slug.value);
             window.history.pushState({}, window.document.title, `#${slug.value}`);
@@ -1195,22 +1281,29 @@ export class App {
                 });
 
             this.arbitraryChannel.On("transcript", (data: any) => {
+
+            
+
                 let parent = DOMUtils.get(`.subs${data.peerId}`);
                 if (parent) {
                     let targetLanguage =
                         this.userSettings.language
                         || navigator.language;
-                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;                 
+                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;    
+
                     if (data.lang !== targetLanguage && this.appDomain.translateKey) {
                         Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                             || navigator.language).then((result) => {
                                 this.addSubtitles(parent, result, data.lang, data.text);
+                                this.journal.add(this.userSettings.nickname,result,data.text,data.lang);
 
                             }).catch(() => {
                                 this.addSubtitles(parent, data.text, data.lang);
                             });
-                    } else
+                    } else{
+                        this.journal.add(this.userSettings.nickname,data.text,"",data.lang);
                         this.addSubtitles(parent, data.text, data.lang);
+                    }
                 }
             });
 
@@ -1367,6 +1460,5 @@ document.addEventListener("DOMContentLoaded", () => {
     let instance = App.getInstance();
 
 
-    window["inst"] = instance;
 
 });
