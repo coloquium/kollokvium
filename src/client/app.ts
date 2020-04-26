@@ -1295,13 +1295,13 @@ export class App {
                         Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                             || navigator.language).then((result) => {
                                 this.addSubtitles(parent, result, data.lang, data.text);
-                                this.journal.add(this.userSettings.nickname,result,data.text,data.lang);
+                                this.journal.add(data.sender,result,data.text,data.lang);
 
                             }).catch(() => {
                                 this.addSubtitles(parent, data.text, data.lang);
                             });
                     } else{
-                        this.journal.add(this.userSettings.nickname,data.text,"",data.lang);
+                        this.journal.add(data.sender,data.text,"",data.lang);
                         this.addSubtitles(parent, data.text, data.lang);
                     }
                 }
