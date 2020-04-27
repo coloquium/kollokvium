@@ -14,7 +14,7 @@ import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
-import { Subtitles } from './Audio/Subtitles';
+import { Transcriber } from './Audio/Transcriber';
 import { JournalCompnent } from './Components/JournalComponent';
 
 
@@ -36,7 +36,7 @@ export class App {
     slug: string;
     participants: Map<string, AppParticipant>;
     isRecording: boolean;
-    transcriber: Subtitles;
+    transcriber: Transcriber;
     preferedLanguage: string;
 
     numOfChatMessagesUnread: number;
@@ -546,6 +546,8 @@ export class App {
     }
 
     disableConfrenceElements() {
+        DOMUtils.get("#mute-speakers").classList.toggle("hide");
+        this.generateSubtitles.classList.toggle("hide");
         location.hash = "";
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
 
@@ -588,6 +590,8 @@ export class App {
 
 
     enableConferenceElements() {
+
+        DOMUtils.get("#mute-speakers").classList.toggle("hide");
 
         if ('pictureInPictureEnabled' in document)
             this.pictueInPicture.classList.toggle("hide");
@@ -644,7 +648,7 @@ export class App {
 
         // add language options to UserSettings 
 
-        DOMUtils.get("#langaues").append(Subtitles.getlanguagePicker());
+        DOMUtils.get("#langaues").append(Transcriber.getlanguagePicker());
 
 
 
@@ -1008,7 +1012,7 @@ export class App {
          
 
             if (!this.transcriber) {
-                this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
+                this.transcriber = new Transcriber(this.rtcClient.LocalPeerId,
                     new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.userSettings.language
                 );
 
@@ -1076,16 +1080,17 @@ export class App {
             $("#share-file").popover("toggle");
         });
 
-        helpButton.addEventListener("click", () => {
-            $("#quick-start-container").modal("show");
-            this.userSettings.showQuickStart = true;
-            this.userSettings.saveSetting();
-        })
+        // helpButton.addEventListener("click", () => {
+        //     $("#quick-start-container").modal("show");
+        //     this.userSettings.showQuickStart = true;
+        //     this.userSettings.saveSetting();
+        // })
 
 
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
             navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
-                e.target.textContent = "Done!"
+                e.target.textContent = "Copied!"
+                
             });
         });
 
@@ -1216,16 +1221,16 @@ export class App {
 
 
                 if (data.lang !== targetLanguage && this.appDomain.translateKey) {
-                    Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                    Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                         || navigator.language).then((result) => {
-                            Subtitles.textToSpeech(result,targetLanguage);
+                            Transcriber.textToSpeech(result,targetLanguage);
                            // this.addSubtitles(parent, result, data.lang, data.text);
                         }).catch(() => {
                             //this.addSubtitles(parent, data.text, data.lang);
                         });
                     }else
                     {
-                        Subtitles.textToSpeech(data.text,targetLanguage);
+                        Transcriber.textToSpeech(data.text,targetLanguage);
                     }
                 });
 
@@ -1241,7 +1246,7 @@ export class App {
                     targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;    
 
                     if (data.lang !== targetLanguage && this.appDomain.translateKey) {
-                        Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                        Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                             || navigator.language).then((result) => {
                                 this.addSubtitles(parent, result, data.lang, data.text);
                                 this.journal.add(data.sender,result,data.text,data.lang);
@@ -1407,7 +1412,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
     }
 
-    let instance = App.getInstance();
+    App.getInstance();
 
 
 

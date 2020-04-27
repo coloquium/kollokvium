@@ -61,7 +61,7 @@ main .overlay {
 .remote {
     height: auto;
     position: absolute;
-    top: 0;
+    top: 80px;
     left: 0;
     z-index: 10;
 }
@@ -183,8 +183,8 @@ main .overlay {
     position: absolute;
     top: 0rem;
     width: 100% !important;
-    padding: 1em;
     z-index: 8;
+    min-height: 70px;
     background: rgba(0, 0, 0, 0.7);
 }
 
