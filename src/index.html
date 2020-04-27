@@ -45,53 +45,28 @@
         ...
     </div>
 
-    <div class="top-bar">
-        <i id="help" class="fa fa-question-circle fa-2x" style="cursor:pointer;" aria-hidden="true"></i>
-
-        <i class="far fa-minus-square fa-2x hide" id="pip" title="toggle picture-in-picture mode"></i>
-   
-
-        <i class="fas fa-volume-up fa-2x" title="mute/unmute all audio" id="mute-speakers" style="cursor:pointer;"></i>
-        <i class="fas fa-share-alt fa-2x hide" id="share-slug" data-container="body" data-toggle="popover"
-            data-placement="bottom" data-trigger="click" data-content="Your room link is now in the clipboard"></i>
-        <div class="hide">
-            <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
-        </div>
-        <i class="fas fa-lock-open fa-2x hide" id="context-lock" title="Lock / unlock this room "></i>
-
-
-        <i class="fas fa-closed-captioning fa-2x hide" id="subtitles"
-            title="Generate captions and send to remote peers"></i>
-        <i class="fas fa-book fa-2x hide" id="show-journal" title="Show / hide journal ( meeting transcript )"></i>
-
-        <!-- <span id="dungeon-messages" class="badge badge-danger style=" float:right">beta</span> -->
-
-        <i class="fas fa-door-open fa-2x right hide" id="leave-context" title="leave this room now!"">
-
-    
-        </i>
-
-    </div>
-
     <div class="modal fade" id="meeting-journal" tabindex="-1" role="dialog"
-            aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalScrollableTitle">Meeting journal (Works best with head phones)</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body" id="journal-content">
-                            <div class="journal">Nothing in the jorurnal yet. You need to activate captions.&nbsp; <i class="fas fa-closed-captioning"></i></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="generate-journal">Download</button>
-                    </div>
+        aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title" id="exampleModalScrollableTitle">Meeting journal 
+                        <span class="text-muted mr-1"> - works best with head
+                        phones <i class="fas fa-headphones"></i> </span></div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="journal-content">
+                    <div class="journal">Nothing in the journal. You need to activate captions.&nbsp; <i
+                            class="fas fa-closed-captioning"></i></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="generate-journal">Download</button>
                 </div>
             </div>
+        </div>
     </div>
 
 
@@ -101,7 +76,10 @@
             <div class="row">
                 <div class="col-md-8 mx-auto p-2 my-2" id="transcript-results">
                     <div>
-                        <h5><i class="fas fa-closed-captioning"></i>&nbsp;Captured speech (Works best with head phones)</h5>
+                        <div class="modal-title">                           
+                            Your captured speech <span class="text-muted mr-1"> - works best with head
+                                phones <i class="fas fa-headphones"></i> </span>
+                            </div>
                     </div>
                     <hr>
                     <div class="p-1">
@@ -194,6 +172,58 @@
     </div>
 
     <main>
+
+        <div class="top-bar d-inline-flex flex-row align-items-center w-100 justify-content-center">
+        
+
+            <div class="p-3">
+                <i class="far fa-minus-square fa-2x hide" id="pip" title="toggle picture-in-picture mode"></i>
+            </div>
+
+
+            <div class="p-3">
+                <i class="fas fa-volume-up fa-2x hide" title="mute/unmute all audio" id="mute-speakers"
+                    style="cursor:pointer;"></i>
+            </div>
+
+            <div class="p-3">
+                <i class="fas fa-share-alt fa-2x hide" id="share-slug" data-container="body" data-toggle="popover"
+                    data-placement="bottom" data-trigger="click"
+                    data-content="Your room link is now in the clipboard"></i>
+                            </div>
+
+          
+
+            <div class="p-3">
+                <i class="fas fa-lock-open fa-2x hide" id="context-lock" title="Lock / unlock this room "></i>
+
+            </div>
+            <div class="p-3">
+                <i class="fas fa-closed-captioning fa-2x hide" id="subtitles"
+                    title="Generate captions and send to remote peers"></i>
+
+            </div>
+
+            <div class="p-3">
+                <i class="fas fa-book fa-2x hide" id="show-journal"
+                    title="Show / hide journal ( meeting transcript )"></i>
+                
+            </div>
+
+            <div class="p-3">
+                <i class="fas fa-door-open fa-2x right hide" id="leave-context" title="leave this room now!"></i>
+
+            </div>
+
+            <div class="p-3 hide d-none">
+                <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
+
+            </div>
+
+             
+    </div>
+
+
         <div class="overlay"></div>
         <div class="container-fluid chat d-none mt-3">
             <div class="card bg-light h-100">
@@ -223,7 +253,7 @@
         </div>
 
         <div class="container-fluid remote hide my-2" id="share-container">
-            <div class="alert alert-secondary">
+            <div class="alert alert-warning">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -318,181 +348,175 @@
                 <div class="form">
                     <div class="form-row">
                         <div class="form-group col-md-12">
-                            <input type="text" class="form-control form-control-lg"" disabled id="text-message"
-                                placeholder="What do you want to say? Use your native language, it will arrive in the recpients language."">
+                            <input id="text-message" type="text"
+                                class="form-control form-control-lg"" disabled  placeholder="What do you want to say?
+                                Use your native language, it will arrive in the recpients language."">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        </div>
 
         <div class=" local">
+        </div>
+
+        <div class="controls d-inline-flex flex-row align-items-center w-100 justify-content-center">
+            <div class="p-3">
+                <i class="fas fa-cog fa-2x" id="settings"></i>
+            </div>
+            <div class="p-3">
+                <i class="fas fa-video fa-2x" id="mute-local-video"></i>
+            </div>
+            <div class="p-3">
+                <i class="fas fa-microphone fa-2x" id="mute-local-audio"></i>
+            </div>
+
+            <div class="p-3 d-none" id="record">
+                <i class="fas fa-circle fa-2x record" title="Record all meeting participants" id="record-all">
+                </i>
+            </div>
+            <div class="p-3 only-desktop">
+                <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
+            </div>
+
+            <div class="p-3">
+                <i class="fas fa-file hide fa-2x " id="share-file"></i>
+            </div>
+            <div class="p-3">
+                <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
+                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
+                </i>
+            </div>
+        </div>
+
+
+        <div class="modal" tabindex="-1" role="dialog" id="modal-dungeon">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create a dungeon</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Click the participants you want to invite to a <strong>dungeon<strong></p>
+                        <div class="dungeon-thumbs">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="invite-dungeon">Invite
+                            selected</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="recorder-result" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Recording ended...</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="recorder-download"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Kollokvium settings</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="txt-nick">Nickname</label>
+                            <input type="text" class="form-control" id="txt-nick"
+                                placeholder="Nickname displayed in chat...">
+                        </div>
+                        <div class="form-group" id="langaues">
+                            <label for="txt-nick">Language (used by translation & subtitles) </label>
+                        </div>
+                        <div class="form-check">
+
+                            <input class="form-check-input" type="checkbox" id="show-text-to-speech" value="true">
+                            <label for="txt-nick">Enable text to speech</label>
                         </div>
 
-                        <div class="controls d-inline-flex flex-row align-items-center w-100 justify-content-center">
-                            <div class="p-3">
-                                <i class="fas fa-cog fa-2x" id="settings"></i>
-                            </div>
-                            <div class="p-3">
-                                <i class="fas fa-video fa-2x" id="mute-local-video"></i>
-                            </div>
-                            <div class="p-3">
-                                <i class="fas fa-microphone fa-2x" id="mute-local-audio"></i>
-                            </div>
+                        <div class="form-group">
 
-                            <div class="p-3 d-none" id="record">
-                                <i class="fas fa-circle fa-2x record" title="Record all meeting participants"
-                                    id="record-all">
-                                </i>
-                            </div>
-                            <div class="p-3 only-desktop">
-                                <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
-                            </div>
+                            <label for="sel-video">Apply virtual background <span
+                                    class="badge badge-info">beta</span></label>
 
-                            <div class="p-3">
-                                <i class="fas fa-file hide fa-2x " id="share-file"></i>
-                            </div>
-                            <div class="p-3">
-                                <span id="unread-messages" class="badge badge-danger d-none"
-                                    style="float:right">0</span>
-                                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
-                                </i>
-                            </div>
+                            <input type="button" class="btn btn-link" id="apply-virtualbg"
+                                value="Try virtual backgrounds">
+
+                            <input type="button" class="btn btn-link hide" id="remove-virtualbg"
+                                value="Remove virtual background">
                         </div>
 
+                        <div class="form-group">
+                            <label for="sel-video">Video input</label>
+                            <select class="form-control" id="sel-video">
+                                <option value="">Not set </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sel-audio">Audio input</label>
+                            <select class="form-control" id="sel-audio">
+                                <option value="">Not set</option>
+                            </select>
+                        </div>
+                        <div class="form-group d-none">
+                            <label for="sel-audio-out">Audio output</label>
 
-                        <div class="modal" tabindex="-1" role="dialog" id="modal-dungeon">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Create a dungeon</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Click the participants you want to invite to a <strong>dungeon<strong></p>
-                                        <div class="dungeon-thumbs">
-
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" id="invite-dungeon">Invite
-                                            selected</button>
-                                        <button type="button" class="btn btn-secondary"
-                                            data-dismiss="modal">Close</button>
-                                    </div>
+                            <select class="form-control" id="sel-audio-out">
+                                <option value="">Not set</option>
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <label for="sel-video-res">Camera resolution</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-outline-primary" type="button"
+                                        id="test-resolutions">Scan</button>
                                 </div>
+                                <select class="form-control" id="sel-video-res" disabled>
+                                    <option value="">Not set</option>
+                                </select>
                             </div>
+                            <small class="form-text text-danger">
+                                Camera resolution will not be saved. will only be applied to current
+                                session.
+                            </small>
                         </div>
-
-                        <div id="recorder-result" class="modal fade" role="dialog">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title">Recording ended...</h4>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p id="recorder-download"></p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default"
-                                            data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Kollokvium settings</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="form-group">
-                                            <label for="txt-nick">Nickname</label>
-                                            <input type="text" class="form-control" id="txt-nick"
-                                                placeholder="Nickname displayed in chat...">
-                                        </div>
-                                        <div class="form-group" id="langaues">
-                                            <label for="txt-nick">Language (used by translation & subtitles) </label>
-                                        </div>
-                                        <div class="form-check">
-
-                                            <input class="form-check-input" type="checkbox" id="show-text-to-speech"
-                                                value="true">
-                                            <label for="txt-nick">Enable text to speech</label>
-                                        </div>
-
-                                        <div class="form-group">
-
-                                            <label for="sel-video">Apply virtual background <span
-                                                    class="badge badge-info">beta</span></label>
-
-                                            <input type="button" class="btn btn-link" id="apply-virtualbg"
-                                                value="Try virtual backgrounds">
-
-                                            <input type="button" class="btn btn-link hide" id="remove-virtualbg"
-                                                value="Remove virtual background">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="sel-video">Video input</label>
-                                            <select class="form-control" id="sel-video">
-                                                <option value="">Not set </option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="sel-audio">Audio input</label>
-                                            <select class="form-control" id="sel-audio">
-                                                <option value="">Not set</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group d-none">
-                                            <label for="sel-audio-out">Audio output</label>
-
-                                            <select class="form-control" id="sel-audio-out">
-                                                <option value="">Not set</option>
-                                            </select>
-                                        </div>
-                                        <hr>
-                                        <div class="form-group">
-                                            <label for="sel-video-res">Camera resolution</label>
-                                            <div class="input-group mb-3">
-                                                <div class="input-group-prepend">
-                                                    <button class="btn btn-outline-primary" type="button"
-                                                        id="test-resolutions">Scan</button>
-                                                </div>
-                                                <select class="form-control" id="sel-video-res" disabled>
-                                                    <option value="">Not set</option>
-                                                </select>
-                                            </div>
-                                            <small class="form-text text-danger">
-                                                Camera resolution will not be saved. will only be applied to current
-                                                session.
-                                            </small>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-link pull-left" id="clear-settings"
-                                            disabled>Clear
-                                            settings</button>
-                                        <button type="button" class="btn btn-primary" id="save-settings">Save
-                                            changes</button>
-                                        <button type="button" class="btn btn-secondary"
-                                            data-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link pull-left" id="clear-settings" disabled>Clear
+                            settings</button>
+                        <button type="button" class="btn btn-primary" id="save-settings">Save
+                            changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </main>
 
