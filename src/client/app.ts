@@ -16,7 +16,7 @@ import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
 import { Transcriber } from './Audio/Transcriber';
 import { JournalCompnent } from './Components/JournalComponent';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web'
+// import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 
 
 
@@ -641,13 +641,13 @@ export class App {
      */
     constructor() {
 
-        const appInsights = new ApplicationInsights({
-            config: {
-                instrumentationKey: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-            }
-        });
-        appInsights.loadAppInsights();
-        appInsights.trackPageView();
+        // const appInsights = new ApplicationInsights({
+        //     config: {
+        //         instrumentationKey: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+        //     }
+        // });
+        // appInsights.loadAppInsights();
+        // appInsights.trackPageView();
         
         this.appDomain = new AppDomain();
 
