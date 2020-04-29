@@ -5,7 +5,7 @@ import https from 'https';
 import express from 'express';
 import webSocket from 'ws';
 
-// import {setup as setupAppInsights, defaultClient } from 'applicationinsights';
+import {setup as setupAppInsights, defaultClient as appInsightsClient } from 'applicationinsights';
 import yargs from 'yargs';
 
 import { ThorIO } from 'thor-io.vnext';
@@ -31,23 +31,18 @@ let clientPath = path.join(rootPath, "client");
 let keyFile = path.join(rootPath, 'cert', 'selfsigned.key');
 let certFile = path.join(rootPath, 'cert', 'selfsigned.crt')
 
-// if(process.env.APPINSIGHTS_INSTRUMENTATIONKEY){
-//     setupAppInsights()
-//         .setAutoDependencyCorrelation(true)
-//         .setAutoCollectRequests(true)
-//         .setAutoCollectPerformance(true)
-//         .setAutoCollectExceptions(true)
-//         .setAutoCollectDependencies(true)
-//         .setAutoCollectConsole(true)
-//         .setUseDiskRetryCaching(true)
-//         .start();
-// }
+if(process.env.APPINSIGHTS_INSTRUMENTATIONKEY){
+    setupAppInsights()
+        .setAutoDependencyCorrelation(true)
+        .setAutoCollectRequests(true)
+        .setAutoCollectPerformance(true)
+        .setAutoCollectExceptions(true)
+        .setAutoCollectDependencies(true)
+        .setAutoCollectConsole(true)
+        .setUseDiskRetryCaching(true)
+        .start();
+}
 
-let appInsightsClient = {
-    trackNodeHttpRequest: _=>{},
-    trackEvent: console.log
-};
-    
     
 if (fs.existsSync(clientPath)) {
     console.log(`Serving client files from ${clientPath}.`);
@@ -68,15 +63,15 @@ if (argv['use-ssl'] && fs.existsSync(keyFile) && fs.existsSync(certFile)) {
         cert,
         key
     }, (req, res)=>{
-        appInsightsClient.trackNodeHttpRequest({request: req, response: res});
         app(req, res);
+        appInsightsClient && appInsightsClient.trackNodeHttpRequest({request: req, response: res});
     });
 }
 else {
     port = port || 1337;
     server = http.createServer((req, res) => {
-        appInsightsClient.trackNodeHttpRequest({request: req, response: res});
         app(req, res);
+        appInsightsClient && appInsightsClient.trackNodeHttpRequest({request: req, response: res});
     });
 }
 
