@@ -1,6 +1,7 @@
 const Path = require('path');
 const Webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
 
 const sourceFolder = Path.resolve(__dirname, 'src');
 const outFolder = Path.resolve(__dirname, 'dist');
@@ -37,6 +38,7 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js'],
   },
+  externals: [ nodeExternals() ],
   output: {
     path: outFolder,
     filename: '[name].js'

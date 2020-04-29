@@ -36,6 +36,7 @@ module.exports = {
       template: Path.join(sourceFolder, 'index.html')
     }),
     new Webpack.DefinePlugin({
+      'process.env.APPINSIGHTS_INSTRUMENTATIONKEY': JSON.stringify(process.env.APPINSIGHTS_INSTRUMENTATIONKEY),
       'process.env.WSS_SERVER_URL': JSON.stringify(process.env.WSS_SERVER_URL),
       'process.env.KOLLOKVIUM_VERSION': JSON.stringify(process.env.KOLLOKVIUM_VERSION || package.version)
     })
@@ -46,6 +47,6 @@ module.exports = {
   
   output: {
     path: outFolder,
-    filename: Path.join('js', '[name]-bundle.js')
+    filename: 'js/[name]-bundle.js'
   }
 }
