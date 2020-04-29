@@ -11,7 +11,13 @@ import { ChatMessageModel } from '../Models/ChatMessageModel';
 import { DungeonModel } from '../Models/DungeonModel';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
 import { Utils } from 'thor-io.client-vnext';
-import {defaultClient} from 'applicationinsights';
+//import {defaultClient} from 'applicationinsights';
+
+
+let appInsightsClient = {
+    trackTrace: _=>{},
+    trackMetric:  _=>{}
+};
 
 @ControllerProperties("broker", false, 5 * 1000)
 export class Broker extends ControllerBase {
@@ -35,7 +41,7 @@ export class Broker extends ControllerBase {
             return pre.peer.context == this.peer.context;
         };
         this.invokeTo(expression, this.peer, "lockContext", this.alias);
-        defaultClient.trackTrace({message: "lockContext"});
+        appInsightsClient.trackTrace({message: "lockContext"});
     }
 
     @CanInvoke(true)
@@ -44,20 +50,20 @@ export class Broker extends ControllerBase {
             return pre.peer.context === slug && pre.peer.locked === true;
         });
         this.invoke({ "state": match.length > 0 ? true : false }, "isRoomLocked");
-        defaultClient.trackTrace({message: "isRoomLocked"});
+        appInsightsClient.trackTrace({message: "isRoomLocked"});
     }
 
     onopen() {
         this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
         this.invoke(this.peer, "contextCreated", this.alias);
-        defaultClient.trackTrace({message: "contextCreated"});
+        appInsightsClient.trackTrace({message: "contextCreated"});
     }
 
     @CanInvoke(true)
     leaveContext() {     
         this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
         this.invoke(this.peer, "leaveContext", this.alias);
-        defaultClient.trackTrace({message: "leaveContext"});
+        appInsightsClient.trackTrace({message: "leaveContext"});
     }
 
     @CanInvoke(true)
@@ -69,10 +75,10 @@ export class Broker extends ControllerBase {
         if (!match) {
             this.peer.context = change.context;
             this.invoke(this.peer, "contextChanged", this.alias);
-            defaultClient.trackTrace({message: "contextChanged"});
+            appInsightsClient.trackTrace({message: "contextChanged"});
         } else {
             this.invoke(this.peer, "contextChangedFailure", this.alias);
-            defaultClient.trackTrace({message: "contextChangedFailure"});
+            appInsightsClient.trackTrace({message: "contextChangedFailure"});
         }
     }
 
@@ -82,7 +88,7 @@ export class Broker extends ControllerBase {
             return pre.connection.id === signal.recipient;
         };
         this.invokeTo(expression, signal, "contextSignal", this.alias);
-        defaultClient.trackTrace({message: "contextSignal"});
+        appInsightsClient.trackTrace({message: "contextSignal"});
     }
 
     @CanInvoke(true)
@@ -92,7 +98,7 @@ export class Broker extends ControllerBase {
                 return p.peer;
             });
             this.invoke(connections, "connectTo", this.alias);
-            defaultClient.trackTrace({message: "connectTo"});
+            appInsightsClient.trackTrace({message: "connectTo"});
         }
     }
 
@@ -109,7 +115,7 @@ export class Broker extends ControllerBase {
             return pre.peer.context >= this.peer.context;        };
         this.invokeTo(expression, { text: "You recived a file (see '" + fileInfo.name + "')", from: 'Kollokvium' }, "chatMessage", this.alias);
         this.invokeTo(expression, fileInfo, "fileShare", this.alias, blob);
-        defaultClient.trackTrace({message: "fileShare"});
+        appInsightsClient.trackTrace({message: "fileShare"});
     }
 
     @CanInvoke(true)
@@ -145,7 +151,7 @@ export class Broker extends ControllerBase {
             };
         }
         this.invokeTo(expression, data, "chatMessage");
-        defaultClient.trackTrace({message: "chatMessage"});
+        appInsightsClient.trackTrace({message: "chatMessage"});
     }
 
     @CanInvoke(true)
@@ -156,7 +162,7 @@ export class Broker extends ControllerBase {
             key: data.key,
             peerId: this.peer.peerId
         }, "leaveDungeon");
-        defaultClient.trackTrace({message: "leaveDungeon"});
+        appInsightsClient.trackTrace({message: "leaveDungeon"});
     }
 
     @CanInvoke(true)
@@ -166,7 +172,7 @@ export class Broker extends ControllerBase {
             this.invokeTo((pre: Broker) => {
                 return pre.peer.peerId == peerId;
             }, dungeon, "inviteDungeon");
-            defaultClient.trackTrace({message: "inviteDungeon"});
+            appInsightsClient.trackTrace({message: "inviteDungeon"});
         });
     }
 
@@ -180,7 +186,7 @@ export class Broker extends ControllerBase {
                 context: dungeon.context,
                 peerId: this.peer.peerId
             }, "declineDungeon");
-            defaultClient.trackTrace({message: "declineDungeon"});
+            appInsightsClient.trackTrace({message: "declineDungeon"});
         });
         // notify creator as well i declined
         this.invokeTo((pre: Broker) => {
@@ -190,7 +196,7 @@ export class Broker extends ControllerBase {
             context: dungeon.context,
             peerId: this.peer.peerId
         }, "declineDungeon");
-        defaultClient.trackTrace({message: "declineDungeon"});
+        appInsightsClient.trackTrace({message: "declineDungeon"});
     }
 
     @CanInvoke(true)
@@ -203,7 +209,7 @@ export class Broker extends ControllerBase {
                 context: dungeon.context,
                 peerId: this.peer.peerId
             }, "acceptDungeon");
-            defaultClient.trackTrace({message: "acceptDungeon"});
+            appInsightsClient.trackTrace({message: "acceptDungeon"});
         });
         // notify creator as well i accepted
         this.invokeTo((pre: Broker) => {
@@ -213,16 +219,16 @@ export class Broker extends ControllerBase {
             context: dungeon.context,
             peerId: this.peer.peerId
         }, "acceptDungeon");
-        defaultClient.trackTrace({message: "acceptDungeon"});
+        appInsightsClient.trackTrace({message: "acceptDungeon"});
     }
 
     @CanInvoke(true)
     isAlive() {
         this.invoke({ timestamp: Date.now() }, "isAlive");
-        defaultClient.trackMetric({
+        appInsightsClient.trackMetric({
             name: 'context',
             value: this.connections.length
         });
-        defaultClient.trackTrace({message: "isAlive"});
+        appInsightsClient.trackTrace({message: "isAlive"});
     }
 }

@@ -5,7 +5,7 @@ import https from 'https';
 import express from 'express';
 import webSocket from 'ws';
 
-import {setup as setupAppInsights, defaultClient as appInsightsClient } from 'applicationinsights';
+// import {setup as setupAppInsights, defaultClient } from 'applicationinsights';
 import yargs from 'yargs';
 
 import { ThorIO } from 'thor-io.vnext';
@@ -31,17 +31,24 @@ let clientPath = path.join(rootPath, "client");
 let keyFile = path.join(rootPath, 'cert', 'selfsigned.key');
 let certFile = path.join(rootPath, 'cert', 'selfsigned.crt')
 
-setupAppInsights()
-    .setAutoDependencyCorrelation(true)
-    .setAutoCollectRequests(true)
-    .setAutoCollectPerformance(true)
-    .setAutoCollectExceptions(true)
-    .setAutoCollectDependencies(true)
-    .setAutoCollectConsole(true)
-    .setUseDiskRetryCaching(true)
-    .start();
+// if(process.env.APPINSIGHTS_INSTRUMENTATIONKEY){
+//     setupAppInsights()
+//         .setAutoDependencyCorrelation(true)
+//         .setAutoCollectRequests(true)
+//         .setAutoCollectPerformance(true)
+//         .setAutoCollectExceptions(true)
+//         .setAutoCollectDependencies(true)
+//         .setAutoCollectConsole(true)
+//         .setUseDiskRetryCaching(true)
+//         .start();
+// }
 
-
+let appInsightsClient = {
+    trackNodeHttpRequest: _=>{},
+    trackEvent: console.log
+};
+    
+    
 if (fs.existsSync(clientPath)) {
     console.log(`Serving client files from ${clientPath}.`);
     app.use("/", express.static(clientPath));
@@ -74,8 +81,11 @@ else {
 }
 
 const ws = new webSocket.Server({ server });
-ws.on('connection', (ws, req) => rtc.addWebSocket (ws, req));
+ws.on('connection', (ws, req) => {
+    rtc.addWebSocket (ws, req);
+    appInsightsClient.trackEvent({ name: 'new client', time: new Date()});
+});
 
-server.listen(port, (req, res) => appInsightsClient.trackEvent({ name: 'new client', time: new Date(), contextObjects: {req, res} }));
+server.listen(port);
 
 console.log(`Kollokvium version ${process.env.KOLLOKVIUM_VERSION} is listening on ${port}`);
