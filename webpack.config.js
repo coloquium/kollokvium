@@ -20,10 +20,7 @@ module.exports = {
       {
         test: /\.ts$/,
         use: {
-          loader: 'ts-loader',
-          options: {
-            allowTsInNodeModules: 'true'
-          }
+          loader: 'ts-loader'
         }
       },
     ],
@@ -42,7 +39,7 @@ module.exports = {
     })
   ],
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.js', '.ts'],
   },
   
   output: {
