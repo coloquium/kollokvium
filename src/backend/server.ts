@@ -78,7 +78,7 @@ else {
 const ws = new webSocket.Server({ server });
 ws.on('connection', (ws, req) => {
     rtc.addWebSocket (ws, req);
-    appInsightsClient.trackEvent({ name: 'new client', time: new Date()});
+    appInsightsClient && appInsightsClient.trackEvent({ name: 'new client', time: new Date()});
 });
 
 server.listen(port);
