@@ -11,6 +11,13 @@ import { ChatMessageModel } from '../Models/ChatMessageModel';
 import { DungeonModel } from '../Models/DungeonModel';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
 import { Utils } from 'thor-io.client-vnext';
+import {defaultClient as appInsightsClient} from 'applicationinsights';
+
+
+// let appInsightsClient = {
+//     trackTrace: _=>{},
+//     trackMetric:  _=>{}
+// };
 
 @ControllerProperties("broker", false, 5 * 1000)
 export class Broker extends ControllerBase {
@@ -34,6 +41,7 @@ export class Broker extends ControllerBase {
             return pre.peer.context == this.peer.context;
         };
         this.invokeTo(expression, this.peer, "lockContext", this.alias);
+        appInsightsClient && appInsightsClient.trackTrace({message: "lockContext"});
     }
 
     @CanInvoke(true)
@@ -42,19 +50,20 @@ export class Broker extends ControllerBase {
             return pre.peer.context === slug && pre.peer.locked === true;
         });
         this.invoke({ "state": match.length > 0 ? true : false }, "isRoomLocked");
-
+        appInsightsClient && appInsightsClient.trackTrace({message: "isRoomLocked"});
     }
+
     onopen() {
         this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
         this.invoke(this.peer, "contextCreated", this.alias);
-
+        appInsightsClient && appInsightsClient.trackTrace({message: "contextCreated"});
     }
 
     @CanInvoke(true)
     leaveContext() {     
         this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
         this.invoke(this.peer, "leaveContext", this.alias);
-
+        appInsightsClient && appInsightsClient.trackTrace({message: "leaveContext"});
     }
 
     @CanInvoke(true)
@@ -66,17 +75,22 @@ export class Broker extends ControllerBase {
         if (!match) {
             this.peer.context = change.context;
             this.invoke(this.peer, "contextChanged", this.alias);
+            appInsightsClient && appInsightsClient.trackTrace({message: "contextChanged"});
         } else {
             this.invoke(this.peer, "contextChangedFailure", this.alias);
+            appInsightsClient && appInsightsClient.trackTrace({message: "contextChangedFailure"});
         }
     }
+
     @CanInvoke(true)
     contextSignal(signal: Signal) {
         let expression = (pre: Broker) => {
             return pre.connection.id === signal.recipient;
         };
         this.invokeTo(expression, signal, "contextSignal", this.alias);
+        appInsightsClient && appInsightsClient.trackTrace({message: "contextSignal"});
     }
+
     @CanInvoke(true)
     connectContext() {
         if (!this.peer.locked) {
@@ -84,21 +98,26 @@ export class Broker extends ControllerBase {
                 return p.peer;
             });
             this.invoke(connections, "connectTo", this.alias);
+            appInsightsClient && appInsightsClient.trackTrace({message: "connectTo"});
         }
     }
+
     getExtendedPeerConnections(peerConnetion: ExtendedPeerConnection): Array<ControllerBase> {
         let match = this.findOn(this.alias, (pre: Broker) => {
             return pre.peer.context === this.peer.context && pre.peer.peerId !== peerConnetion.peerId;
         });
         return match;
     }
+
     @CanInvoke(true)
     fileShare(fileInfo: any, topic: any, controller: any, blob: any) {
         let expression = (pre: Broker) => {
             return pre.peer.context >= this.peer.context;        };
         this.invokeTo(expression, { text: "You recived a file (see '" + fileInfo.name + "')", from: 'Kollokvium' }, "chatMessage", this.alias);
         this.invokeTo(expression, fileInfo, "fileShare", this.alias, blob);
+        appInsightsClient && appInsightsClient.trackTrace({message: "fileShare"});
     }
+
     @CanInvoke(true)
     setNickname(name: string) {
         this.nickname = name;
@@ -132,7 +151,9 @@ export class Broker extends ControllerBase {
             };
         }
         this.invokeTo(expression, data, "chatMessage");
+        appInsightsClient && appInsightsClient.trackTrace({message: "chatMessage"});
     }
+
     @CanInvoke(true)
     leaveDungeon(data: any) {
         this.invokeTo((pre: Broker) => {
@@ -141,7 +162,9 @@ export class Broker extends ControllerBase {
             key: data.key,
             peerId: this.peer.peerId
         }, "leaveDungeon");
+        appInsightsClient && appInsightsClient.trackTrace({message: "leaveDungeon"});
     }
+
     @CanInvoke(true)
     inviteDungeon(dungeon: DungeonModel) {
         dungeon.creator = this.peer.peerId;
@@ -149,8 +172,10 @@ export class Broker extends ControllerBase {
             this.invokeTo((pre: Broker) => {
                 return pre.peer.peerId == peerId;
             }, dungeon, "inviteDungeon");
+            appInsightsClient && appInsightsClient.trackTrace({message: "inviteDungeon"});
         });
     }
+
     @CanInvoke(true)
     declineDungeon(dungeon: DungeonModel) {
         dungeon.peerIds.forEach((peerId: string) => {
@@ -161,6 +186,7 @@ export class Broker extends ControllerBase {
                 context: dungeon.context,
                 peerId: this.peer.peerId
             }, "declineDungeon");
+            appInsightsClient && appInsightsClient.trackTrace({message: "declineDungeon"});
         });
         // notify creator as well i declined
         this.invokeTo((pre: Broker) => {
@@ -170,7 +196,9 @@ export class Broker extends ControllerBase {
             context: dungeon.context,
             peerId: this.peer.peerId
         }, "declineDungeon");
+        appInsightsClient && appInsightsClient.trackTrace({message: "declineDungeon"});
     }
+
     @CanInvoke(true)
     acceptDungeon(dungeon: DungeonModel) {
         dungeon.peerIds.forEach((peerId: string) => {
@@ -181,6 +209,7 @@ export class Broker extends ControllerBase {
                 context: dungeon.context,
                 peerId: this.peer.peerId
             }, "acceptDungeon");
+            appInsightsClient && appInsightsClient.trackTrace({message: "acceptDungeon"});
         });
         // notify creator as well i accepted
         this.invokeTo((pre: Broker) => {
@@ -190,10 +219,16 @@ export class Broker extends ControllerBase {
             context: dungeon.context,
             peerId: this.peer.peerId
         }, "acceptDungeon");
+        appInsightsClient && appInsightsClient.trackTrace({message: "acceptDungeon"});
     }
 
     @CanInvoke(true)
     isAlive() {
         this.invoke({ timestamp: Date.now() }, "isAlive");
+        appInsightsClient && appInsightsClient.trackMetric({
+            name: 'context',
+            value: this.connections.length
+        });
+        appInsightsClient && appInsightsClient.trackTrace({message: "isAlive"});
     }
 }

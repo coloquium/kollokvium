@@ -122,7 +122,7 @@ export class GreenScreenComponent extends AppComponent {
                 <div class="col-md-9">
                 <h5>Preview</h5>
                 <video width="800" height="450" id="preview" autoplay muted class="img-thumbnail greenscreen-preview -mt-2"
-                poster="https://via.placeholder.com/800x450.png?text=Select an image to start...">
+                poster="/img/800x450.png">
                 </video>
              
                 </div>

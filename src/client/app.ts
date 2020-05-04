@@ -16,6 +16,8 @@ import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
 import { Transcriber } from './Audio/Transcriber';
 import { JournalCompnent } from './Components/JournalComponent';
+// import { ApplicationInsights } from '@microsoft/applicationinsights-web'
+
 
 
 export class App {
@@ -225,7 +227,7 @@ export class App {
      */
     muteAudio(evt: any): void {
 
-       
+
         let el = evt.target as HTMLElement;
         el.classList.toggle("fa-microphone");
         el.classList.toggle("fa-microphone-slash")
@@ -236,7 +238,7 @@ export class App {
         });
 
 
-      
+
 
     }
     /**
@@ -639,6 +641,14 @@ export class App {
      */
     constructor() {
 
+        // const appInsights = new ApplicationInsights({
+        //     config: {
+        //         instrumentationKey: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+        //     }
+        // });
+        // appInsights.loadAppInsights();
+        // appInsights.trackPageView();
+        
         this.appDomain = new AppDomain();
 
         this.factory = this.connectToServer(this.appDomain.serverUrl, {})
@@ -753,20 +763,20 @@ export class App {
 
 
 
-        DOMUtils.get("#show-journal").addEventListener("click",() => {      
-            DOMUtils.get("#generate-journal").textContent = "Copy to clipboard";    
-            if(this.journal.data.length > 0)
-                DOMUtils.get("#journal-content div.journal").remove();             
-                DOMUtils.get("#journal-content").append(this.journal.render());
-                $("#meeting-journal").modal("toggle");
+        DOMUtils.get("#show-journal").addEventListener("click", () => {
+            DOMUtils.get("#generate-journal").textContent = "Copy to clipboard";
+            if (this.journal.data.length > 0)
+                DOMUtils.get("#journal-content div.journal").remove();
+            DOMUtils.get("#journal-content").append(this.journal.render());
+            $("#meeting-journal").modal("toggle");
         });
 
         DOMUtils.get("#generate-journal").addEventListener("click", () => {
 
             this.journal.download();
-         
+
         });
-        
+
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
@@ -792,13 +802,13 @@ export class App {
         DOMUtils.makeDragable(DOMUtils.get(".local"));
 
 
-        this.textToSpeech.addEventListener("click",() => {
+        this.textToSpeech.addEventListener("click", () => {
 
-                if(this.textToSpeech.checked) {
-                    DOMUtils.get(".text-to-speech").classList.remove("hide");
-                }else{
-                    DOMUtils.get(".text-to-speech").classList.add("hide");
-                }
+            if (this.textToSpeech.checked) {
+                DOMUtils.get(".text-to-speech").classList.remove("hide");
+            } else {
+                DOMUtils.get(".text-to-speech").classList.add("hide");
+            }
 
         });
 
@@ -917,7 +927,7 @@ export class App {
             this.userSettings.videoResolution = videoResolution.value;
             this.userSettings.language = this.languagePicker.value;
 
-            if(this.transcriber)
+            if (this.transcriber)
                 this.generateSubtitles.click();
 
             this.userSettings.saveSetting();
@@ -1009,17 +1019,17 @@ export class App {
 
 
         this.generateSubtitles.addEventListener("click", () => {
-         
+
 
             if (!this.transcriber) {
                 this.transcriber = new Transcriber(this.rtcClient.LocalPeerId,
                     new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.userSettings.language
                 );
 
-                this.transcriber.onInterim = (interim,final,lang) =>{
-                    DOMUtils.get("#final-result").textContent = final; 
-                    DOMUtils.get("#interim-result").textContent = interim; 
-                
+                this.transcriber.onInterim = (interim, final, lang) => {
+                    DOMUtils.get("#final-result").textContent = final;
+                    DOMUtils.get("#interim-result").textContent = interim;
+
                 }
 
                 this.transcriber.onFinal = (peerId, result, lang) => {
@@ -1030,7 +1040,7 @@ export class App {
                         sender: this.userSettings.nickname
                     });
 
-                    this.journal.add(this.userSettings.nickname,result,"",lang);
+                    this.journal.add(this.userSettings.nickname, result, "", lang);
 
                 }
                 this.transcriber.start();
@@ -1040,13 +1050,13 @@ export class App {
                     DOMUtils.get(".transcript-bar").classList.add("hide");
                     this.generateSubtitles.classList.remove("flash");
                     this.transcriber = null;
-                    
+
                 }
             } else {
                 if (this.transcriber)
 
                     this.transcriber.stop();
-              
+
             }
         });
 
@@ -1058,8 +1068,8 @@ export class App {
         });
 
         muteAudio.addEventListener("click", (e) => {
-            if(!this.textToSpeech.checked)
-            DOMUtils.get(".text-to-speech").classList.toggle("hide")
+            if (!this.textToSpeech.checked)
+                DOMUtils.get(".text-to-speech").classList.toggle("hide")
             this.muteAudio(e)
         });
         muteVideo.addEventListener("click", (e) => {
@@ -1090,7 +1100,7 @@ export class App {
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
             navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
                 e.target.textContent = "Copied!"
-                
+
             });
         });
 
@@ -1182,10 +1192,10 @@ export class App {
             }
         });
 
-        this.textToSpeechMessage.addEventListener("keydown",(e) => {
+        this.textToSpeechMessage.addEventListener("keydown", (e) => {
             if (e.keyCode == 13) {
                 //this.sendMessage(this.userSettings.nickname, chatMessage.value)
-                this.arbitraryChannel.Invoke("textToSpeech",{
+                this.arbitraryChannel.Invoke("textToSpeech", {
                     text: this.textToSpeechMessage.value,
                     peerId: this.rtcClient.LocalPeerId,
                     lang: this.userSettings.language || navigator.language
@@ -1214,49 +1224,48 @@ export class App {
             });
 
 
-            this.arbitraryChannel.On("textToSpeech",(data:any )=> {
+            this.arbitraryChannel.On("textToSpeech", (data: any) => {
                 let targetLanguage =
-                this.userSettings.language
-                || navigator.language;
+                    this.userSettings.language
+                    || navigator.language;
 
 
                 if (data.lang !== targetLanguage && this.appDomain.translateKey) {
                     Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                         || navigator.language).then((result) => {
-                            Transcriber.textToSpeech(result,targetLanguage);
-                           // this.addSubtitles(parent, result, data.lang, data.text);
+                            Transcriber.textToSpeech(result, targetLanguage);
+                            // this.addSubtitles(parent, result, data.lang, data.text);
                         }).catch(() => {
                             //this.addSubtitles(parent, data.text, data.lang);
                         });
-                    }else
-                    {
-                        Transcriber.textToSpeech(data.text,targetLanguage);
-                    }
-                });
+                } else {
+                    Transcriber.textToSpeech(data.text, targetLanguage);
+                }
+            });
 
             this.arbitraryChannel.On("transcript", (data: any) => {
 
-            
+
 
                 let parent = DOMUtils.get(`.subs${data.peerId}`);
                 if (parent) {
                     let targetLanguage =
                         this.userSettings.language
                         || navigator.language;
-                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;    
+                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;
 
                     if (data.lang !== targetLanguage && this.appDomain.translateKey) {
                         Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                             || navigator.language).then((result) => {
                                 this.addSubtitles(parent, result, data.lang, data.text);
-                                this.journal.add(data.sender,result,data.text,data.lang);
+                                this.journal.add(data.sender, result, data.text, data.lang);
 
                             }).catch(() => {
                                 this.addSubtitles(parent, data.text, data.lang);
-                                this.journal.add(data.sender,data.text,"",data.lang);
+                                this.journal.add(data.sender, data.text, "", data.lang);
                             });
-                    } else{
-                        this.journal.add(data.sender,data.text,"",data.lang);
+                    } else {
+                        this.journal.add(data.sender, data.text, "", data.lang);
                         this.addSubtitles(parent, data.text, data.lang);
                     }
                 }
