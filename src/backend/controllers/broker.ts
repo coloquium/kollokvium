@@ -8,7 +8,6 @@ import {
 } from 'thor-io.vnext'
 
 import { ChatMessageModel } from '../Models/ChatMessageModel';
-import { DungeonModel } from '../Models/DungeonModel';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
 import { Utils } from 'thor-io.client-vnext';
 import {defaultClient as appInsightsClient} from 'applicationinsights';
@@ -109,118 +108,12 @@ export class Broker extends ControllerBase {
         return match;
     }
 
-    @CanInvoke(true)
-    fileShare(fileInfo: any, topic: any, controller: any, blob: any) {
-        let expression = (pre: Broker) => {
-            return pre.peer.context >= this.peer.context;        };
-        this.invokeTo(expression, { text: "You recived a file (see '" + fileInfo.name + "')", from: 'Kollokvium' }, "chatMessage", this.alias);
-        this.invokeTo(expression, fileInfo, "fileShare", this.alias, blob);
-        appInsightsClient && appInsightsClient.trackTrace({message: "fileShare"});
-    }
-
+   
     @CanInvoke(true)
     setNickname(name: string) {
         this.nickname = name;
     }
 
-    /**
-     *  Not used as we use dataChannels for the text chat
-     *
-     * @param {ChatMessageModel} data
-     * @param {string} topic
-     * @param {string} controller
-     * @memberof Broker
-     */
-    @CanInvoke(true)
-    chatMessage(data: ChatMessageModel, topic: string, controller: string) {        
-        return;
-        let expression;
-        let mentions = data.text.match(/\B@[a-z0-9_-]+/gi) as Array<string>;
-        // has mentions, then target only thoose ..
-        if (!mentions) {
-            data.hasMentions = false;
-            expression = (pre: Broker) => {
-                return pre.peer.context == this.peer.context;
-            };
-        } else {
-            data.hasMentions = true;
-            // Make sure i also get it, push self
-            mentions.push(this.nickname);
-            expression = (pre: Broker) => {
-                return pre.peer.context == this.peer.context && mentions.includes(`${pre.nickname}`);
-            };
-        }
-        this.invokeTo(expression, data, "chatMessage");
-        appInsightsClient && appInsightsClient.trackTrace({message: "chatMessage"});
-    }
-
-    @CanInvoke(true)
-    leaveDungeon(data: any) {
-        this.invokeTo((pre: Broker) => {
-            return pre.peer.peerId == data.peerId;
-        }, {
-            key: data.key,
-            peerId: this.peer.peerId
-        }, "leaveDungeon");
-        appInsightsClient && appInsightsClient.trackTrace({message: "leaveDungeon"});
-    }
-
-    @CanInvoke(true)
-    inviteDungeon(dungeon: DungeonModel) {
-        dungeon.creator = this.peer.peerId;
-        dungeon.peerIds.forEach((peerId: string) => {
-            this.invokeTo((pre: Broker) => {
-                return pre.peer.peerId == peerId;
-            }, dungeon, "inviteDungeon");
-            appInsightsClient && appInsightsClient.trackTrace({message: "inviteDungeon"});
-        });
-    }
-
-    @CanInvoke(true)
-    declineDungeon(dungeon: DungeonModel) {
-        dungeon.peerIds.forEach((peerId: string) => {
-            this.invokeTo((pre: Broker) => {
-                return pre.peer.peerId == peerId;
-            }, {
-                key: dungeon.key,
-                context: dungeon.context,
-                peerId: this.peer.peerId
-            }, "declineDungeon");
-            appInsightsClient && appInsightsClient.trackTrace({message: "declineDungeon"});
-        });
-        // notify creator as well i declined
-        this.invokeTo((pre: Broker) => {
-            return pre.peer.peerId == dungeon.creator;
-        }, {
-            key: dungeon.key,
-            context: dungeon.context,
-            peerId: this.peer.peerId
-        }, "declineDungeon");
-        appInsightsClient && appInsightsClient.trackTrace({message: "declineDungeon"});
-    }
-
-    @CanInvoke(true)
-    acceptDungeon(dungeon: DungeonModel) {
-        dungeon.peerIds.forEach((peerId: string) => {
-            this.invokeTo((pre: Broker) => {
-                return pre.peer.peerId == peerId && pre.peer.peerId !== this.peer.peerId;
-            }, {
-                key: dungeon.key,
-                context: dungeon.context,
-                peerId: this.peer.peerId
-            }, "acceptDungeon");
-            appInsightsClient && appInsightsClient.trackTrace({message: "acceptDungeon"});
-        });
-        // notify creator as well i accepted
-        this.invokeTo((pre: Broker) => {
-            return pre.peer.peerId == dungeon.creator;
-        }, {
-            key: dungeon.key,
-            context: dungeon.context,
-            peerId: this.peer.peerId
-        }, "acceptDungeon");
-        appInsightsClient && appInsightsClient.trackTrace({message: "acceptDungeon"});
-    }
 
     @CanInvoke(true)
     isAlive() {

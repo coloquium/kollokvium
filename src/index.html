@@ -1,9 +1,11 @@
 <html lang="en-US">
+
 <head>
     <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Kollokvium - Private & secure web-based video chat platform that instantly and connects people with video, chat, & language translation services on any device without registration and data collection!">
+    <meta name="description"
+        content="Kollokvium - Private & secure web-based video chat platform that instantly and connects people with video, chat, & language translation services on any device without registration and data collection!">
     <link rel="apple-touch-icon" sizes="57x57" href="img/favicons/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="img/favicons/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="img/favicons/apple-icon-72x72.png">
@@ -29,15 +31,10 @@
 
     <div id="components"></div>
 
-    <div class="toasters">
-    </div>
-
     <div id="remtote-audio-node" class="hide">
         <audio></audio>
     </div>
 
-    <div class="dungeons d-none">
-    </div>
 
     <div class="our-brand" id="appVersion">
         ...
@@ -48,9 +45,9 @@
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <div class="modal-title" id="exampleModalScrollableTitle">Meeting journal 
+                    <div class="modal-title" id="exampleModalScrollableTitle">Meeting journal
                         <span class="text-muted mr-1"> - works best with head
-                        phones <i class="fas fa-headphones"></i> </span></div>
+                            phones <i class="fas fa-headphones"></i> </span></div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -74,10 +71,10 @@
             <div class="row">
                 <div class="col-md-8 mx-auto p-2 my-2" id="transcript-results">
                     <div>
-                        <div class="modal-title">                           
+                        <div class="modal-title">
                             Your captured speech <span class="text-muted mr-1"> - works best with head
                                 phones <i class="fas fa-headphones"></i> </span>
-                            </div>
+                        </div>
                     </div>
                     <hr>
                     <div class="p-1">
@@ -172,7 +169,7 @@
     <main>
 
         <div class="top-bar d-inline-flex flex-row align-items-center w-100 justify-content-center">
-        
+
 
             <div class="p-3">
                 <i class="far fa-minus-square fa-2x hide" id="pip" title="toggle picture-in-picture mode"></i>
@@ -188,9 +185,9 @@
                 <i class="fas fa-share-alt fa-2x hide" id="share-slug" data-container="body" data-toggle="popover"
                     data-placement="bottom" data-trigger="click"
                     data-content="Your room link is now in the clipboard"></i>
-                            </div>
+            </div>
 
-          
+
 
             <div class="p-3">
                 <i class="fas fa-lock-open fa-2x hide" id="context-lock" title="Lock / unlock this room "></i>
@@ -205,7 +202,7 @@
             <div class="p-3">
                 <i class="fas fa-book fa-2x hide" id="show-journal"
                     title="Show / hide journal ( meeting transcript )"></i>
-                
+
             </div>
 
             <div class="p-3">
@@ -213,13 +210,7 @@
 
             </div>
 
-            <div class="p-3 hide d-none">
-                <i class="fas fa-dungeon fa-2x hide" id="create-dungeon"></i>
-
-            </div>
-
-             
-    </div>
+        </div>
 
 
         <div class="overlay"></div>
@@ -281,16 +272,30 @@
 
                     <div class="text-left" id="await-streams">
 
-                        <div class="alert alert-warning" role="alert">
+                        <div class="alert alert-warning" role="alert" id="await-need-accept">
                             <h4 class="alert-heading">Accept camera & microphone access!</h4>
                             <p>
                                 Your device has just requested access to your webcam and microphone to enable video
                                 conferencing.
-
-                                .
                             </p>
                             <p class="mb-0">Click <strong>allow</strong> if you wish to continue! </p>
                         </div>
+
+                        <div class="alert alert-danger hide" role="alert" id="await-need-error">
+                            <h4 class="alert-heading">Faild to access camera</h4>
+                            <p>
+                                <strong>Damn!</strong>
+                                Kollokvium.se failed to get hold of your camera.,Please try use
+                                <button class="btn btn-primary" id="apply-fail-save-constraints">
+                                    <i class="fas fa-life-ring"></i> Try fail-safe settings</button> for a start.
+                                <hr>
+                                You can later change settings using <i class="fa fa-cog"></i>.
+                                But first please make sure you see yourself in the lower right corner
+                            </p>
+
+                        </div>
+
+
                     </div>
 
 
@@ -347,7 +352,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-12">
                             <input id="text-message" type="text"
-                                class="form-control form-control-lg"" disabled  placeholder="What do you want to say?
+                                class="form-control form-control-lg"" disabled  placeholder=" What do you want to say?
                                 Use your native language, it will arrive in the recpients language."">
                         </div>
                     </div>
@@ -388,29 +393,6 @@
         </div>
 
 
-        <div class="modal" tabindex="-1" role="dialog" id="modal-dungeon">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Create a dungeon</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Click the participants you want to invite to a <strong>dungeon<strong></p>
-                        <div class="dungeon-thumbs">
-
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="invite-dungeon">Invite
-                            selected</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div id="recorder-result" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -474,6 +456,7 @@
                                 <option value="">Not set </option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label for="sel-audio">Audio input</label>
                             <select class="form-control" id="sel-audio">
@@ -518,17 +501,17 @@
 
     </main>
     <script type="text/javascript">
-        var sdkInstance="appInsightsSDK";window[sdkInstance]="appInsights";var aiName=window[sdkInstance],aisdk=window[aiName]||function(n){var o={config:n,initialize:!0},t=document,e=window,i="script";setTimeout(function(){var e=t.createElement(i);e.src=n.url||"https://az416426.vo.msecnd.net/scripts/b/ai.2.min.js",t.getElementsByTagName(i)[0].parentNode.appendChild(e)});try{o.cookie=t.cookie}catch(e){}function a(n){o[n]=function(){var e=arguments;o.queue.push(function(){o[n].apply(o,e)})}}o.queue=[],o.version=2;for(var s=["Event","PageView","Exception","Trace","DependencyData","Metric","PageViewPerformance"];s.length;)a("track"+s.pop());var r="Track",c=r+"Page";a("start"+c),a("stop"+c);var u=r+"Event";if(a("start"+u),a("stop"+u),a("addTelemetryInitializer"),a("setAuthenticatedUserContext"),a("clearAuthenticatedUserContext"),a("flush"),o.SeverityLevel={Verbose:0,Information:1,Warning:2,Error:3,Critical:4},!(!0===n.disableExceptionTracking||n.extensionConfig&&n.extensionConfig.ApplicationInsightsAnalytics&&!0===n.extensionConfig.ApplicationInsightsAnalytics.disableExceptionTracking)){a("_"+(s="onerror"));var p=e[s];e[s]=function(e,n,t,i,a){var r=p&&p(e,n,t,i,a);return!0!==r&&o["_"+s]({message:e,url:n,lineNumber:t,columnNumber:i,error:a}),r},n.autoExceptionInstrumented=!0}return o}(
-        {
-          instrumentationKey:'9a80d319-6100-4b4d-8f40-f1009e7afc60'
-        }
-        );(window[aiName]=aisdk).queue&&0===aisdk.queue.length&&aisdk.trackPageView({});
-        </script>
+        var sdkInstance = "appInsightsSDK"; window[sdkInstance] = "appInsights"; var aiName = window[sdkInstance], aisdk = window[aiName] || function (n) { var o = { config: n, initialize: !0 }, t = document, e = window, i = "script"; setTimeout(function () { var e = t.createElement(i); e.src = n.url || "https://az416426.vo.msecnd.net/scripts/b/ai.2.min.js", t.getElementsByTagName(i)[0].parentNode.appendChild(e) }); try { o.cookie = t.cookie } catch (e) { } function a(n) { o[n] = function () { var e = arguments; o.queue.push(function () { o[n].apply(o, e) }) } } o.queue = [], o.version = 2; for (var s = ["Event", "PageView", "Exception", "Trace", "DependencyData", "Metric", "PageViewPerformance"]; s.length;)a("track" + s.pop()); var r = "Track", c = r + "Page"; a("start" + c), a("stop" + c); var u = r + "Event"; if (a("start" + u), a("stop" + u), a("addTelemetryInitializer"), a("setAuthenticatedUserContext"), a("clearAuthenticatedUserContext"), a("flush"), o.SeverityLevel = { Verbose: 0, Information: 1, Warning: 2, Error: 3, Critical: 4 }, !(!0 === n.disableExceptionTracking || n.extensionConfig && n.extensionConfig.ApplicationInsightsAnalytics && !0 === n.extensionConfig.ApplicationInsightsAnalytics.disableExceptionTracking)) { a("_" + (s = "onerror")); var p = e[s]; e[s] = function (e, n, t, i, a) { var r = p && p(e, n, t, i, a); return !0 !== r && o["_" + s]({ message: e, url: n, lineNumber: t, columnNumber: i, error: a }), r }, n.autoExceptionInstrumented = !0 } return o }(
+            {
+                instrumentationKey: '9a80d319-6100-4b4d-8f40-f1009e7afc60'
+            }
+        ); (window[aiName] = aisdk).queue && 0 === aisdk.queue.length && aisdk.trackPageView({});
+    </script>
 
-        <script src="js/jquery.min.js"></script>
-        <script src="js/jquery.min.js"></script>
-        <script src="js/bootstrap.bundle.min.js"></script>
-        <script src="js/adapter.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/adapter.min.js"></script>
 </body>
 
 </html>

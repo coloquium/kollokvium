@@ -87,8 +87,12 @@ export class DetectResolutions {
                 cb(candidate);
             }))
             .catch((error) => {
-                console.log('non working candidate', candidate);
+                console.info('Non working candidate', candidate);
             });
+    }
+    static supportedConstraints():MediaTrackSupportedConstraints{
+        let supports = navigator.mediaDevices.getSupportedConstraints()
+        return supports;
     }
     static testResolutions(deviceId: string, cb: (result: any) => void) {
         let c = 0;
