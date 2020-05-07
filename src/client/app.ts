@@ -8,8 +8,6 @@ import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
 import { MediaStreamBlender, MediaStreamRecorder, StreamSource } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
-import { AppComponentToaster } from './Components/AppComponentToaster';
-import { DungeonComponent } from './Components/DungeonComponent';
 import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
@@ -30,7 +28,6 @@ export class App {
     fileChannel: DataChannel;
     arbitraryChannel: DataChannel;
 
-    dungeons: Map<string, DungeonComponent>;
     singleStreamRecorder: MediaStreamRecorder
     factory: Factory;
     rtcClient: WebRTC;
@@ -92,8 +89,12 @@ export class App {
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
+
+
         }).catch(err => {
-            console.error(err);
+            // unable to get camera, show camera dialog ?
+            DOMUtils.get("#await-need-error").classList.toggle("hide");
+            DOMUtils.get("#await-need-accept").classList.toggle("hide");
         });
     }
     /**
@@ -322,6 +323,7 @@ export class App {
 
         video.autoplay = true;
         video.muted = true;
+        video.poster = "/img/novideo.png";
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
 
@@ -431,6 +433,7 @@ export class App {
         item.prepend(videoTools);
 
         let video = document.createElement("video");
+        video.poster = "/img/novideo.png";
         video.srcObject = mediaStream;
         video.width = 1280;
         video.height = 720;
@@ -456,39 +459,6 @@ export class App {
         DOMUtils.get("#remote-videos").append(item);
     }
 
-    /**
-     *
-     *
-     * @param {string} key
-     * @memberof App
-     */
-    addDungeon(key: string) {
-        let d = new DungeonComponent(key);
-        this.dungeons.set(key, d);
-        d.render(DOMUtils.get(".dungeons"));
-        DOMUtils.get("#dungeon-" + key + " i").addEventListener("click", () => {
-            d.destroy((peers: Array<string>) => {
-                peers.forEach((peerId: string) => {
-                    this.factory.GetController("broker").Invoke("leaveDungeon", {
-                        key: d.id,
-                        peerId: peerId
-                    });
-                });
-                this.dungeons.delete(key);
-                DOMUtils.get("#dungeon-" + key).remove();
-            });
-        });
-
-        DOMUtils.get("#dungeon-" + key).addEventListener("click", () => {
-            DOMUtils.get(".video-grid").classList.add("blur");
-            DOMUtils.get(".dungeons-header").classList.add("flash");
-
-        });
-        if (DOMUtils.get(".dungeons").classList.contains("d-none")) {
-            DOMUtils.get(".dungeons").classList.remove("d-none");
-        }
-
-    }
 
     /**
      * Get this clients media devices
@@ -572,7 +542,6 @@ export class App {
         this.textToSpeechMessage.disabled = true;
 
         DOMUtils.get("#show-journal").classList.toggle("hide");
-        DOMUtils.get(".fa-dungeon").classList.add("hide");
         DOMUtils.get(".top-bar").classList.add("d-none");
 
         DOMUtils.get("#record").classList.add("d-none");
@@ -617,7 +586,6 @@ export class App {
         this.leaveCotext.classList.remove("hide");
 
         DOMUtils.get("#show-journal").classList.toggle("hide");
-        DOMUtils.get(".fa-dungeon").classList.toggle("hide");
         DOMUtils.get(".top-bar").classList.remove("d-none");
 
         DOMUtils.get("#record").classList.remove("d-none");
@@ -648,7 +616,7 @@ export class App {
         // });
         // appInsights.loadAppInsights();
         // appInsights.trackPageView();
-        
+
         this.appDomain = new AppDomain();
 
         this.factory = this.connectToServer(this.appDomain.serverUrl, {})
@@ -715,7 +683,6 @@ export class App {
 
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map<string, AppParticipant>();
-        this.dungeons = new Map<string, DungeonComponent>();
 
         this.slug = location.hash.replace("#", "");
 
@@ -762,6 +729,22 @@ export class App {
 
 
 
+        DOMUtils.get("button#apply-fail-save-constraints").addEventListener("click", () => {
+
+            this.getLocalStream(
+                UserSettings.failSafeConstraints(),
+                (mediaStream: MediaStream) => {
+                    DOMUtils.get("#await-streams").classList.toggle("hide");
+                    DOMUtils.get("#has-streams").classList.toggle("hide");
+                    this.localMediaStream = mediaStream;
+                    this.rtcClient.AddLocalStream(this.localMediaStream);
+                    this.addLocalVideo(this.localMediaStream, true);
+                    if (location.hash.length <= 6)
+                        $("#random-slug").popover("show");
+                });
+        });
+
+
 
         DOMUtils.get("#show-journal").addEventListener("click", () => {
             DOMUtils.get("#generate-journal").textContent = "Copy to clipboard";
@@ -789,7 +772,7 @@ export class App {
         });
 
         DOMUtils.get("#remove-virtualbg").addEventListener("click", () => {
-            this.getLocalStream(UserSettings.defaultConstraints, (mediaStream: MediaStream) => {
+            this.getLocalStream(UserSettings.defaultConstraints(true), (mediaStream: MediaStream) => {
                 const track = this.localMediaStream.getVideoTracks()[0];
                 this.localMediaStream.removeTrack(track);
                 this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
@@ -969,41 +952,6 @@ export class App {
             });
         });
 
-        DOMUtils.get("#create-dungeon").addEventListener("click", () => {
-            $("#modal-dungeon").modal("toggle");
-            let container = DOMUtils.get(".dungeon-thumbs");
-            container.innerHTML = "";
-            // get a new list of participants , and show thumbs
-            this.participants.forEach((p: AppParticipant) => {
-                p.captureImage().then((i: ImageBitmap) => {
-                    let canvas = document.createElement("canvas");
-                    canvas.height = i.height; canvas.width = i.width;
-                    let ctx = canvas.getContext("2d");
-                    ctx.drawImage(i, 0, 0, i.width, i.height);
-                    canvas.dataset.peerId = p.id;
-                    canvas.addEventListener("click", () => {
-                        canvas.classList.toggle("dungeon-paricipant");
-                    });
-                    container.append(canvas);
-                })
-            });
-        });
-
-        DOMUtils.get("button#invite-dungeon").addEventListener("click", () => {
-            DOMUtils.get(".dungeons").classList.remove("d-none");
-            $("#modal-dungeon").modal("toggle");
-            let peers = new Array<string>();
-            DOMUtils.getAll(".dungeon-paricipant").forEach((el: HTMLElement) => {
-                peers.push(el.dataset.peerId);
-            });
-            const key = Math.random().toString(36).substring(6);
-            this.addDungeon(key);
-            this.factory.GetController("broker").Invoke("inviteDungeon", {
-                peerIds: peers,
-                key: key,
-                context: this.rtcClient.Context
-            });
-        });
 
         this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
             const option = document.createElement("option");
@@ -1312,47 +1260,7 @@ export class App {
                 }
             });
 
-            broker.On("leaveDungeon", (data: any) => {
-                this.dungeons.get(data.key).removeParticipant(data.peerId);
-            });
 
-            broker.On("inviteDungeon", (invite: any) => {
-                let toast = AppComponentToaster.dungeonToaster(
-                    "Dungeon invite", "Someone in the meeting created a dungeon...");
-                let node = toast.children[0] as HTMLElement;
-                node.dataset.peerId = invite.peerId;
-                toast.querySelector(".btn-primary").addEventListener("click", (el: any) => {
-                    this.factory.GetController("broker").Invoke("acceptDungeon", invite);
-                    this.addDungeon(invite.key);
-                    node.remove();
-                    try {
-                        this.dungeons.get(invite.key).addDungeonParticipant(this.participants.get(invite.creator));
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-
-                toast.querySelector(".btn-danger").addEventListener("click", (el: any) => {
-                    this.factory.GetController("broker").Invoke("declineDungeon", invite);
-                    node.remove();
-                });
-                DOMUtils.get(".toasters").prepend(toast);
-                $(".toast").toast("show");
-
-            });
-
-            broker.On("acceptDungeon", (data) => {
-                let d = this.dungeons.get(data.key);
-                try {
-                    d.addDungeonParticipant(this.participants.get(data.peerId));
-                } catch (e) {
-                    console.log(e);
-                }
-            });
-
-            broker.On("chatMessage", (data: any) => {
-                this.displayChatMessage(data);
-            });
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
             }
@@ -1390,7 +1298,7 @@ export class App {
 
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
-                    UserSettings.defaultConstraints,
+                    UserSettings.defaultConstraints(true),
                     (mediaStream: MediaStream) => {
                         DOMUtils.get("#await-streams").classList.toggle("hide");
                         DOMUtils.get("#has-streams").classList.toggle("hide");
