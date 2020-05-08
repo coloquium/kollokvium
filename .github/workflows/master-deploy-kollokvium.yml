@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy master branch
+name: master - Build and deploy
 
 on:
   push:
@@ -51,4 +51,4 @@ jobs:
     - name: 'Purge Azure CDN Endpoint'
       uses: azure/CLI@v1
       with:
-        inlineScript: az cdn endpoint purge --ids ${{ secrets.AZURE_CDN_ENDPOINT_master }} --content-path '/*'
+        inlineScript: az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
