@@ -1,13 +1,13 @@
 import { Utils } from 'thor-io.client-vnext';
 declare var webkitSpeechRecognition: any;
 
-export class Subtitles {
+export class Transcriber {
 
     recognition: SpeechRecognition;
     isRunning: boolean;
 
     onFinal: (peerId: string, result: string, lang: string) => void;
-    onInterim: (peerId: string, result: string, lang: string) => void;
+    onInterim: (final: string, interim: string, lang: string) => void;
 
     onReady: (event: any) => void;
     onStop: (event: any) => void;
@@ -90,14 +90,25 @@ export class Subtitles {
             this.recognition.lang = lang;
         }
         this.recognition.onspeechend = (event: any) => {
-            this.recognition.stop();
+            if(this.isRunning) this.onStop(event);
             this.isRunning = false;
-            this.onStop(event);
-        };
-        this.recognition.onsoundend
+        }
         this.recognition.onspeechstart = () => {
-        };
-
+        }
+        this.recognition.onaudiostart = (event: any) => {
+        }
+        this.recognition.onaudioend = e => {
+        }
+        this.recognition.onend = (event) => {
+            if(this.isRunning) this.onStop(event);
+            this.isRunning = false;          
+        }
+        this.recognition.onerror = (event: any) => {
+            if (this.onError) this.onError(event);
+        }
+        this.recognition.onstart = () => {
+            this.isRunning = true;
+        }
         this.recognition.onresult = (event: SpeechRecognitionEvent) => {
             let interim = '';
             let final = "";
@@ -109,33 +120,23 @@ export class Subtitles {
                 }
             }
             if (final.length > 0 && this.onFinal) {
+                if(this.onInterim)
+                    this.onInterim(interim, final, this.lang || navigator.language)
+
                 this.onFinal(this.peeId, final, this.lang || navigator.language)
             }
             if (interim.length > 0 && this.onInterim) {
-                this.onInterim(this.peeId, interim, this.lang || navigator.language)
+                this.onInterim(interim, final, this.lang || navigator.language)
             }
         };
 
-        this.recognition.onerror = (event: any) => {
-
-            if (this.onError) this.onError(event);
-        }
-
-        this.recognition.onaudiostart = (event: any) => {
-        }
-
-        this.recognition.onaudioend = e => {
-
-        }
-
-        this.recognition.onstart = () => {
-            this.isRunning = true;
-        }
 
         this.stop = () => {
+
             if (this.isRunning) {
                 this.isRunning = false;
                 this.recognition.stop();
+                this.onStop(event);
             }
         };
         this.start = () => {
@@ -186,7 +187,7 @@ export class Subtitles {
         notset.value = "";
         notset.textContent = "Not set (use browser language)";
         selectLanguage.append(notset);
-        Subtitles.languages.forEach((entry: any) => {
+        Transcriber.languages.forEach((entry: any) => {
             let country = entry[0];
             let dialects = entry[1];
             if (dialects.length === 1) {
@@ -215,34 +216,25 @@ export class Subtitles {
 
 
         let payload = {
-            from: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
-            to: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
-            text: phrase
+            source: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
+            target: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
+            q: phrase
         }
         return new Promise<string>((resolve, reject) => {
-            let result = fetch(`https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=${payload.to}&from=${payload.from}`, {
+            let result = fetch(`https://www.googleapis.com/language/translate/v2/?key=${key}`, {
                 method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Ocp-Apim-Subscription-Region': 'westeurope',
-                    'Ocp-Apim-Subscription-Key': key
-                },
-                body: JSON.stringify([{
-                    text: payload.text
-                }])
-
+                body: JSON.stringify(payload)
             });
             result.then((response: Response) => {
                 response.json().then((result) => {
-                    if (Array.isArray(result)) {
-                        resolve(result[0].translations[0].text)
-                    } else
-                        resolve(phrase);
+                    if (Array.isArray(result.data.translations)) {
+                        resolve(result.data.translations[0].translatedText)
+                    } else resolve(phrase);
                 }).catch(() => {
                     resolve(phrase); // pass non translated text back
                 });
             }).catch(() => {
-                resolve(phrase);
+                reject(phrase);
             })
         });
 

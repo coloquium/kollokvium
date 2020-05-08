@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const sourceFolder = Path.resolve(__dirname, 'src');
 const outFolder = Path.resolve(__dirname, 'dist', 'client');
-const assetFolders = ['css', 'img'];
+const assetFolders = ['css', 'img','fonts','js'];
 
 const package = require('./package.json');
 
@@ -20,10 +20,7 @@ module.exports = {
       {
         test: /\.ts$/,
         use: {
-          loader: 'ts-loader',
-          options: {
-            allowTsInNodeModules: 'true'
-          }
+          loader: 'ts-loader'
         }
       },
     ],
@@ -36,16 +33,17 @@ module.exports = {
       template: Path.join(sourceFolder, 'index.html')
     }),
     new Webpack.DefinePlugin({
+      'process.env.APPINSIGHTS_INSTRUMENTATIONKEY': JSON.stringify(process.env.APPINSIGHTS_INSTRUMENTATIONKEY),
       'process.env.WSS_SERVER_URL': JSON.stringify(process.env.WSS_SERVER_URL),
       'process.env.KOLLOKVIUM_VERSION': JSON.stringify(process.env.KOLLOKVIUM_VERSION || package.version)
     })
   ],
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.js', '.ts'],
   },
   
   output: {
     path: outFolder,
-    filename: Path.join('js', '[name]-bundle.js')
+    filename: 'js/[name]-bundle.js'
   }
 }

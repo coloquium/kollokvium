@@ -46,7 +46,7 @@ To deploy to Azure you need an Azure account, and you need to create an Azure We
 
 ### Heroku apps
 
-TBD 
+TBD
 
 ### Deploy front end only 
 If you want to deploy only the front-end as a static site, build the application and copy all the files from dist/client folder to the root of you web application. 

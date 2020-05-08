@@ -23,6 +23,7 @@ jobs:
     - name: 'Install dependencies, and build'
       env:
         WSS_SERVER_URL: 'wss://lunsj.kollokvium.net'
+        APPINSIGHTS_INSTRUMENTATIONKEY: ${{ secrets.AzureAppService_AppInsights_lunsj_kollokvium }}
       run: |
         npm install
         npm run build --if-present

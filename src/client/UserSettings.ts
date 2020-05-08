@@ -2,14 +2,34 @@ import { SlugHistory } from './SlugHistory';
 import { DetectResolutions } from "./Helpers/DetectResolutions";
 export class UserSettings {
 
-    static defaultConstraints: MediaStreamConstraints = {
+    static failSafeConstraints(): MediaStreamConstraints {
+        return{
+            video: true, audio: true,
+        };
+    }
+    static defaultConstraints(shouldFaceUser?:boolean): MediaStreamConstraints {
 
-        video: {
-            width: { min: 640, ideal: 1280 },
-            height: { min: 400, ideal: 720 },
-            frameRate: 25
-        }, audio: true,
-    };
+        let constraints = {
+            video: {
+                width: { min: 320, max: 1280, ideal: 1280 },
+                height: { min: 240, max: 720, ideal: 720 },
+                frameRate: 25,
+                facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' },
+            }, audio: true,
+        };
+
+        // let makeItFail = {
+        //     video: {
+        //         width: { exact: 1920},
+        //         height: { exact: 1080 },
+        //         frameRate: 25,
+        //         facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' },
+        //     }, audio: true,
+        // };
+
+        return constraints;
+
+    }
 
     slugHistory: SlugHistory;
     videoDevice: string;
@@ -30,16 +50,14 @@ export class UserSettings {
         };
         localStorage.setItem("settings", JSON.stringify(data));
     }
-    createConstraints(candidate: string): MediaStreamConstraints {
+    createConstraints(candidate: string, shouldFaceUser?: boolean): MediaStreamConstraints {
+
+
         let constraints: MediaStreamConstraints;
 
         if (candidate.length === 0) {
-            constraints = {
-                video: {
-                    width: { min: 320, ideal: 1280 },
-                    height: { min: 240, ideal: 720 }
-                }, audio: true,
-            };
+            constraints = UserSettings.defaultConstraints(true);
+
         } else {
             const preferedResolution = DetectResolutions.getCandidate(candidate);
 
@@ -47,7 +65,9 @@ export class UserSettings {
                 audio: true,
                 video: {
                     width: { exact: preferedResolution.width },
-                    height: { exact: preferedResolution.height }
+                    height: { exact: preferedResolution.height },
+                    frameRate: 25,
+                    facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' }
                 }
             };
         };

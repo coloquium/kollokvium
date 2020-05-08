@@ -8,13 +8,16 @@ import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
 import { MediaStreamBlender, MediaStreamRecorder, StreamSource } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
-import { AppComponentToaster } from './Components/AppComponentToaster';
-import { DungeonComponent } from './Components/DungeonComponent';
 import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
 import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
-import { Subtitles } from './Audio/Subtitles';
+import { Transcriber } from './Audio/Transcriber';
+import { JournalCompnent } from './Components/JournalComponent';
+// import { ApplicationInsights } from '@microsoft/applicationinsights-web'
+
+
+
 export class App {
 
     appDomain: AppDomain;
@@ -25,7 +28,6 @@ export class App {
     fileChannel: DataChannel;
     arbitraryChannel: DataChannel;
 
-    dungeons: Map<string, DungeonComponent>;
     singleStreamRecorder: MediaStreamRecorder
     factory: Factory;
     rtcClient: WebRTC;
@@ -33,7 +35,7 @@ export class App {
     slug: string;
     participants: Map<string, AppParticipant>;
     isRecording: boolean;
-    transcriber: Subtitles;
+    transcriber: Transcriber;
     preferedLanguage: string;
 
     numOfChatMessagesUnread: number;
@@ -55,6 +57,11 @@ export class App {
     pictureInPictureElement: HTMLVideoElement;
     textToSpeech: HTMLInputElement;
     textToSpeechMessage: HTMLInputElement;
+
+
+    journal: JournalCompnent;
+
+
     /**
      *
      *
@@ -82,8 +89,12 @@ export class App {
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
+
+
         }).catch(err => {
-            console.error(err);
+            // unable to get camera, show camera dialog ?
+            DOMUtils.get("#await-need-error").classList.toggle("hide");
+            DOMUtils.get("#await-need-accept").classList.toggle("hide");
         });
     }
     /**
@@ -217,7 +228,7 @@ export class App {
      */
     muteAudio(evt: any): void {
 
-       
+
         let el = evt.target as HTMLElement;
         el.classList.toggle("fa-microphone");
         el.classList.toggle("fa-microphone-slash")
@@ -228,7 +239,7 @@ export class App {
         });
 
 
-      
+
 
     }
     /**
@@ -312,6 +323,7 @@ export class App {
 
         video.autoplay = true;
         video.muted = true;
+        video.poster = "/img/novideo.png";
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
 
@@ -421,6 +433,7 @@ export class App {
         item.prepend(videoTools);
 
         let video = document.createElement("video");
+        video.poster = "/img/novideo.png";
         video.srcObject = mediaStream;
         video.width = 1280;
         video.height = 720;
@@ -446,39 +459,6 @@ export class App {
         DOMUtils.get("#remote-videos").append(item);
     }
 
-    /**
-     *
-     *
-     * @param {string} key
-     * @memberof App
-     */
-    addDungeon(key: string) {
-        let d = new DungeonComponent(key);
-        this.dungeons.set(key, d);
-        d.render(DOMUtils.get(".dungeons"));
-        DOMUtils.get("#dungeon-" + key + " i").addEventListener("click", () => {
-            d.destroy((peers: Array<string>) => {
-                peers.forEach((peerId: string) => {
-                    this.factory.GetController("broker").Invoke("leaveDungeon", {
-                        key: d.id,
-                        peerId: peerId
-                    });
-                });
-                this.dungeons.delete(key);
-                DOMUtils.get("#dungeon-" + key).remove();
-            });
-        });
-
-        DOMUtils.get("#dungeon-" + key).addEventListener("click", () => {
-            DOMUtils.get(".video-grid").classList.add("blur");
-            DOMUtils.get(".dungeons-header").classList.add("flash");
-
-        });
-        if (DOMUtils.get(".dungeons").classList.contains("d-none")) {
-            DOMUtils.get(".dungeons").classList.remove("d-none");
-        }
-
-    }
 
     /**
      * Get this clients media devices
@@ -538,6 +518,8 @@ export class App {
     }
 
     disableConfrenceElements() {
+        DOMUtils.get("#mute-speakers").classList.toggle("hide");
+        this.generateSubtitles.classList.toggle("hide");
         location.hash = "";
         let slug = DOMUtils.get("#slug") as HTMLInputElement;
 
@@ -559,7 +541,7 @@ export class App {
 
         this.textToSpeechMessage.disabled = true;
 
-        DOMUtils.get(".fa-dungeon").classList.add("hide");
+        DOMUtils.get("#show-journal").classList.toggle("hide");
         DOMUtils.get(".top-bar").classList.add("d-none");
 
         DOMUtils.get("#record").classList.add("d-none");
@@ -580,10 +562,16 @@ export class App {
 
     enableConferenceElements() {
 
+        DOMUtils.get("#mute-speakers").classList.toggle("hide");
+
         if ('pictureInPictureEnabled' in document)
             this.pictueInPicture.classList.toggle("hide");
+
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
+
+
+
 
         this.shareSlug.classList.remove("hide");
 
@@ -597,7 +585,7 @@ export class App {
 
         this.leaveCotext.classList.remove("hide");
 
-        DOMUtils.get(".fa-dungeon").classList.toggle("hide");
+        DOMUtils.get("#show-journal").classList.toggle("hide");
         DOMUtils.get(".top-bar").classList.remove("d-none");
 
         DOMUtils.get("#record").classList.remove("d-none");
@@ -621,6 +609,14 @@ export class App {
      */
     constructor() {
 
+        // const appInsights = new ApplicationInsights({
+        //     config: {
+        //         instrumentationKey: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+        //     }
+        // });
+        // appInsights.loadAppInsights();
+        // appInsights.trackPageView();
+
         this.appDomain = new AppDomain();
 
         this.factory = this.connectToServer(this.appDomain.serverUrl, {})
@@ -630,7 +626,7 @@ export class App {
 
         // add language options to UserSettings 
 
-        DOMUtils.get("#langaues").append(Subtitles.getlanguagePicker());
+        DOMUtils.get("#langaues").append(Transcriber.getlanguagePicker());
 
 
 
@@ -687,7 +683,6 @@ export class App {
 
         this.numOfChatMessagesUnread = 0;
         this.participants = new Map<string, AppParticipant>();
-        this.dungeons = new Map<string, DungeonComponent>();
 
         this.slug = location.hash.replace("#", "");
 
@@ -734,8 +729,37 @@ export class App {
 
 
 
+        DOMUtils.get("button#apply-fail-save-constraints").addEventListener("click", () => {
 
-        
+            this.getLocalStream(
+                UserSettings.failSafeConstraints(),
+                (mediaStream: MediaStream) => {
+                    DOMUtils.get("#await-streams").classList.toggle("hide");
+                    DOMUtils.get("#has-streams").classList.toggle("hide");
+                    this.localMediaStream = mediaStream;
+                    this.rtcClient.AddLocalStream(this.localMediaStream);
+                    this.addLocalVideo(this.localMediaStream, true);
+                    if (location.hash.length <= 6)
+                        $("#random-slug").popover("show");
+                });
+        });
+
+
+
+        DOMUtils.get("#show-journal").addEventListener("click", () => {
+            DOMUtils.get("#generate-journal").textContent = "Copy to clipboard";
+            if (this.journal.data.length > 0)
+                DOMUtils.get("#journal-content div.journal").remove();
+            DOMUtils.get("#journal-content").append(this.journal.render());
+            $("#meeting-journal").modal("toggle");
+        });
+
+        DOMUtils.get("#generate-journal").addEventListener("click", () => {
+
+            this.journal.download();
+
+        });
+
 
         DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
@@ -748,7 +772,7 @@ export class App {
         });
 
         DOMUtils.get("#remove-virtualbg").addEventListener("click", () => {
-            this.getLocalStream(UserSettings.defaultConstraints, (mediaStream: MediaStream) => {
+            this.getLocalStream(UserSettings.defaultConstraints(true), (mediaStream: MediaStream) => {
                 const track = this.localMediaStream.getVideoTracks()[0];
                 this.localMediaStream.removeTrack(track);
                 this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
@@ -761,13 +785,13 @@ export class App {
         DOMUtils.makeDragable(DOMUtils.get(".local"));
 
 
-        this.textToSpeech.addEventListener("click",() => {
+        this.textToSpeech.addEventListener("click", () => {
 
-                if(this.textToSpeech.checked) {
-                    DOMUtils.get(".text-to-speech").classList.remove("hide");
-                }else{
-                    DOMUtils.get(".text-to-speech").classList.add("hide");
-                }
+            if (this.textToSpeech.checked) {
+                DOMUtils.get(".text-to-speech").classList.remove("hide");
+            } else {
+                DOMUtils.get(".text-to-speech").classList.add("hide");
+            }
 
         });
 
@@ -886,7 +910,7 @@ export class App {
             this.userSettings.videoResolution = videoResolution.value;
             this.userSettings.language = this.languagePicker.value;
 
-            if(this.transcriber)
+            if (this.transcriber)
                 this.generateSubtitles.click();
 
             this.userSettings.saveSetting();
@@ -928,41 +952,6 @@ export class App {
             });
         });
 
-        DOMUtils.get("#create-dungeon").addEventListener("click", () => {
-            $("#modal-dungeon").modal("toggle");
-            let container = DOMUtils.get(".dungeon-thumbs");
-            container.innerHTML = "";
-            // get a new list of participants , and show thumbs
-            this.participants.forEach((p: AppParticipant) => {
-                p.captureImage().then((i: ImageBitmap) => {
-                    let canvas = document.createElement("canvas");
-                    canvas.height = i.height; canvas.width = i.width;
-                    let ctx = canvas.getContext("2d");
-                    ctx.drawImage(i, 0, 0, i.width, i.height);
-                    canvas.dataset.peerId = p.id;
-                    canvas.addEventListener("click", () => {
-                        canvas.classList.toggle("dungeon-paricipant");
-                    });
-                    container.append(canvas);
-                })
-            });
-        });
-
-        DOMUtils.get("button#invite-dungeon").addEventListener("click", () => {
-            DOMUtils.get(".dungeons").classList.remove("d-none");
-            $("#modal-dungeon").modal("toggle");
-            let peers = new Array<string>();
-            DOMUtils.getAll(".dungeon-paricipant").forEach((el: HTMLElement) => {
-                peers.push(el.dataset.peerId);
-            });
-            const key = Math.random().toString(36).substring(6);
-            this.addDungeon(key);
-            this.factory.GetController("broker").Invoke("inviteDungeon", {
-                peerIds: peers,
-                key: key,
-                context: this.rtcClient.Context
-            });
-        });
 
         this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
             const option = document.createElement("option");
@@ -978,32 +967,44 @@ export class App {
 
 
         this.generateSubtitles.addEventListener("click", () => {
-         
+
 
             if (!this.transcriber) {
-                this.transcriber = new Subtitles(this.rtcClient.LocalPeerId,
+                this.transcriber = new Transcriber(this.rtcClient.LocalPeerId,
                     new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.userSettings.language
                 );
+
+                this.transcriber.onInterim = (interim, final, lang) => {
+                    DOMUtils.get("#final-result").textContent = final;
+                    DOMUtils.get("#interim-result").textContent = interim;
+
+                }
+
                 this.transcriber.onFinal = (peerId, result, lang) => {
                     this.arbitraryChannel.Invoke("transcript", {
                         peerId: peerId,
                         text: result,
-                        lang: lang
+                        lang: lang,
+                        sender: this.userSettings.nickname
                     });
+
+                    this.journal.add(this.userSettings.nickname, result, "", lang);
+
                 }
                 this.transcriber.start();
                 this.generateSubtitles.classList.toggle("flash");
+                DOMUtils.get(".transcript-bar").classList.remove("hide");
                 this.transcriber.onStop = () => {
-
+                    DOMUtils.get(".transcript-bar").classList.add("hide");
                     this.generateSubtitles.classList.remove("flash");
                     this.transcriber = null;
-                    
+
                 }
             } else {
                 if (this.transcriber)
 
                     this.transcriber.stop();
-              
+
             }
         });
 
@@ -1015,8 +1016,8 @@ export class App {
         });
 
         muteAudio.addEventListener("click", (e) => {
-            if(!this.textToSpeech.checked)
-            DOMUtils.get(".text-to-speech").classList.toggle("hide")
+            if (!this.textToSpeech.checked)
+                DOMUtils.get(".text-to-speech").classList.toggle("hide")
             this.muteAudio(e)
         });
         muteVideo.addEventListener("click", (e) => {
@@ -1037,16 +1038,17 @@ export class App {
             $("#share-file").popover("toggle");
         });
 
-        helpButton.addEventListener("click", () => {
-            $("#quick-start-container").modal("show");
-            this.userSettings.showQuickStart = true;
-            this.userSettings.saveSetting();
-        })
+        // helpButton.addEventListener("click", () => {
+        //     $("#quick-start-container").modal("show");
+        //     this.userSettings.showQuickStart = true;
+        //     this.userSettings.saveSetting();
+        // })
 
 
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
             navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
-                e.target.textContent = "Done!"
+                e.target.textContent = "Copied!"
+
             });
         });
 
@@ -1116,6 +1118,10 @@ export class App {
         })
 
         this.startButton.addEventListener("click", () => {
+
+
+            this.journal = new JournalCompnent();
+
             this.enableConferenceElements();
             this.userSettings.slugHistory.addToHistory(slug.value);
             window.history.pushState({}, window.document.title, `#${slug.value}`);
@@ -1134,10 +1140,10 @@ export class App {
             }
         });
 
-        this.textToSpeechMessage.addEventListener("keydown",(e) => {
+        this.textToSpeechMessage.addEventListener("keydown", (e) => {
             if (e.keyCode == 13) {
                 //this.sendMessage(this.userSettings.nickname, chatMessage.value)
-                this.arbitraryChannel.Invoke("textToSpeech",{
+                this.arbitraryChannel.Invoke("textToSpeech", {
                     text: this.textToSpeechMessage.value,
                     peerId: this.rtcClient.LocalPeerId,
                     lang: this.userSettings.language || navigator.language
@@ -1166,43 +1172,50 @@ export class App {
             });
 
 
-            this.arbitraryChannel.On("textToSpeech",(data:any )=> {
+            this.arbitraryChannel.On("textToSpeech", (data: any) => {
                 let targetLanguage =
-                this.userSettings.language
-                || navigator.language;
+                    this.userSettings.language
+                    || navigator.language;
 
 
                 if (data.lang !== targetLanguage && this.appDomain.translateKey) {
-                    Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                    Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                         || navigator.language).then((result) => {
-                            Subtitles.textToSpeech(result,targetLanguage);
-                           // this.addSubtitles(parent, result, data.lang, data.text);
+                            Transcriber.textToSpeech(result, targetLanguage);
+                            // this.addSubtitles(parent, result, data.lang, data.text);
                         }).catch(() => {
                             //this.addSubtitles(parent, data.text, data.lang);
                         });
-                    }else
-                    {
-                        Subtitles.textToSpeech(data.text,targetLanguage);
-                    }
-                });
+                } else {
+                    Transcriber.textToSpeech(data.text, targetLanguage);
+                }
+            });
 
             this.arbitraryChannel.On("transcript", (data: any) => {
+
+
+
                 let parent = DOMUtils.get(`.subs${data.peerId}`);
                 if (parent) {
                     let targetLanguage =
                         this.userSettings.language
                         || navigator.language;
-                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;                 
+                    targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;
+
                     if (data.lang !== targetLanguage && this.appDomain.translateKey) {
-                        Subtitles.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                        Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                             || navigator.language).then((result) => {
                                 this.addSubtitles(parent, result, data.lang, data.text);
+                                this.journal.add(data.sender, result, data.text, data.lang);
 
                             }).catch(() => {
                                 this.addSubtitles(parent, data.text, data.lang);
+                                this.journal.add(data.sender, data.text, "", data.lang);
                             });
-                    } else
+                    } else {
+                        this.journal.add(data.sender, data.text, "", data.lang);
                         this.addSubtitles(parent, data.text, data.lang);
+                    }
                 }
             });
 
@@ -1247,47 +1260,7 @@ export class App {
                 }
             });
 
-            broker.On("leaveDungeon", (data: any) => {
-                this.dungeons.get(data.key).removeParticipant(data.peerId);
-            });
 
-            broker.On("inviteDungeon", (invite: any) => {
-                let toast = AppComponentToaster.dungeonToaster(
-                    "Dungeon invite", "Someone in the meeting created a dungeon...");
-                let node = toast.children[0] as HTMLElement;
-                node.dataset.peerId = invite.peerId;
-                toast.querySelector(".btn-primary").addEventListener("click", (el: any) => {
-                    this.factory.GetController("broker").Invoke("acceptDungeon", invite);
-                    this.addDungeon(invite.key);
-                    node.remove();
-                    try {
-                        this.dungeons.get(invite.key).addDungeonParticipant(this.participants.get(invite.creator));
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
-
-                toast.querySelector(".btn-danger").addEventListener("click", (el: any) => {
-                    this.factory.GetController("broker").Invoke("declineDungeon", invite);
-                    node.remove();
-                });
-                DOMUtils.get(".toasters").prepend(toast);
-                $(".toast").toast("show");
-
-            });
-
-            broker.On("acceptDungeon", (data) => {
-                let d = this.dungeons.get(data.key);
-                try {
-                    d.addDungeonParticipant(this.participants.get(data.peerId));
-                } catch (e) {
-                    console.log(e);
-                }
-            });
-
-            broker.On("chatMessage", (data: any) => {
-                this.displayChatMessage(data);
-            });
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
             }
@@ -1325,7 +1298,7 @@ export class App {
 
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
-                    UserSettings.defaultConstraints,
+                    UserSettings.defaultConstraints(true),
                     (mediaStream: MediaStream) => {
                         DOMUtils.get("#await-streams").classList.toggle("hide");
                         DOMUtils.get("#has-streams").classList.toggle("hide");
@@ -1356,9 +1329,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
     }
 
-    let instance = App.getInstance();
+    App.getInstance();
 
 
-    window["inst"] = instance;
 
 });
