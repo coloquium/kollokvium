@@ -43,12 +43,9 @@ jobs:
         folder: 'dist/client'
         connection-string: ${{ secrets.AzureStorage_Connection_String_master_kollokvium }}
 
-    - name: 'Azure Login'
+    - name: 'Azure Login and Purge CDN Endpoint'
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS_master }}
-    
-    - name: 'Purge Azure CDN Endpoint'
-      uses: azure/CLI@v1
-      with:
-        inlineScript: az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
+      -run: |
+        az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
