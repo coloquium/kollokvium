@@ -47,5 +47,5 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS_master }}
-      -run: |
-        az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
+
+      run: az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
