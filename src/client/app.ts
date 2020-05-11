@@ -323,9 +323,11 @@ export class App {
 
         video.autoplay = true;
         video.muted = true;
+        
         video.poster = "/img/novideo.png";
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
+        video.setAttribute("playsinline",null);
 
         mediaStream.getVideoTracks()[0].onended = () => {
             this.arbitraryChannel.Invoke("streamChange", { id: mediaStream.getVideoTracks()[0].id });
@@ -438,6 +440,7 @@ export class App {
         video.width = 1280;
         video.height = 720;
         video.autoplay = true;
+        video.setAttribute("playsinline",null);
 
         let subtitles = document.createElement("div");
         subtitles.classList.add("subtitles");
