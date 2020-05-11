@@ -15,7 +15,7 @@ import { AudioNodes } from './Audio/AudioNodes';
 import { Transcriber } from './Audio/Transcriber';
 import { JournalCompnent } from './Components/JournalComponent';
 // import { ApplicationInsights } from '@microsoft/applicationinsights-web'
-
+import hotkeys from 'hotkeys-js';
 
 
 export class App {
@@ -1020,6 +1020,10 @@ export class App {
             }
         });
 
+        hotkeys('ctrl+m', function(e, h) {
+            DOMUtils.get("#mute-local-audio").click();
+            event.preventDefault() 
+          });
 
         muteSpeakers.addEventListener("click", () => {
             muteSpeakers.classList.toggle("fa-volume-mute");
