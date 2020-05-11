@@ -39,6 +39,8 @@ export class App {
     preferedLanguage: string;
 
     numOfChatMessagesUnread: number;
+    numOfPeers:number = 0;
+
 
     shareContainer: HTMLElement;
     videoGrid: HTMLElement;
@@ -290,6 +292,15 @@ export class App {
         }
     }
 
+  
+    /**
+     * Display the number of participants & room name in page title
+     *
+     * @memberof App
+     */
+    updatePageTitle(){
+        document.title = `(${this.numOfPeers+1}) Kollokvium  - ${this.slug} | A free multi-party video conference for you and your friends!`;
+    }
     /**
      * Display recording results
      *
@@ -323,9 +334,11 @@ export class App {
 
         video.autoplay = true;
         video.muted = true;
+        
         video.poster = "/img/novideo.png";
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
+        video.setAttribute("playsinline",'');
 
         mediaStream.getVideoTracks()[0].onended = () => {
             this.arbitraryChannel.Invoke("streamChange", { id: mediaStream.getVideoTracks()[0].id });
@@ -438,6 +451,7 @@ export class App {
         video.width = 1280;
         video.height = 720;
         video.autoplay = true;
+        video.setAttribute("playsinline",'');
 
         let subtitles = document.createElement("div");
         subtitles.classList.add("subtitles");
@@ -445,7 +459,7 @@ export class App {
 
         item.append(subtitles);
         item.append(video);
-        // listener for fulscreen view of a participants video
+        // listener for fullscreen view of a participants video
         f.addEventListener("click", (e) => {
             let elem = video;
             if (!document.fullscreenElement) {
@@ -458,8 +472,6 @@ export class App {
         });
         DOMUtils.get("#remote-videos").append(item);
     }
-
-
     /**
      * Get this clients media devices
      *
@@ -1264,29 +1276,27 @@ export class App {
 
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
             }
-            this.rtcClient.OnContextConnected = (ctx) => {
-            };
             this.rtcClient.OnContextCreated = (ctx) => {
-
             };
             this.rtcClient.OnContextChanged = (ctx) => {
                 this.rtcClient.ConnectContext();
-
             }
             this.rtcClient.OnContextDisconnected = (peer) => {
                 DOMUtils.get(".p" + peer.id).remove();
                 this.participants.delete(peer.id);
+                this.numOfPeers--;
+                this.updatePageTitle();
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 DOMUtils.get(".remote").classList.add("hide");
+                this.numOfPeers ++;
+                this.updatePageTitle();
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
                 participant.addTrack(track);
             }
-            this.rtcClient.OnContextCreated = function (ctx: PeerConnection) {
-                // noop
-            }
+          
             broker.OnOpen = (ci: any) => {
 
 
