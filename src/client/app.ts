@@ -765,7 +765,7 @@ export class App {
         DOMUtils.get("#apply-virtualbg").addEventListener("click", () => {
             $("#settings-modal").modal("toggle");
             const track = this.localMediaStream.getVideoTracks()[0]
-            track.applyConstraints({ width: 800, height: 400 });
+            track.applyConstraints({ width: 800, height: 450 });
             this.greenScreen.setMediaTrack(track);
             $("#gss").modal("toggle");
         });
