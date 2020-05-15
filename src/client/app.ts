@@ -39,7 +39,7 @@ export class App {
     preferedLanguage: string;
 
     numOfChatMessagesUnread: number;
-    numOfPeers:number = 0;
+    numOfPeers: number = 0;
 
 
     shareContainer: HTMLElement;
@@ -69,18 +69,7 @@ export class App {
      *
      * @memberof App
      */
-    testCameraResolutions() {
-        let parent = DOMUtils.get("#sel-video-res");
-        parent.innerHTML = "";
-        let deviceId = (DOMUtils.get("#sel-video") as HTMLInputElement).value;
-        DetectResolutions.testResolutions(deviceId == "" ? undefined : deviceId, (result) => {
-            let option = document.createElement("option");
-            option.textContent = `${result.label} ${result.width} x ${result.height} ${result.ratio}`;
-            option.value = result.label;
-            parent.append(option);
-        });
-        parent.removeAttribute("disabled");
-    }
+
     /**
      *
      *
@@ -91,8 +80,6 @@ export class App {
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
-
-
         }).catch(err => {
             // unable to get camera, show camera dialog ?
             DOMUtils.get("#await-need-error").classList.toggle("hide");
@@ -292,14 +279,14 @@ export class App {
         }
     }
 
-  
+
     /**
      * Display the number of participants & room name in page title
      *
      * @memberof App
      */
-    updatePageTitle(){
-        document.title = `(${this.numOfPeers+1}) Kollokvium  - ${this.slug} | A free multi-party video conference for you and your friends!`;
+    updatePageTitle() {
+        document.title = `(${this.numOfPeers + 1}) Kollokvium  - ${this.slug} | A free multi-party video conference for you and your friends!`;
     }
     /**
      * Display recording results
@@ -334,11 +321,11 @@ export class App {
 
         video.autoplay = true;
         video.muted = true;
-        
+
         video.poster = "/img/novideo.png";
         video.classList.add("l-" + mediaStream.id);
         video.srcObject = mediaStream;
-        video.setAttribute("playsinline",'');
+        video.setAttribute("playsinline", '');
 
         mediaStream.getVideoTracks()[0].onended = () => {
             this.arbitraryChannel.Invoke("streamChange", { id: mediaStream.getVideoTracks()[0].id });
@@ -451,7 +438,7 @@ export class App {
         video.width = 1280;
         video.height = 720;
         video.autoplay = true;
-        video.setAttribute("playsinline",'');
+        video.setAttribute("playsinline", '');
 
         let subtitles = document.createElement("div");
         subtitles.classList.add("subtitles");
@@ -636,6 +623,10 @@ export class App {
 
         this.userSettings = new UserSettings();
 
+
+
+        UserSettings.testCameraResolutions(this.userSettings.videoResolution);
+
         // add language options to UserSettings 
 
         DOMUtils.get("#langaues").append(Transcriber.getlanguagePicker());
@@ -654,7 +645,6 @@ export class App {
         this.audioNodes = new AudioNodes();
 
         this.mediaStreamBlender = new MediaStreamBlender();
-
 
         let blenderWaterMark = DOMUtils.get("#watermark") as HTMLImageElement;
         this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
@@ -735,9 +725,7 @@ export class App {
         let videoDevice = DOMUtils.get("#sel-video") as HTMLInputElement;
         let audioDevice = DOMUtils.get("#sel-audio") as HTMLInputElement;
         let videoResolution = DOMUtils.get("#sel-video-res") as HTMLInputElement;
-        // just set the value to saved key, as user needs to scan..
-        let closeQuickstartButton = DOMUtils.get("#close-quick-start") as HTMLInputElement;
-        let helpButton = DOMUtils.get("#help") as HTMLInputElement;
+
 
 
 
@@ -773,18 +761,17 @@ export class App {
         });
 
 
-        DOMUtils.get("#sel-video-res option").textContent = "Using dynamic resolution";
 
         DOMUtils.get("#apply-virtualbg").addEventListener("click", () => {
             $("#settings-modal").modal("toggle");
             const track = this.localMediaStream.getVideoTracks()[0]
-            track.applyConstraints({ width: 800, height: 450 });
+            track.applyConstraints({ width: 800, height: 400 });
             this.greenScreen.setMediaTrack(track);
             $("#gss").modal("toggle");
         });
 
         DOMUtils.get("#remove-virtualbg").addEventListener("click", () => {
-            this.getLocalStream(UserSettings.defaultConstraints(true), (mediaStream: MediaStream) => {
+            this.getLocalStream(UserSettings.defaultConstraints(), (mediaStream: MediaStream) => {
                 const track = this.localMediaStream.getVideoTracks()[0];
                 this.localMediaStream.removeTrack(track);
                 this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
@@ -809,7 +796,6 @@ export class App {
 
         let toogleRecord = DOMUtils.get("#record-all") as HTMLAudioElement;
 
-        let testResolutions = DOMUtils.get("#test-resolutions") as HTMLButtonElement;
 
         this.pictureInPictureElement = DOMUtils.get("#pip-stream") as HTMLVideoElement;
 
@@ -875,9 +861,6 @@ export class App {
         });
 
 
-        testResolutions.addEventListener("click", () => {
-            this.testCameraResolutions();
-        })
 
         this.lockContext.addEventListener("click", () => {
             this.factory.GetController("broker").Invoke("lockContext", {});
@@ -927,28 +910,33 @@ export class App {
 
             this.userSettings.saveSetting();
 
-            let constraints = this.userSettings.createConstraints(this.userSettings.videoResolution);
+            let constraints = UserSettings.createConstraints(
+                this.userSettings.videoDevice,
+                this.userSettings.videoResolution);
 
-            this.localMediaStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
-                track.applyConstraints(constraints["video"] as MediaTrackConstraints).then(() => {
-                }).catch((e) => {
-                    console.error(e);
-                });
+            this.localMediaStream.getTracks().forEach((track: MediaStreamTrack) => {
+
+                if (track.kind === "video") {
+                    track.applyConstraints(constraints["video"] as MediaTrackConstraints).then(() => {
+                    }).catch((e) => {
+                        console.error(e);
+                    });
+                } else if (track.kind === "audio") {
+                    track.applyConstraints(constraints["video"] as MediaTrackConstraints).then(() => {
+                    }).catch((e) => {
+                        console.error(e);
+                    });
+                }
             });
-
             $("#settings-modal").modal("toggle");
-
         });
         settings.addEventListener("click", () => {
             $("#settings-modal").modal("toggle");
         })
-
         // jQuery hacks for file share etc
-
         $('.modal').on('shown.bs.modal', function () {
             $(".popover").popover("hide");
         });
-
 
         $("#share-file").popover({
             trigger: "manual",
@@ -963,7 +951,6 @@ export class App {
                 this.sendFile(file);
             });
         });
-
 
         this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
             const option = document.createElement("option");
@@ -1020,10 +1007,10 @@ export class App {
             }
         });
 
-        hotkeys('ctrl+m', function(e, h) {
+        hotkeys('ctrl+m', function (e, h) {
             DOMUtils.get("#mute-local-audio").click();
-            event.preventDefault() 
-          });
+            event.preventDefault()
+        });
 
         muteSpeakers.addEventListener("click", () => {
             muteSpeakers.classList.toggle("fa-volume-mute");
@@ -1054,11 +1041,6 @@ export class App {
             $("#share-file").popover("toggle");
         });
 
-        // helpButton.addEventListener("click", () => {
-        //     $("#quick-start-container").modal("show");
-        //     this.userSettings.showQuickStart = true;
-        //     this.userSettings.saveSetting();
-        // })
 
 
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
@@ -1101,10 +1083,42 @@ export class App {
         });
 
 
+
+
         this.languagePicker.addEventListener("change", () => {
             this.userSettings.language = this.languagePicker.value;
         });
 
+        DOMUtils.get("#sel-video").addEventListener("change", (evt: any) => {
+            const deviceId = evt.target.value;
+            const constraints = UserSettings.createConstraints(deviceId);
+            this.getLocalStream(constraints, (cs: MediaStream) => {
+                (DOMUtils.get("#video-preview") as HTMLVideoElement).srcObject = cs;
+
+            });
+        });
+
+        DOMUtils.get("#sel-video-res").addEventListener("change", (evt: any) => {
+            const deviceId = DOMUtils.get<HTMLInputElement>("#sel-video").value;
+            const resolution = evt.target.value;
+            const constraints = UserSettings.createConstraints(deviceId, resolution);
+            console.log("testing", constraints);
+            DetectResolutions.tryCandidate(deviceId, constraints.video).then((ms: MediaStream) => {
+                DOMUtils.get<HTMLVideoElement>("#video-preview").srcObject = ms;
+                $("#sel-video-res").popover("hide");
+                DOMUtils.get<HTMLButtonElement>("#save-settings").disabled = false;
+            }).catch( () => {
+                $("#sel-video-res").popover("show");
+                DOMUtils.get<HTMLButtonElement>("#save-settings").disabled = true;
+            });
+        });
+        $("#settings-modal").on('show.bs.modal', () => {
+            const constraints = UserSettings.createConstraints();
+            this.getLocalStream(constraints, (cs: MediaStream) => {
+                (DOMUtils.get("#video-preview") as HTMLVideoElement).srcObject = cs;
+
+            });
+        });
 
         slug.addEventListener("click", () => {
             $("#slug").popover('show');
@@ -1135,14 +1149,13 @@ export class App {
 
         this.startButton.addEventListener("click", () => {
 
+            window.history.pushState({}, window.document.title, `#${slug.value}`);
 
             this.journal = new JournalCompnent();
 
             this.enableConferenceElements();
             this.userSettings.slugHistory.addToHistory(slug.value);
-            window.history.pushState({}, window.document.title, `#${slug.value}`);
             this.userSettings.saveSetting();
-
 
             this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
 
@@ -1293,14 +1306,14 @@ export class App {
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 DOMUtils.get(".remote").classList.add("hide");
-                this.numOfPeers ++;
+                this.numOfPeers++;
                 this.updatePageTitle();
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
                 participant.addTrack(track);
             }
-          
+
             broker.OnOpen = (ci: any) => {
 
 
@@ -1312,7 +1325,9 @@ export class App {
 
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
-                    UserSettings.defaultConstraints(true),
+                    UserSettings.defaultConstraints(
+                        this.userSettings.videoDevice, this.userSettings.videoResolution, true
+                    ),
                     (mediaStream: MediaStream) => {
                         DOMUtils.get("#await-streams").classList.toggle("hide");
                         DOMUtils.get("#has-streams").classList.toggle("hide");

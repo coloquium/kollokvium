@@ -1,6 +1,6 @@
 export class DOMUtils {
-    static get(query: string, parent?: Element): HTMLElement {
-        return parent ? parent.querySelector(query) : document.querySelector(query)
+    static get<T extends HTMLElement>(query: string, parent?: Element): T {
+        return parent ? parent.querySelector(query) as T : document.querySelector(query) as T
     }
     static getAll(query: string, parent?: Element): Array<Element> {
         var results = new Array<Element>();

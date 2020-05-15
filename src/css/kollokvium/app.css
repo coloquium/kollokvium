@@ -536,3 +536,14 @@ i.fa-lock {
     max-width: 320px;
 }
 
+#video-preview-container{
+    height: 250px;
+
+}
+
+#video-preview{
+    min-width: 100%;
+    width: 100%;
+    max-height: 240px;
+    height: 200px;
+}
