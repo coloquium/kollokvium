@@ -330,9 +330,10 @@ main .overlay {
 }
 
 .video-tools i {
-    margin-right: 10px;
-    z-index: 1000;
-    margin: .5rem;
+     z-index: 1000;
+     background: rgba(0,0,0,.45);
+     padding: 0.5rem;
+     cursor: pointer;
 }
 
 .white {
