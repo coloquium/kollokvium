@@ -1,6 +1,6 @@
 export class DOMUtils {
-    static get(query: string, parent?: Element): HTMLElement {
-        return parent ? parent.querySelector(query) : document.querySelector(query)
+    static get<T extends HTMLElement>(query: string, parent?: Element): T {
+        return parent ? parent.querySelector(query) as T : document.querySelector(query) as T
     }
     static getAll(query: string, parent?: Element): Array<Element> {
         var results = new Array<Element>();
@@ -20,16 +20,13 @@ export class DOMUtils {
         }
         return node;
     }
-
     static linkify(text: string) {
         const regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
         return text.replace(regex, (url: string) => {
             return `<a href="${url}" target="_blank">${url}</a>`;
         });
     }
-
     static makeDragable(elmnt: HTMLElement) {
-
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
         const elementDrag = (e: any) => {
@@ -42,7 +39,6 @@ export class DOMUtils {
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
         }
-
         elmnt.onmousedown = (e: any) => {
             e = e || window.event;
             e.preventDefault();
@@ -53,9 +49,7 @@ export class DOMUtils {
                 document.onmousemove = null;
             };
             document.onmousemove = elementDrag;
-        };
-
-     
+        };     
     }
 
 

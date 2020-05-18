@@ -73,34 +73,36 @@ export class DetectResolutions {
         });
         return match;
     }
-    static tryCandidate(deviceId: string, candidate: any, cb: (result: any) => void) {
+    static tryCandidate(deviceId: string, candidate: any): Promise<MediaStream> {
         let constraints = {
             audio: false,
             video: {
-                deviceId: deviceId ? { exact: deviceId } : undefined,
-                width: { exact: candidate.width },
-                height: { exact: candidate.height }
+                width: candidate.width ,
+                height: candidate.height 
             }
         };
-        navigator.mediaDevices.getUserMedia(constraints)
-            .then(((mediaStream: MediaStream) => {
-                cb(candidate);
-            }))
-            .catch((error) => {
-                console.info('Non working candidate', candidate);
-            });
+
+        if(deviceId){
+            constraints.video["deviceId"] = deviceId
+        
+        }
+
+        return new Promise<any>((resolve, reject) => {
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(((mediaStream: MediaStream) => {
+                    resolve(mediaStream);
+                }))
+                .catch((error) => {
+                    console.log(error);
+                    reject(error)
+                });
+        });
+
+
     }
-    static supportedConstraints():MediaTrackSupportedConstraints{
+    static supportedConstraints(): MediaTrackSupportedConstraints {
         let supports = navigator.mediaDevices.getSupportedConstraints()
         return supports;
     }
-    static testResolutions(deviceId: string, cb: (result: any) => void) {
-        let c = 0;
-        this.candidates.forEach((option: any) => {
-            window.setTimeout(() => {
-                this.tryCandidate(deviceId, this.candidates[c], cb);
-                c++;
-            }, 200);
-        });
-    }
+
 }

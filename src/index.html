@@ -89,82 +89,6 @@
         </div>
     </div>
 
-    <div class="modal" tabindex="-1" role="dialog" id="quick-start-container">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"> Quick start guide</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Welcome to Kollokvium, an easy to use no sign up required audio, video and text chat
-                        with built in end to end privacy over a peer to peer (no middle man) network<br /><br />
-                        To start your own room:
-                        <div class="list-group">
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 1: Please click "allow" for both camera and microphone when the prompt is
-                                shown.
-                            </div>
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 2: Either click the Dice button for a random room name or input your own
-                                room name, this must be atleast 6 characters<br /><br />
-                                <i class="fas fa-exclamation"></i> Please Note: anyone with your room name can
-                                enter your room, if you would like to ensure your privacy, please use the dice
-                                button or input a unique name and communicate it only to your partners
-                            </div>
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 3: Click Start
-                            </div>
-                            <div class="list-group-item list-group-item-secondary">
-                                Step 4: Click copy link and share it with who you would like to invite to your
-                                room
-                            </div>
-                        </div>
-                        <br />
-                        Once you are in the chat room the following commands can be found at the bottom menu,
-                        their functions are as follows:<br /><br />
-                        <table cellpadding="5">
-                            <tr>
-                                <td><i class="fas fa-cog" aria-hidden="true"></i></td>
-                                <td>Settings</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-video" aria-hidden="true"></i></td>
-                                <td>Enable/Disable Video Streaming</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-microphone" aria-hidden="true"></i></td>
-                                <td>Enable/Disable Audio Streaming</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-circle record" aria-hidden="true"></i></td>
-                                <td>Record/Stop Recording</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-desktop" aria-hidden="true"></i></td>
-                                <td>Share your desktop</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-file" aria-hidden="true"></i></td>
-                                <td>Share a file</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-comment-alt" aria-hidden="true"></i></td>
-                                <td>Show text chat window</td>
-                            </tr>
-                            <tr>
-                                <td><i class="fas fa-door-open" aria-hidden="true"></i></td>
-                                <td>Leave the call</td>
-                            </tr>
-                        </table>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <main>
 
@@ -228,9 +152,30 @@
                 <div class="card-footer">
                     <div class="form">
                         <div class="form-row">
-                            <div class="form-group col-md-10">
+                            <div class="form-group col-md-8">
+
                                 <input type="text" class="form-control" id="chat-message"
                                     placeholder="What do you want to say?">
+                            </div>
+                            <div class="form-group col-md-4" id="share-box">
+
+
+                                <div class="progress hide" id="file-progress">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="10" aria-valuemin="0"
+                                        aria-valuemax="100" style="width:0%">
+                                        <span class="sr-only">70% Complete</span>
+                                    </div>
+                                </div>
+
+
+                                <div class="custom-file" id="share-file-box">
+                                    <input type="file" class="file-selected custom-file-input" class="form-contol"
+                                        id="share-file">
+                                    <label class="custom-file-label" for="inputGroupFile01">Select file to share..</label>
+                                </div>
+
+
+
                             </div>
                         </div>
                     </div>
@@ -332,17 +277,6 @@
         </div>
 
 
-        <div id="share-form" class="hide p-2">
-            <div class="progress mb-2">
-                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                </div>
-            </div>
-
-            <div class="mb-2">
-                <input type="file" class="file-selected" class="form-contol">
-            </div>
-
-        </div>
 
 
         <div class="text-to-speech p-3 hide">
@@ -352,8 +286,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-12">
                             <input id="text-message" type="text"
-                                class="form-control form-control-lg"" disabled  placeholder=" What do you want to say?
-                                Use your native language, it will arrive in the recpients language."">
+                                class="form-control form-control-lg"" disabled  placeholder=" What do you want to say?">
                         </div>
                     </div>
                 </div>
@@ -368,10 +301,10 @@
                 <i class="fas fa-cog fa-2x" id="settings"></i>
             </div>
             <div class="p-3">
-                <i class="fas fa-video fa-2x" id="mute-local-video"></i>
+                <i class="fas fa-video fa-2x" id="mute-local-video" data-hotkey="ctrl+v"></i>
             </div>
             <div class="p-3">
-                <i class="fas fa-microphone fa-2x" id="mute-local-audio"></i>
+                <i class="fas fa-microphone fa-2x" id="mute-local-audio" data-hotkey="ctrl+m"></i>
             </div>
 
             <div class="p-3 d-none" id="record">
@@ -382,9 +315,7 @@
                 <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
             </div>
 
-            <div class="p-3">
-                <i class="fas fa-file hide fa-2x " id="share-file"></i>
-            </div>
+
             <div class="p-3">
                 <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
                 <i id="show-chat" class="fas fa-comment-alt fa-2x d-none">
@@ -415,7 +346,7 @@
 
 
         <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Kollokvium settings</h5>
@@ -424,68 +355,97 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="txt-nick">Nickname</label>
-                            <input type="text" class="form-control" id="txt-nick"
-                                placeholder="Nickname displayed in chat...">
-                        </div>
-                        <div class="form-group" id="langaues">
-                            <label for="txt-nick">Language (used by translation & subtitles) </label>
-                        </div>
-                        <div class="form-check">
+                        <div class="container-fluid">
 
-                            <input class="form-check-input" type="checkbox" id="show-text-to-speech" value="true">
-                            <label for="txt-nick">Enable text to speech</label>
-                        </div>
 
-                        <div class="form-group">
-
-                            <label for="sel-video">Apply virtual background <span
-                                    class="badge badge-info">beta</span></label>
-
-                            <input type="button" class="btn btn-link" id="apply-virtualbg"
-                                value="Try virtual backgrounds">
-
-                            <input type="button" class="btn btn-link hide" id="remove-virtualbg"
-                                value="Remove virtual background">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="sel-video">Video input</label>
-                            <select class="form-control" id="sel-video">
-                                <option value="">Not set </option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="sel-audio">Audio input</label>
-                            <select class="form-control" id="sel-audio">
-                                <option value="">Not set</option>
-                            </select>
-                        </div>
-                        <div class="form-group d-none">
-                            <label for="sel-audio-out">Audio output</label>
-
-                            <select class="form-control" id="sel-audio-out">
-                                <option value="">Not set</option>
-                            </select>
-                        </div>
-                        <hr>
-                        <div class="form-group">
-                            <label for="sel-video-res">Camera resolution</label>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <button class="btn btn-outline-primary" type="button"
-                                        id="test-resolutions">Scan</button>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txt-nick">Nickname</label>
+                                        <input type="text" class="form-control" id="txt-nick"
+                                            placeholder="Nickname displayed in chat...">
+                                    </div>
                                 </div>
-                                <select class="form-control" id="sel-video-res" disabled>
-                                    <option value="">Not set</option>
-                                </select>
+                                <div class="col-md-6">
+                                    <div class="form-group" id="langaues">
+                                        <label for="txt-nick">Language (used by translation & subtitles) </label>
+                                    </div>
+                                    <div class="form-check">
+
+                                        <input class="form-check-input" type="checkbox" id="show-text-to-speech"
+                                            value="true">
+                                        <label for="txt-nick">Enable text to speech</label>
+                                    </div>
+                                </div>
+
                             </div>
-                            <small class="form-text text-danger">
-                                Camera resolution will not be saved. will only be applied to current
-                                session.
-                            </small>
+
+                            <hr>
+
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="sel-video">Video input</label>
+                                        <select class="form-control" id="sel-video">
+                                            <option value="">Auto detected</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="sel-audio">Audio input</label>
+                                        <select class="form-control" id="sel-audio">
+                                            <option value="">Auto detected</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sel-audio-out">Audio output</label>
+
+                                        <select class="form-control" id="sel-audio-out">
+                                            <option value="">Auto detected</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="sel-video-res">Camera resolution</label>
+                                        <div class="input-group mb-3">
+
+                                            <select class="form-control" id="sel-video-res" data-container="body"
+                                                data-toggle="popover" data-placement="top"
+                                                data-content="The device cannot use that resolution try another ( lower probably )">
+                                                <option value="">Use recommended settings</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <div id="video-preview-container" class="d-flex">
+                                        <video id="video-preview" autoplay muted playsinline class="align-self-center">
+
+                                        </video>
+                                    </div>
+
+
+                                    <div class="alert alert-info">
+
+                                        <p>Apply virtual background <span class="badge badge-primary">beta</span></p>
+
+                                        <input type="button" class="btn btn-link" id="apply-virtualbg"
+                                            value="Try virtual backgrounds">
+
+                                        <input type="button" class="btn btn-link hide" id="remove-virtualbg"
+                                            value="Remove virtual background">
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+
                         </div>
                     </div>
                     <div class="modal-footer">
