@@ -882,11 +882,15 @@ export class App {
                 this.userSettings.videoDevice,
                 this.userSettings.videoResolution);
 
-            this.localMediaStream.getTracks().forEach((track: MediaStreamTrack) => {
-                track.applyConstraints(constraints[track.kind] as MediaTrackConstraints).then(() => {
-                }).catch((e) => {
-                    console.error(e);
-                });
+            this.localMediaStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
+                if (track.kind === "video") {
+
+
+                    track.applyConstraints(constraints[track.kind] as MediaTrackConstraints).then(() => {
+                    }).catch((e) => {
+                        console.error(e);
+                    });
+                }
 
             });
             $("#settings-modal").modal("toggle");
@@ -960,7 +964,7 @@ export class App {
             }
         });
 
-        
+
 
         muteSpeakers.addEventListener("click", () => {
             muteSpeakers.classList.toggle("fa-volume-mute");
@@ -1104,7 +1108,7 @@ export class App {
             this.journal = new JournalCompnent();
             this.userSettings.slugHistory.addToHistory(slug.value);
             this.userSettings.saveSetting();
-            this.factory.GetController("broker").Invoke("changeContext",{context:this.appDomain.getSlug(slug.value),isOrganizer:location.hash.length  >0});
+            this.factory.GetController("broker").Invoke("changeContext", { context: this.appDomain.getSlug(slug.value), isOrganizer: location.hash.length > 0 });
             window.history.pushState({}, window.document.title, `#${slug.value}`);
         });
 
@@ -1133,24 +1137,24 @@ export class App {
             Parse hotkeys
         */
 
-        DOMUtils.getAll("*[data-hotkey]").forEach ( (el:HTMLElement) => {
-            const keys = el.dataset.hotkey;     
-            hotkeys(keys, function(e:KeyboardEvent, h:HotkeysEvent)  {       
-                el.click();           
+        DOMUtils.getAll("*[data-hotkey]").forEach((el: HTMLElement) => {
+            const keys = el.dataset.hotkey;
+            hotkeys(keys, function (e: KeyboardEvent, h: HotkeysEvent) {
+                el.click();
                 event.preventDefault()
             });
         });
 
-        hotkeys("ctrl+o", (e:KeyboardEvent, h:HotkeysEvent) => {       
-           
-            this.factory.GetController("broker").Invoke("onliners",{});
-            
+        hotkeys("ctrl+o", (e: KeyboardEvent, h: HotkeysEvent) => {
+
+            this.factory.GetController("broker").Invoke("onliners", {});
+
             event.preventDefault()
         });
 
 
-        
-     
+
+
 
         this.factory.OnClose = (reason: any) => {
             console.error(reason);
@@ -1191,7 +1195,7 @@ export class App {
             });
 
 
-            
+
 
             this.arbitraryChannel.On("transcript", (data: any) => {
 
@@ -1255,8 +1259,8 @@ export class App {
                 }
             });
 
-            broker.On("onliners",(data)=> {
-                console.log("onliners",data);
+            broker.On("onliners", (data) => {
+                console.log("onliners", data);
             });
 
 
@@ -1273,13 +1277,13 @@ export class App {
                 this.participants.delete(peer.id);
                 this.numOfPeers--;
                 this.updatePageTitle();
-                this.factory.GetController("broker").Invoke("onliners",{}); // refresh onliners
+                this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 DOMUtils.get(".remote").classList.add("hide");
                 this.numOfPeers++;
                 this.updatePageTitle();
-                this.factory.GetController("broker").Invoke("onliners",{}); // refresh onliners
+                this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
