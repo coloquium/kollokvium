@@ -1190,6 +1190,9 @@ export class App {
                 }
             });
 
+
+            
+
             this.arbitraryChannel.On("transcript", (data: any) => {
 
 
@@ -1295,7 +1298,7 @@ export class App {
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
                     UserSettings.defaultConstraints(
-                        this.userSettings.videoDevice, this.userSettings.videoResolution, true
+                        this.userSettings.videoDevice, this.userSettings.videoResolution
                     ),
                     (mediaStream: MediaStream) => {
                         DOMUtils.get("#await-streams").classList.toggle("hide");
