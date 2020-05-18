@@ -1,50 +1,56 @@
 /* nanum-gothic-regular - latin */
+
 @font-face {
     font-family: 'Nanum Gothic';
     font-style: normal;
     font-weight: 400;
-    src: url('../webfonts/nanum-gothic-v17-latin-regular.eot'); /* IE9 Compat Modes */
-    src: local('NanumGothic'),
-         url('../webfonts/nanum-gothic-v17-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-         url('../webfonts/nanum-gothic-v17-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-         url('../webfonts/nanum-gothic-v17-latin-regular.woff') format('woff'), /* Modern Browsers */
-         url('../webfonts/nanum-gothic-v17-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-         url('../webfonts/nanum-gothic-v17-latin-regular.svg#NanumGothic') format('svg'); /* Legacy iOS */
-  }
-  /* nanum-gothic-800 - latin */
-  @font-face {
+    src: url('../webfonts/nanum-gothic-v17-latin-regular.eot');
+    /* IE9 Compat Modes */
+    src: local('NanumGothic'), url('../webfonts/nanum-gothic-v17-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../webfonts/nanum-gothic-v17-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-regular.woff') format('woff'), /* Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('../webfonts/nanum-gothic-v17-latin-regular.svg#NanumGothic') format('svg');
+    /* Legacy iOS */
+}
+
+/* nanum-gothic-800 - latin */
+
+@font-face {
     font-family: 'Nanum Gothic';
     font-style: normal;
     font-weight: 800;
-    src: url('../webfonts/nanum-gothic-v17-latin-800.eot'); /* IE9 Compat Modes */
-    src: local('NanumGothic ExtraBold'), local('NanumGothic-ExtraBold'),
-         url('../webfonts/nanum-gothic-v17-latin-800.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-         url('../webfonts/nanum-gothic-v17-latin-800.woff2') format('woff2'), /* Super Modern Browsers */
-         url('../webfonts/nanum-gothic-v17-latin-800.woff') format('woff'), /* Modern Browsers */
-         url('../webfonts/nanum-gothic-v17-latin-800.ttf') format('truetype'), /* Safari, Android, iOS */
-         url('../webfonts/nanum-gothic-v17-latin-800.svg#NanumGothic') format('svg'); /* Legacy iOS */
-  }
-  /* nanum-gothic-700 - latin */
-  @font-face {
+    src: url('../webfonts/nanum-gothic-v17-latin-800.eot');
+    /* IE9 Compat Modes */
+    src: local('NanumGothic ExtraBold'), local('NanumGothic-ExtraBold'), url('../webfonts/nanum-gothic-v17-latin-800.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../webfonts/nanum-gothic-v17-latin-800.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-800.woff') format('woff'), /* Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-800.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('../webfonts/nanum-gothic-v17-latin-800.svg#NanumGothic') format('svg');
+    /* Legacy iOS */
+}
+
+/* nanum-gothic-700 - latin */
+
+@font-face {
     font-family: 'Nanum Gothic';
     font-style: normal;
     font-weight: 700;
-    src: url('../webfonts/nanum-gothic-v17-latin-700.eot'); /* IE9 Compat Modes */
-    src: local('NanumGothic Bold'), local('NanumGothic-Bold'),
-         url('../webfonts/nanum-gothic-v17-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-         url('../webfonts/nanum-gothic-v17-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
-         url('../webfonts/nanum-gothic-v17-latin-700.woff') format('woff'), /* Modern Browsers */
-         url('../webfonts/nanum-gothic-v17-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
-         url('../webfonts/nanum-gothic-v17-latin-700.svg#NanumGothic') format('svg'); /* Legacy iOS */
-  }
-
+    src: url('../webfonts/nanum-gothic-v17-latin-700.eot');
+    /* IE9 Compat Modes */
+    src: local('NanumGothic Bold'), local('NanumGothic-Bold'), url('../webfonts/nanum-gothic-v17-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../webfonts/nanum-gothic-v17-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-700.woff') format('woff'), /* Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('../webfonts/nanum-gothic-v17-latin-700.svg#NanumGothic') format('svg');
+    /* Legacy iOS */
+}
 
 body {
     font-family: 'Nanum Gothic', sans-serif;
 }
 
-
-.right{
+.right {
     float: right;
 }
 
@@ -111,22 +117,15 @@ main .overlay {
     display: none;
 }
 
-.text-to-speech
-{
+.text-to-speech {
     width: 50%;
     position: absolute;
     bottom: 80px;
     left: 1rem;
     height: 80px;
     z-index: 2000;
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
 }
-
-
-
-
-
-
 
 .local {
     position: absolute;
@@ -143,6 +142,7 @@ main .overlay {
     max-height: 100px;
     border: 2px solid #333;
 }
+
 .local video:hover {
     right: 0;
     float: left;
@@ -150,7 +150,6 @@ main .overlay {
     max-height: 100px;
     border: 2px solid #eee;
 }
-
 
 .local:first-child {
     transform: rotateY(180deg);
@@ -191,20 +190,18 @@ main .overlay {
 #chatmessges div {
     padding: 0.5rem;
 }
+
 #chatmessages div mark {
     padding: 0.5rem;
 }
 
-
 #chatmessages div time {
-
     padding: 0.5rem;
 }
 
 #chatmessages div span {
     padding: 0.5rem;
 }
-
 
 .custom-heading {
     font-family: 'Nanum Gothic', sans-serif;
@@ -305,12 +302,12 @@ main .overlay {
     height: 33%;
 }
 
-.video-grid li:first-child:nth-last-child(6).video-grid  li:first-child:nth-last-child(6)~li {
+.video-grid li:first-child:nth-last-child(6).video-grid li:first-child:nth-last-child(6)~li {
     width: 50%;
     height: 33%;
 }
 
-.video-grid li:first-child:nth-last-child(7),.video-grid  li:first-child:nth-last-child(7)~li {
+.video-grid li:first-child:nth-last-child(7), .video-grid li:first-child:nth-last-child(7)~li {
     width: 33%;
     height: 33%
 }
@@ -342,12 +339,12 @@ main .overlay {
     color: #fff;
 }
 
-.red,.record {
+.red, .record {
     color: #ff0000;
 }
 
 i.fa-lock {
-    color:#ff0000;
+    color: #ff0000;
 }
 
 .flash {
@@ -445,13 +442,11 @@ i.fa-lock {
     padding: 50px;
 }
 
-
-.greenscreen-option
-{
+.greenscreen-option {
     max-width: 100%;
 }
 
-#palette{
+#palette {
     font-size: 1.2rem;
     color: #000;
 }
@@ -460,44 +455,43 @@ i.fa-lock {
     cursor: pointer;
 }
 
-.greenscreen-optimal{
-    background-color:#009933;
-    color:#fff;
+.greenscreen-optimal {
+    background-color: #009933;
+    color: #fff;
 }
 
-.transcript-bar{
+.transcript-bar {
     position: absolute;
-    top:100px;
+    top: 100px;
     z-index: 2000;
     width: 100%;
     height: 80px;
     opacity: 0.95;
 }
 
-#transcript-results{
-    background:#fff;
+#transcript-results {
+    background: #fff;
     opacity: 0.8s;
-
-} 
+}
 
 .final {
-    color:#000
-}
-.final:first-letter{
-    text-transform:uppercase;
+    color: #000
 }
 
-.interim{
-    color:gray
+.final:first-letter {
+    text-transform: uppercase;
 }
 
-.interim:first-letter{
-    text-transform:uppercase;
+.interim {
+    color: gray
+}
+
+.interim:first-letter {
+    text-transform: uppercase;
 }
 
 .subtitles {
     position: absolute;
-
     bottom: 100px;
     position: absolute;
     z-index: 40000;
@@ -506,7 +500,6 @@ i.fa-lock {
     padding: 20px;
     left: 20px;
     font-weight: 400;
-
 }
 
 .subtitles p {
@@ -516,13 +509,13 @@ i.fa-lock {
     color: #fff;
     animation: fadeOut 2s forwards;
     animation-delay: 10s;
-    font-size:1.2rem;
-    
-    
+    font-size: 1.2rem;
 }
-.subtitles p:first-letter{
-    text-transform:uppercase;
+
+.subtitles p:first-letter {
+    text-transform: uppercase;
 }
+
 @keyframes fadeOut {
     from {
         opacity: 1;
@@ -532,16 +525,19 @@ i.fa-lock {
     }
 }
 
-#pip-stream{
+#pip-stream {
     max-width: 320px;
 }
 
-#video-preview-container{
-    height: 250px;
-
+#file-progress {
+    height: 38px;
 }
 
-#video-preview{
+#video-preview-container {
+    height: 250px;
+}
+
+#video-preview {
     min-width: 100%;
     width: 100%;
     max-height: 240px;

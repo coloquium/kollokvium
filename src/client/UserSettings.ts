@@ -17,7 +17,7 @@ export class UserSettings {
             video: true, audio: true,
         };
     }
-    static testCameraResolutions(current?:string) {
+    static cameraResolutions(current?:string) {
         let parent = DOMUtils.get("#sel-video-res");
         DetectResolutions.candidates.forEach ( (candidate:any) => {
 
