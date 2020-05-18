@@ -1270,11 +1270,13 @@ export class App {
                 this.participants.delete(peer.id);
                 this.numOfPeers--;
                 this.updatePageTitle();
+                this.factory.GetController("broker").Invoke("onliners",{}); // refresh onliners
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 DOMUtils.get(".remote").classList.add("hide");
                 this.numOfPeers++;
                 this.updatePageTitle();
+                this.factory.GetController("broker").Invoke("onliners",{}); // refresh onliners
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
