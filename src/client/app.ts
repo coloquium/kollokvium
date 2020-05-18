@@ -1100,17 +1100,12 @@ export class App {
         })
 
         this.startButton.addEventListener("click", () => {
-
-            window.history.pushState({}, window.document.title, `#${slug.value}`);
-
-            this.journal = new JournalCompnent();
-
             this.enableConferenceElements();
+            this.journal = new JournalCompnent();
             this.userSettings.slugHistory.addToHistory(slug.value);
             this.userSettings.saveSetting();
-
-            this.rtcClient.ChangeContext(this.appDomain.getSlug(slug.value));
-
+            this.factory.GetController("broker").Invoke("changeContext",{context:this.appDomain.getSlug(slug.value),isOrganizer:location.hash.length  >0});
+            window.history.pushState({}, window.document.title, `#${slug.value}`);
         });
 
 
@@ -1135,18 +1130,26 @@ export class App {
 
 
         /*
-            Ally hotkeys
+            Parse hotkeys
         */
 
         DOMUtils.getAll("*[data-hotkey]").forEach ( (el:HTMLElement) => {
-            const keys = el.dataset.hotkey;
-     
+            const keys = el.dataset.hotkey;     
             hotkeys(keys, function(e:KeyboardEvent, h:HotkeysEvent)  {       
                 el.click();           
                 event.preventDefault()
             });
         });
 
+        hotkeys("ctrl+o", (e:KeyboardEvent, h:HotkeysEvent) => {       
+           
+            this.factory.GetController("broker").Invoke("onliners",{});
+            
+            event.preventDefault()
+        });
+
+
+        
      
 
         this.factory.OnClose = (reason: any) => {
@@ -1236,15 +1239,10 @@ export class App {
                 DOMUtils.get("#remote-videos").innerHTML = "";
                 this.disableConfrenceElements();
             });
-
-
-
-
             broker.On("lockContext", () => {
                 this.lockContext.classList.toggle("fa-lock-open");
                 this.lockContext.classList.toggle("fa-lock");
             });
-
             broker.On("isRoomLocked", (data: any) => {
                 this.startButton.disabled = data.state;
                 if (data.state) {
@@ -1252,6 +1250,10 @@ export class App {
                 } else {
                     slug.classList.remove("is-invalid");
                 }
+            });
+
+            broker.On("onliners",(data)=> {
+                console.log("onliners",data);
             });
 
 
