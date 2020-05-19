@@ -14,7 +14,7 @@ import { defaultClient as appInsightsClient } from 'applicationinsights';
 export class Broker extends ControllerBase {
 
     peer: ExtendedPeerConnection;
-    localPeerId: string;
+    // localPeerId: string;
     nickname: string;
     isOrganizer: boolean;
     connections: Array<ExtendedPeerConnection>;
@@ -54,13 +54,18 @@ export class Broker extends ControllerBase {
         appInsightsClient && appInsightsClient.trackTrace({ message: "leaveContext" });
     }
     @CanInvoke(true)
-    changeContext(change: { context: string, isOrganizer: boolean }) {
+    changeContext(change: { context: string }) {
         let match = this.getExtendedPeerConnections(this.peer).find((pre: Broker) => {
             return pre.peer.locked == false && pre.peer.context == change.context;
         });
 
         if (!match) {
+
+            const isOrganizer = this.findOn(this.alias, (pre: Broker) => {
+                return pre.peer.context === change.context && pre.isOrganizer == true;
+            }).length == 0 ? true : false;
             this.peer.context = change.context;
+            this.isOrganizer = isOrganizer;
             this.invoke(this.peer, "contextChanged", this.alias);
             appInsightsClient && appInsightsClient.trackTrace({ message: "contextChanged" });
         } else {
@@ -89,15 +94,27 @@ export class Broker extends ControllerBase {
     @CanInvoke(true)
     setNickname(name: string) {
         this.nickname = name;
+        this.invokeTo((pre: Broker) => {
+            return pre.peer.context == this.peer.context;
+        },
+            {
+                nickname: this.nickname, peerId: this.peer.peerId
+            }, "nicknameChange")
     }
     @CanInvoke(true)
     onliners() {
         let onliners = this.getExtendedPeerConnections(this.peer).map((p: Broker) => {
-            return { peerId: p.peer.peerId, nickname: p.nickname,created: this.peer.created};
+            return {
+                peerId: p.peer.peerId, nickname: p.nickname, created: p.peer.created,
+                organizer: p.isOrganizer
+            };
         });
         onliners.push(
-            { peerId: this.peer.peerId, nickname: this.nickname,created:this.peer.created }
-        ); // self also
+            {
+                peerId: this.peer.peerId, nickname: this.nickname, created: this.peer.created,
+                organizer: this.isOrganizer
+            }
+        ); // self also..
         this.invoke(onliners, "onliners");
         appInsightsClient && appInsightsClient.trackTrace({ message: "onliners" });
     }

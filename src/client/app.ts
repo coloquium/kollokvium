@@ -868,31 +868,37 @@ export class App {
 
         saveSettings.addEventListener("click", () => {
             this.userSettings.nickname = nickname.value;
-            this.userSettings.audioDevice = audioDevice.value;
-            this.userSettings.videoDevice = videoDevice.value;
-            this.userSettings.videoResolution = videoResolution.value;
             this.userSettings.language = this.languagePicker.value;
 
             if (this.transcriber)
                 this.generateSubtitles.click();
 
+            if (this.userSettings.audioDevice != audioDevice.value ||
+                this.userSettings.videoDevice != videoDevice.value ||
+                this.userSettings.videoResolution != videoResolution.value) {
+           
+                DOMUtils.getAll("video.local-cam").forEach ( el => el.remove());
+
+                this.localMediaStream.getTracks().forEach(track => {
+                    this.localMediaStream.removeTrack(track);
+                    console.log("remove track",track);
+                });
+                this.getLocalStream(UserSettings.createConstraints(
+                    this.userSettings.videoDevice,
+                    this.userSettings.videoResolution), (ms: MediaStream) => {                 
+                    this.addLocalVideo(ms,true);
+                        ms.getTracks().forEach(track => this.localMediaStream.addTrack(track))
+                    });
+            
+            }
+
+            this.userSettings.audioDevice = audioDevice.value;
+            this.userSettings.videoDevice = videoDevice.value;
+            this.userSettings.videoResolution = videoResolution.value;
+
+
             this.userSettings.saveSetting();
 
-            let constraints = UserSettings.createConstraints(
-                this.userSettings.videoDevice,
-                this.userSettings.videoResolution);
-
-            this.localMediaStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
-                if (track.kind === "video") {
-
-
-                    track.applyConstraints(constraints[track.kind] as MediaTrackConstraints).then(() => {
-                    }).catch((e) => {
-                        console.error(e);
-                    });
-                }
-
-            });
             $("#settings-modal").modal("toggle");
         });
         settings.addEventListener("click", () => {
@@ -1108,7 +1114,7 @@ export class App {
             this.journal = new JournalCompnent();
             this.userSettings.slugHistory.addToHistory(slug.value);
             this.userSettings.saveSetting();
-            this.factory.GetController("broker").Invoke("changeContext", { context: this.appDomain.getSlug(slug.value), isOrganizer: location.hash.length > 0 });
+            this.factory.GetController("broker").Invoke("changeContext", { context: this.appDomain.getSlug(slug.value)});
             window.history.pushState({}, window.document.title, `#${slug.value}`);
         });
 
