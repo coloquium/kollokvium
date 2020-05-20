@@ -31,7 +31,7 @@
 
     <div id="components"></div>
 
-    <div id="remtote-audio-node" class="hide">
+    <div id="remote-audio-node" class="hide">
         <audio></audio>
     </div>
 
@@ -146,7 +146,7 @@
                     </span>
                 </div>
                 <div class="card-body" style="overflow:auto">
-                    <p class="card-text" id="chatmessages">
+                    <p class="card-text" id="chat-messages">
                     </p>
                 </div>
                 <div class="card-footer">
@@ -169,7 +169,7 @@
 
 
                                 <div class="custom-file" id="share-file-box">
-                                    <input type="file" class="file-selected custom-file-input" class="form-contol"
+                                    <input type="file" class="file-selected custom-file-input" class="form-control"
                                         id="share-file">
                                     <label class="custom-file-label" for="inputGroupFile01">Select file to share..</label>
                                 </div>
@@ -227,7 +227,7 @@
                         </div>
 
                         <div class="alert alert-danger hide" role="alert" id="await-need-error">
-                            <h4 class="alert-heading">Faild to access camera</h4>
+                            <h4 class="alert-heading">Failed to access camera</h4>
                             <p>
                                 <strong>Damn!</strong>
                                 Kollokvium.se failed to get hold of your camera.,Please try use
@@ -257,7 +257,7 @@
                         <input list="slug-history" type="text" id="slug" placeholder="Enter any room name..." value=""
                             class="form-control form-control-lg" data-container="body" data-toggle="popover"
                             data-placement="top" data-trigger="none"
-                            data-content="Ohoy! your room name is six chars minimum, it can be many things such as company name, meeting occasion or whatever you want.. Have a nice day!">
+                            data-content="Ahoy! Your room name should be six characters minimum. It can be many things such as company name, meeting occasion or whatever you want... Have a nice day!">
 
                         <datalist id="slug-history">
 
@@ -265,7 +265,7 @@
 
 
                         <div class="input-group-append">
-                            <button id="joinconference" class="btn btn-primary bt-lg" type="button"
+                            <button id="join-conference" class="btn btn-primary bt-lg" type="button"
                                 disabled>START</button>
                         </div>
                     </div>
@@ -367,7 +367,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-group" id="langaues">
+                                    <div class="form-group" id="languages">
                                         <label for="txt-nick">Language (used by translation & subtitles) </label>
                                     </div>
                                     <div class="form-check">
@@ -393,8 +393,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="sel-audio">Audio input</label>
-                                        <select class="form-control" id="sel-audio">
+                                        <label for="sel-audio-in">Audio input</label>
+                                        <select class="form-control" id="sel-audio-in">
                                             <option value="">Auto detected</option>
                                         </select>
                                     </div>
@@ -432,10 +432,10 @@
 
                                         <p>Apply virtual background <span class="badge badge-primary">beta</span></p>
 
-                                        <input type="button" class="btn btn-link" id="apply-virtualbg"
+                                        <input type="button" class="btn btn-link" id="apply-virtual-bg"
                                             value="Try virtual backgrounds">
 
-                                        <input type="button" class="btn btn-link hide" id="remove-virtualbg"
+                                        <input type="button" class="btn btn-link hide" id="remove-virtual-bg"
                                             value="Remove virtual background">
 
                                     </div>

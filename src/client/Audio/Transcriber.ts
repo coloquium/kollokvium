@@ -180,13 +180,13 @@ export class Transcriber {
         });
     }
 
-    static getlanguagePicker(): HTMLElement {
+    static getLanguagePicker(): HTMLElement {
         let selectLanguage = document.createElement("select");
         selectLanguage.classList.add("selected-language", "form-control");
-        let notset = document.createElement("option");
-        notset.value = "";
-        notset.textContent = "Not set (use browser language)";
-        selectLanguage.append(notset);
+        let notSet = document.createElement("option");
+        notSet.value = "";
+        notSet.textContent = "Not set (use browser language)";
+        selectLanguage.append(notSet);
         Transcriber.languages.forEach((entry: any) => {
             let country = entry[0];
             let dialects = entry[1];

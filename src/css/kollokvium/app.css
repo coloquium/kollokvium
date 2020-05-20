@@ -187,19 +187,19 @@ main .overlay {
     cursor: pointer;
 }
 
-#chatmessges div {
+#chat-messages div {
     padding: 0.5rem;
 }
 
-#chatmessages div mark {
+#chat-messages div mark {
     padding: 0.5rem;
 }
 
-#chatmessages div time {
+#chat-messages div time {
     padding: 0.5rem;
 }
 
-#chatmessages div span {
+#chat-messages div span {
     padding: 0.5rem;
 }
 
@@ -372,7 +372,7 @@ i.fa-lock {
     max-width: 120px;
 }
 
-.dungeon-paricipant {
+.dungeon-participant {
     border: 2px solid #ff0000;
     filter: none;
 }

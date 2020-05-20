@@ -5,7 +5,8 @@ export class UserSettings {
 
     slugHistory: SlugHistory;
     videoDevice: string;
-    audioDevice: string;
+    audioDeviceIn: string;
+    audioDeviceOut: string;
     videoResolution: string;
     showQuickStart: boolean;
     facingMode: string; // should be enums?
@@ -38,7 +39,8 @@ export class UserSettings {
         const data = {
             slugHistory: this.slugHistory.history,
             videoDevice: this.videoDevice,
-            audioDevice: this.audioDevice,
+            audioDeviceIn: this.audioDeviceIn,
+            audioDeviceOut: this.audioDeviceOut,
             videoResolution: this.videoResolution,
             nickname: this.nickname,
             showQuickStart: this.showQuickStart,
@@ -103,7 +105,8 @@ export class UserSettings {
         const ls = localStorage.getItem("settings");
         if (ls) {
             let settings = JSON.parse(ls);
-            this.audioDevice = settings.audioDevice;
+            this.audioDeviceIn = settings.audioDeviceIn;
+            this.audioDeviceOut = settings.audioDeviceOut;
             this.videoDevice = settings.videoDevice;
             this.videoResolution = settings.videoResolution;
             this.nickname = settings.nickname;
@@ -115,7 +118,9 @@ export class UserSettings {
         else {
             this.slugHistory.history = new Array<string>();
             this.nickname = Math.random().toString(36).substring(8);
-            this.audioDevice = ""; this.videoDevice = "";
+            this.audioDeviceIn = ""; 
+            this.audioDeviceOut = ""; 
+            this.videoDevice = "";
             this.videoResolution = "";
             this.showQuickStart = true;
             this.language = ""

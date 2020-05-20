@@ -20,13 +20,13 @@ export class DOMUtils {
         }
         return node;
     }
-    static linkify(text: string) {
+    static makeLink(text: string) {
         const regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
         return text.replace(regex, (url: string) => {
             return `<a href="${url}" target="_blank">${url}</a>`;
         });
     }
-    static makeDragable(elmnt: HTMLElement) {
+    static makeDraggable(el: HTMLElement) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
         const elementDrag = (e: any) => {
@@ -36,10 +36,10 @@ export class DOMUtils {
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            el.style.top = (el.offsetTop - pos2) + "px";
+            el.style.left = (el.offsetLeft - pos1) + "px";
         }
-        elmnt.onmousedown = (e: any) => {
+        el.onmousedown = (e: any) => {
             e = e || window.event;
             e.preventDefault();
             pos3 = e.clientX;

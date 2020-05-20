@@ -1,6 +1,6 @@
 import { DOMUtils } from "../Helpers/DOMUtils";
 
-export class JournalCompnent {
+export class JournalComponent {
     data: any[];
     constructor() {
         this.data = new Array<any>();
@@ -43,9 +43,9 @@ export class JournalCompnent {
 
        
             let blob = new Blob([data], {type: "text/html"});
-            let blouUrl = window.URL.createObjectURL(blob);
+            let blobUrl = window.URL.createObjectURL(blob);
             var a = document.createElement("a");
-            a.href = blouUrl;
+            a.href = blobUrl;
             a.download = `${Math.random().toString(36).substring(8)}.html`;
             a.click();
         
