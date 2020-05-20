@@ -886,23 +886,34 @@ export class App {
             if (this.transcriber)
                 this.generateSubtitles.click();
 
+            if (this.userSettings.audioDeviceIn != audioDeviceIn.value ||
+                this.userSettings.audioDeviceOut != audioDeviceOut.value ||
+                this.userSettings.videoDevice != videoDevice.value ||
+                this.userSettings.videoResolution != videoResolution.value) {
+           
+                DOMUtils.getAll("video.local-cam").forEach ( el => el.remove());
+
+                this.localMediaStream.getTracks().forEach(track => {
+                    this.localMediaStream.removeTrack(track);
+                    console.log("remove track",track);
+                });
+                this.getLocalStream(UserSettings.createConstraints(
+                    this.userSettings.videoDevice,
+                    this.userSettings.videoResolution), (ms: MediaStream) => {                 
+                    this.addLocalVideo(ms,true);
+                        ms.getTracks().forEach(track => this.localMediaStream.addTrack(track))
+                    });
+            
+            }
+
+            this.userSettings.audioDeviceIn = audioDeviceIn.value;
+            this.userSettings.audioDeviceOut = audioDeviceOut.value;
+            this.userSettings.videoDevice = videoDevice.value;
+            this.userSettings.videoResolution = videoResolution.value;
+
+
             this.userSettings.saveSetting();
 
-            let constraints = UserSettings.createConstraints(
-                this.userSettings.videoDevice,
-                this.userSettings.videoResolution);
-
-            this.localMediaStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
-                if (track.kind === "video") {
-
-
-                    track.applyConstraints(constraints[track.kind] as MediaTrackConstraints).then(() => {
-                    }).catch((e) => {
-                        console.error(e);
-                    });
-                }
-
-            });
             $("#settings-modal").modal("toggle");
         });
         settings.addEventListener("click", () => {
@@ -1111,7 +1122,7 @@ export class App {
             this.journal = new JournalComponent();
             this.userSettings.slugHistory.addToHistory(slug.value);
             this.userSettings.saveSetting();
-            this.factory.GetController("broker").Invoke("changeContext", { context: this.appDomain.getSlug(slug.value), isOrganizer: location.hash.length > 0 });
+            this.factory.GetController("broker").Invoke("changeContext", { context: this.appDomain.getSlug(slug.value)});
             window.history.pushState({}, window.document.title, `#${slug.value}`);
         });
 
