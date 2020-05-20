@@ -6,7 +6,7 @@ import { PeerConnection } from 'thor-io.vnext';
 import { ReadFile } from './Helpers/ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
-import { MediaStreamBlender, MediaStreamRecorder, StreamSource } from 'MediaStreamBlender'
+import { MediaStreamBlender, MediaStreamRecorder, StreamSource } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
 import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
