@@ -14,7 +14,7 @@ import { GreenScreenComponent } from './Components/GreenScreenComponent';
 import { AudioNodes } from './Audio/AudioNodes';
 import { Transcriber } from './Audio/Transcriber';
 import { JournalComponent } from './Components/JournalComponent';
-// import { ApplicationInsights } from '@microsoft/applicationinsights-web'
+import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 import hotkeys, { HotkeysEvent } from 'hotkeys-js';
 
 
@@ -1346,5 +1346,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("file://"))) { // temp hack for electron
         if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
     }
+
+    const instrumentationKey = process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
+    if(!!instrumentationKey){
+        const appInsights = new ApplicationInsights({ config: { instrumentationKey: instrumentationKey }});
+        appInsights.loadAppInsights();
+        appInsights.trackPageView();
+    }     
+
     App.getInstance();
 });
