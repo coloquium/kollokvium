@@ -5,12 +5,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const sourceFolder = Path.resolve(__dirname, 'src');
 const outFolder = Path.resolve(__dirname, 'dist', 'client');
-const assetFolders = ['css', 'img','fonts','js'];
+const assetFolders = ['css', 'img', 'js'];
 
 const package = require('./package.json');
 
 module.exports = {
-  mode:"production", 
   watch: false,
   entry: {    
     kollkovium : Path.join(sourceFolder, 'client', 'app'),

@@ -9,7 +9,6 @@ const assetFolders = ['cert'];
 const package = require('./package.json');
 
 module.exports = {
-  mode: "production",
   target: "node",
   watch: false,
   entry: {
