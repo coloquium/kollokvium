@@ -571,7 +571,7 @@ i.fa-lock {
     height: 200px;
 }
 
-.is-speaking{
-    background-color:rgb(2, 160, 2);;
+span.is-speaking{
+    background:green;
     color:#fff;
 }
