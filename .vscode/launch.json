@@ -5,22 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Kollo in Chrome",
-            "type": "chrome",
-            "request": "launch",
-            "preLaunchTask": "npm: start",
-            "url": "http://localhost:1337/",
-            "webRoot": "${workspaceFolder}/src/client"
-        },
-        {
-            "name": "Launch Kollo",
-            "type": "edge",
-            "request": "launch",
-            "preLaunchTask": "npm: start",
-            "url": "http://localhost:1337/",
-            "webRoot": "${workspaceFolder}/src/client"
-        },
-        {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
@@ -32,5 +16,6 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]
-        }]
+        }
+    ]
 }
