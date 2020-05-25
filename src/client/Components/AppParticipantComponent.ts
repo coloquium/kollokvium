@@ -44,26 +44,25 @@ export class AppParticipantComponent {
         }
     }
 
-    addVideo(id: string, mediaStream: MediaStream) {
-
-        const participant = DOMUtils.get(".p" + id);
-
+    addVideo(id: string, mediaStream: MediaStream, node: HTMLElement) {
         let video = document.createElement("video");
+        video.classList.add("p" + this.id);
+        video.classList.add("s" + mediaStream.id);
         video.poster = "/img/novideo.png";
         video.srcObject = mediaStream;
         video.width = 1280;
         video.height = 720;
         video.autoplay = true;
         video.setAttribute("playsinline", '');
+        let pre = DOMUtils.get("img", node);
+        if (pre) pre.remove();
+        node.append(video);
 
-        DOMUtils.get("img", participant).remove();
-        participant.append(video);
-
-        DOMUtils.get(".video-tools", participant).classList.remove("d-none");
+        DOMUtils.get(".video-tools", node).classList.remove("d-none");
 
     }
 
-    render(target: HTMLElement) {
+    render(): HTMLElement {
 
         let item = document.createElement("li");
         item.classList.add("p" + this.id);
@@ -84,7 +83,7 @@ export class AppParticipantComponent {
         let fullscreen = document.createElement("i");
         fullscreen.classList.add("fas", "fa-arrows-alt", "fa-2x", "white")
         fullscreen.addEventListener("click", (e) => {
-            let elem = DOMUtils.get(`.p${this.id} video`);
+            let elem = DOMUtils.get("video",item);
             if (!document.fullscreenElement) {
                 elem.requestFullscreen().catch(err => {
                     alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
@@ -112,7 +111,7 @@ export class AppParticipantComponent {
 
         item.append(subtitles);
 
-        target.append(item);
+        return item;
 
     }
 
@@ -139,14 +138,14 @@ export class AppParticipantComponent {
     addVideoTrack(t: MediaStreamTrack) {
         this.videoTracks.push(t);
         let stream = new MediaStream([t]);
-
-        t.onended = () => {
-            // todo: would be an delagated event
+        
+     
+        stream.getVideoTracks()[0].onended = () => {  
+            console.log("this track has ended");
             if (this.onVideoTrackLost)
                 this.onVideoTrackLost(this.id, stream, t);
-
         };
-        this.onVideoTrackAdded(this.id, stream, t);
+        this.onVideoTrackAdded(this.id, stream, stream.getVideoTracks()[0]);
     }
     addAudioTrack(t: MediaStreamTrack): void {
         this.audioTracks.push(t);

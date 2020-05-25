@@ -360,7 +360,7 @@ span.namebadge {
     height: 48px;
 }
 
-span.is-speaking{
+span.namebadge.is-speaking{
     background:green;
     color:#fff;
 }

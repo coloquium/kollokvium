@@ -170,7 +170,6 @@ export class App {
         sendProgress.setAttribute("aria-valuenow", "0")
         sendProgress.classList.toggle("hide");
 
-
         let meta = {
             name: file.name,
             size: file.size,
@@ -291,27 +290,28 @@ export class App {
      */
     addLocalVideo(mediaStream: MediaStream, isCam: boolean) {
         let video = document.createElement("video") as HTMLVideoElement;
-
         video.autoplay = true;
         video.muted = true;
-
-        video.poster = "/img/novideo.png";
-        video.classList.add("l-" + mediaStream.id);
+        video.poster = "/img/novideo.png";    ;
         video.srcObject = mediaStream;
         video.setAttribute("playsinline", '');
-
-        mediaStream.getVideoTracks()[0].onended = () => {
-            this.arbitraryChannel.Invoke("streamChange", { id: mediaStream.getVideoTracks()[0].id });
-            DOMUtils.get(".l-" + mediaStream.id).remove();
-        }
+        let t = mediaStream.getVideoTracks()[0];
+        video.classList.add("l-" + t.id)
+        t.onended = () => {
+            this.rtcClient.Peers.forEach(p => {
+                console.log(p.RTCPeer.getSenders());
+                let sender = p.RTCPeer.getSenders().find((sender: RTCRtpSender) => {
+                    return sender.track.id === t.id;
+                });
+                p.RTCPeer.removeTrack(sender);
+            });
+            DOMUtils.get(".l-" + t.id).remove();
+        };
 
         if (isCam) video.classList.add("local-cam");
 
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
-
-
-
     }
     /**
      * PeerConnection configuration
@@ -384,22 +384,24 @@ export class App {
             let participant = new AppParticipantComponent(id);
 
             participant.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
-                participant.addVideo(id, mediaStream);
-                //     this.addParticipant(id, mediaStream, mediaStreamTrack.id);
+                let node = participant.render();
+                participant.addVideo(id, mediaStream, node);
+                DOMUtils.get("#remote-videos").append(node);
             }
             participant.onAudioTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
                 this.audioNodes.add(id, mediaStream);
             };
             participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
-                let p = DOMUtils.get(".p" + id);
-                if (p) p.remove();
+                let p = DOMUtils.getAll(`li video.s${stream.id}`);
+                p.forEach(n => n.parentElement.remove());
+
             }
             participant.onAudioTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
                 this.audioNodes.remove(id);
             }
             this.participants.set(id, participant);
 
-            participant.render(DOMUtils.get("#remote-videos"));
+
 
             return participant;
 
@@ -912,7 +914,6 @@ export class App {
         DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
             navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
                 e.target.textContent = "Copied!"
-
             });
         });
 
@@ -923,8 +924,6 @@ export class App {
                     $("#share-slug").popover("hide");
                 }, 5000);
             });
-
-
         });
 
         if (this.slug.length >= 6) {
@@ -1067,13 +1066,9 @@ export class App {
         });
 
         hotkeys("ctrl+o", (e: KeyboardEvent, h: HotkeysEvent) => {
-
             this.factory.GetController("broker").Invoke("onliners", {});
-
             event.preventDefault()
         });
-
-
 
 
 
@@ -1136,10 +1131,7 @@ export class App {
                     }
                 }
             });
-            this.arbitraryChannel.On("streamChange", (data: any) => {
-                let el = DOMUtils.get(".s" + data.id);
-                if (el) el.remove();
-            });
+
             this.arbitraryChannel.On("chatMessage", (data: any) => {
                 this.displayChatMessage(data);
             });
@@ -1156,7 +1148,7 @@ export class App {
             });
             this.arbitraryChannel.OnOpen = (e, peerId) => {
             };
-            
+
             broker.On("leaveContext", (data: any) => {
                 this.rtcClient.Peers.forEach((connection: WebRTCConnection) => {
                     connection.RTCPeer.close();
@@ -1201,13 +1193,11 @@ export class App {
                 this.rtcClient.ConnectContext();
             }
             this.rtcClient.OnContextDisconnected = (peer) => {
-                DOMUtils.get(".p" + peer.id).remove();
                 this.participants.delete(peer.id);
+                DOMUtils.getAll(`li.p${peer.id}`).forEach(n => n.remove());
                 this.numOfPeers--;
                 this.updatePageTitle();
                 this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
-
-
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 DOMUtils.get(".remote").classList.add("hide");
