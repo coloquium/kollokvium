@@ -82,7 +82,7 @@ export class App {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
 
-          
+
 
         }).catch(err => {
             // unable to get camera, show camera dialog ?
@@ -370,13 +370,13 @@ export class App {
     connectToServer(url: string, config: any): Factory {
         return new Factory(url, ["broker"]);
     }
-      /**
-     *  Add a participant to the "conference"
-     *
-     * @param {string} id
-     * @returns {AppParticipantComponent}
-     * @memberof App
-     */
+    /**
+   *  Add a participant to the "conference"
+   *
+   * @param {string} id
+   * @returns {AppParticipantComponent}
+   * @memberof App
+   */
     tryAddParticipant(id: string): AppParticipantComponent {
         if (this.participants.has(id)) {
             return this.participants.get(id);
@@ -789,23 +789,23 @@ export class App {
 
                 this.userSettings.videoDevice = videoDevice.value;
                 this.userSettings.videoResolution = videoResolution.value;
-        
+
                 let localVideos = DOMUtils.getAll("video.local-cam");
 
-                if(!!localVideos && localVideos.length > 0){
-                    localVideos.forEach ( el => el.remove());
+                if (!!localVideos && localVideos.length > 0) {
+                    localVideos.forEach(el => el.remove());
                 }
 
                 this.localMediaStream.getTracks().forEach(track => {
                     this.localMediaStream.removeTrack(track);
                 });
                 this.getLocalStream(UserSettings.createConstraints(
-                                                    this.userSettings.videoDevice, 
-                                                    this.userSettings.videoResolution), 
-                                                    (ms: MediaStream) => {                 
-                                                        this.addLocalVideo(ms,true);
-                                                        ms.getTracks().forEach(track => this.localMediaStream.addTrack(track))
-                                                    });
+                    this.userSettings.videoDevice,
+                    this.userSettings.videoResolution),
+                    (ms: MediaStream) => {
+                        this.addLocalVideo(ms, true);
+                        ms.getTracks().forEach(track => this.localMediaStream.addTrack(track))
+                    });
             }
 
 
@@ -1025,8 +1025,6 @@ export class App {
                 video: MediaUtils.CheckStream(this.localMediaStream.getVideoTracks(), "live")
             });
 
-            console.log(this.localMediaStream);
-
             window.history.pushState({}, window.document.title, `#${slug.value}`);
 
             setTimeout(() => {
@@ -1097,13 +1095,10 @@ export class App {
                 }));
             });
 
-
             this.arbitraryChannel.On("textToSpeech", (data: any) => {
                 let targetLanguage =
                     this.userSettings.language
                     || navigator.language;
-
-
                 if (data.lang !== targetLanguage && this.appDomain.translateKey) {
                     Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
                         || navigator.language).then((result) => {
@@ -1117,13 +1112,7 @@ export class App {
                 }
             });
 
-
-
-
             this.arbitraryChannel.On("transcript", (data: any) => {
-
-
-
                 let parent = DOMUtils.get(`.subs${data.peerId}`);
                 if (parent) {
                     let targetLanguage =
@@ -1147,20 +1136,27 @@ export class App {
                     }
                 }
             });
-
             this.arbitraryChannel.On("streamChange", (data: any) => {
                 let el = DOMUtils.get(".s" + data.id);
                 if (el) el.remove();
             });
-
-
             this.arbitraryChannel.On("chatMessage", (data: any) => {
                 this.displayChatMessage(data);
             });
 
+            this.arbitraryChannel.On("isSpeaking", (data: any) => {
+                let m = DOMUtils.get(`.n${data.peerId}`);
+                if (m) {
+                    if (data.state) {
+                        m.classList.add("is-speaking");
+                    } else {
+                        m.classList.remove("is-speaking");
+                    }
+                }
+            });
             this.arbitraryChannel.OnOpen = (e, peerId) => {
             };
-
+            
             broker.On("leaveContext", (data: any) => {
                 this.rtcClient.Peers.forEach((connection: WebRTCConnection) => {
                     connection.RTCPeer.close();
@@ -1182,19 +1178,19 @@ export class App {
                 }
             });
 
-            
+
             broker.On("onliners", (data) => {
                 console.log("onliners", data);
             });
 
-            broker.On("nicknameChange",(data) => {
-                let n =DOMUtils.get(`.n${data.peerId}`);
-                if(n) 
+            broker.On("nicknameChange", (data) => {
+                let n = DOMUtils.get(`.n${data.peerId}`);
+                if (n)
                     n.textContent = data.nickname;
             });
-            broker.On("whois",(data) => {
-                let n =DOMUtils.get(`.n${data.peerId}`);
-                if(n) 
+            broker.On("whois", (data) => {
+                let n = DOMUtils.get(`.n${data.peerId}`);
+                if (n)
                     n.textContent = data.nickname;
             });
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
@@ -1218,13 +1214,13 @@ export class App {
                 this.numOfPeers++;
                 this.updatePageTitle();
                 this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
-                
+
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
                 participant.addTrack(track);
                 // who is?
-                this.factory.GetController("broker").Invoke("whois",connection.id);            
+                this.factory.GetController("broker").Invoke("whois", connection.id);
             }
 
             broker.OnOpen = (ci: any) => {
@@ -1239,22 +1235,26 @@ export class App {
                     ),
                     (mediaStream: MediaStream) => {
                         //  remove local video track
-                        if(location.search.includes("novideo"))
-                                mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
+                        if (location.search.includes("novideo"))
+                            mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
 
 
-                        this.speechDetector = new SpeechDetector(mediaStream,5,512);
+                        this.speechDetector = new SpeechDetector(mediaStream, 5, 512);
 
                         this.speechDetector.start(2000);
 
                         this.speechDetector.onspeechstarted = (rms) => {
-                            console.log("speaking",rms,this.rtcClient.LocalPeerId);
-                        
-                        }
+                            this.arbitraryChannel.Invoke("isSpeaking", {
+                                state: true,
+                                rms: rms, peerId: this.rtcClient.LocalPeerId
+                            });
+                        };
                         this.speechDetector.onspeechended = (rms) => {
-                            console.log("not speaking",rms,this.rtcClient.LocalPeerId);
-                        }
-
+                            this.arbitraryChannel.Invoke("isSpeaking", {
+                                state: false,
+                                rms: rms, peerId: this.rtcClient.LocalPeerId
+                            });
+                        };
 
                         DOMUtils.get("#await-streams").classList.toggle("hide");
                         DOMUtils.get("#has-streams").classList.toggle("hide");
@@ -1263,7 +1263,7 @@ export class App {
                         this.addLocalVideo(this.localMediaStream, true);
                         if (location.hash.length <= 6)
                             $("#random-slug").popover("show");
-    
+
 
 
                     });

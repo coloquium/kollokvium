@@ -115,7 +115,7 @@ export class AppParticipantComponent {
         target.append(item);
 
     }
-   
+
 
     getTracks(): Array<MediaStreamTrack> {
         let tracks = new Array<MediaStreamTrack>();

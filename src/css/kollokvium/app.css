@@ -360,6 +360,8 @@ span.namebadge {
     height: 48px;
 }
 
+
+
 .white {
     color: #fff;
 }
@@ -567,4 +569,9 @@ i.fa-lock {
     width: 100%;
     max-height: 240px;
     height: 200px;
+}
+
+.is-speaking{
+    background-color:rgb(2, 160, 2) green;
+    color:#fff;
 }
