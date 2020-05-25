@@ -11,8 +11,9 @@ const package = require('./package.json');
 
 module.exports = {
   watch: false,
-  entry: {    
-    kollkovium : Path.join(sourceFolder, 'client', 'app'),
+  mode: process.env.WEBPACK_DEV_SERVER ? "development" : "production",
+  entry: {
+    kollkovium: Path.join(sourceFolder, 'client', 'app'),
   },
   module: {
     rules: [
@@ -26,7 +27,7 @@ module.exports = {
   },
   plugins: [
 
-    new CopyPlugin(assetFolders.map(folder => new Object({ from : Path.join(sourceFolder, folder), to: folder}))),
+    new CopyPlugin(assetFolders.map(folder => new Object({ from: Path.join(sourceFolder, folder), to: folder }))),
 
     new HtmlWebpackPlugin({
       template: Path.join(sourceFolder, 'index.html')
@@ -40,7 +41,6 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts'],
   },
-  
   output: {
     path: outFolder,
     filename: 'js/[name]-bundle.js'

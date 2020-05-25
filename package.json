@@ -24,14 +24,12 @@
   ],
   "scripts": {
     "build": "concurrently \"npm run build:client\" \"npm run build:server\"",
-    "build:client": "webpack --config=webpack.config.js --mode=production",
-    "build:server": "webpack --config=webpack.server.js --mode=production",
+    "build:client": "webpack --config=webpack.config.js",
+    "build:server": "webpack --config=webpack.server.js",
     "build:electron": "build",
-    "build:dev": "concurrently \"npm run build:client-dev\" \"npm run build:server-dev\"",
-    "build:client-dev": "webpack --config=webpack.config.js --mode=development",
-    "build:server-dev": "webpack --config=webpack.server.js --mode=development",
     "start": "node dist/server.js",
     "start:secure": "node dist/server.js -s",
+    "start:debug": "cross-env WSS_SERVER_URL='wss://dev-wss.kollokvium.net' webpack-dev-server",
     "run-electron": "electron electron-launch.js",
     "pack-electron": "",
     "test": "echo \"Error: no test specified\" && exit 0"
@@ -89,12 +87,14 @@
     "@types/yargs": "^15.0.4",
     "concurrently": "^5.1.0",
     "copy-webpack-plugin": "^5.1.1",
+    "cross-env": "^7.0.2",
     "electron": "^8.2.0",
     "electron-packager": "^14.2.1",
     "html-webpack-plugin": "^4.0.4",
     "ts-loader": "^6.2.2",
     "typescript": "^3.8.3",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
   }
 }

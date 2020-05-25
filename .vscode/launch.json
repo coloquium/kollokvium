@@ -8,29 +8,23 @@
             "name": "Launch Kollo in Chrome",
             "type": "chrome",
             "request": "launch",
-            "preLaunchTask": "npm: start",
-            "url": "http://localhost:1337/",
-            "webRoot": "${workspaceFolder}/src/client"
+            "preLaunchTask": "npm: start:debug",
+            "url": "http://localhost:8080/index.html",
+            "userDataDir": true,
+            "webRoot": "${workspaceFolder}/src/client",
+            "sourceMaps": true,
+            "trace": true,
+            "breakOnLoad": true
         },
         {
-            "name": "Launch Kollo",
-            "type": "edge",
-            "request": "launch",
-            "preLaunchTask": "npm: start",
-            "url": "http://localhost:1337/",
-            "webRoot": "${workspaceFolder}/src/client"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\dist\\server.js",
-            "args": ["--use-ssl"],
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
+            "name": "Attach Kollo to Chrome",
+            "type": "chrome",
+            "request": "attach",
+            "preLaunchTask": "npm: start:debug",
+            "urlFilter": "http://localhost:8080/*",
+            "sourceMaps": true,
+            "trace": true,
+            "webRoot": "${workspaceFolder}/src/client",
+            "port": 9222
         }]
 }
