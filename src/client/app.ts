@@ -779,36 +779,34 @@ export class App {
             this.userSettings.nickname = nickname.value;
             this.userSettings.audioDeviceIn = audioDeviceIn.value;
             this.userSettings.audioDeviceOut = audioDeviceOut.value;
-            this.userSettings.videoDevice = videoDevice.value;
-            this.userSettings.videoResolution = videoResolution.value;
             this.userSettings.language = this.languagePicker.value;
 
             if (this.transcriber)
                 this.generateSubtitles.click();
 
-            if (this.userSettings.audioDeviceIn != audioDeviceIn.value ||
-                this.userSettings.audioDeviceOut != audioDeviceOut.value ||
-                this.userSettings.videoDevice != videoDevice.value ||
+            if (this.userSettings.videoDevice != videoDevice.value ||
                 this.userSettings.videoResolution != videoResolution.value) {
 
-                DOMUtils.getAll("video.local-cam").forEach(el => el.remove());
+                this.userSettings.videoDevice = videoDevice.value;
+                this.userSettings.videoResolution = videoResolution.value;
+        
+                let localVideos = DOMUtils.getAll("video.local-cam");
+
+                if(!!localVideos && localVideos.length > 0){
+                    localVideos.forEach ( el => el.remove());
+                }
 
                 this.localMediaStream.getTracks().forEach(track => {
                     this.localMediaStream.removeTrack(track);
                 });
                 this.getLocalStream(UserSettings.createConstraints(
-                    this.userSettings.videoDevice,
-                    this.userSettings.videoResolution), (ms: MediaStream) => {
-                        this.addLocalVideo(ms, true);
-                        ms.getTracks().forEach(track => this.localMediaStream.addTrack(track))
-                    });
-
+                                                    this.userSettings.videoDevice, 
+                                                    this.userSettings.videoResolution), 
+                                                    (ms: MediaStream) => {                 
+                                                        this.addLocalVideo(ms,true);
+                                                        ms.getTracks().forEach(track => this.localMediaStream.addTrack(track))
+                                                    });
             }
-
-            this.userSettings.audioDeviceIn = audioDeviceIn.value;
-            this.userSettings.audioDeviceOut = audioDeviceOut.value;
-            this.userSettings.videoDevice = videoDevice.value;
-            this.userSettings.videoResolution = videoResolution.value;
 
 
             this.userSettings.saveSetting();
