@@ -360,6 +360,11 @@ span.namebadge {
     height: 48px;
 }
 
+span.is-speaking{
+    background:green;
+    color:#fff;
+}
+
 
 
 .white {
@@ -571,7 +576,3 @@ i.fa-lock {
     height: 200px;
 }
 
-span.is-speaking{
-    background:green;
-    color:#fff;
-}
