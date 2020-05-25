@@ -1,3 +1,4 @@
+
 export class DOMUtils {
     static get<T extends HTMLElement>(query: string, parent?: Element): T {
         return parent ? parent.querySelector(query) as T : document.querySelector(query) as T

@@ -54,7 +54,7 @@ export class Broker extends ControllerBase {
         appInsightsClient && appInsightsClient.trackTrace({ message: "leaveContext" });
     }
     @CanInvoke(true)
-    changeContext(change: { context: string }) {
+    changeContext(change: { context: string, audio?: boolean, video?: boolean }) {
         let match = this.getExtendedPeerConnections(this.peer).find((pre: Broker) => {
             return pre.peer.locked == false && pre.peer.context == change.context;
         });
@@ -65,6 +65,8 @@ export class Broker extends ControllerBase {
                 return pre.peer.context === change.context && pre.isOrganizer == true;
             }).length == 0 ? true : false;
             this.peer.context = change.context;
+            this.peer.audio = change.audio;
+            this.peer.video = change.video;
             this.isOrganizer = isOrganizer;
             this.invoke(this.peer, "contextChanged", this.alias);
             appInsightsClient && appInsightsClient.trackTrace({ message: "contextChanged" });
@@ -103,12 +105,7 @@ export class Broker extends ControllerBase {
     }
     @CanInvoke(true)
     onliners() {
-        let onliners = this.getExtendedPeerConnections(this.peer).map((p: Broker) => {
-            return {
-                peerId: p.peer.peerId, nickname: p.nickname, created: p.peer.created,
-                organizer: p.isOrganizer
-            };
-        });
+        let onliners = this.getOnliners();
         onliners.push(
             {
                 peerId: this.peer.peerId, nickname: this.nickname, created: this.peer.created,
@@ -127,6 +124,28 @@ export class Broker extends ControllerBase {
         });
         appInsightsClient && appInsightsClient.trackTrace({ message: "isAlive" });
     }
+
+    @CanInvoke(true)
+    whois(peerId: string) {
+
+        const match = this.getOnliners().find((pre) => {
+            return pre.peerId === peerId;
+        })
+        if (match) {
+            this.invoke(match, "whois");
+        }
+    }
+
+
+    getOnliners(): Array<any> {
+        return this.getExtendedPeerConnections(this.peer).map((p: Broker) => {
+            return {
+                peerId: p.peer.peerId, nickname: p.nickname, created: p.peer.created,
+                organizer: p.isOrganizer
+            };
+        });
+    }
+
 
     getExtendedPeerConnections(peerConnetion: ExtendedPeerConnection): Array<ControllerBase> {
         let match = this.findOn(this.alias, (pre: Broker) => {

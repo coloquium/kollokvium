@@ -259,6 +259,19 @@ main .overlay {
     overflow: hidden;
 }
 
+.video-grid ul li img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 50%;
+    /* % of surrounding element */
+    top: 50%;
+    transform: translate(-50%, -50%);
+    /* % of current element */
+    filter: blur(20px);
+}
+
 .video-grid ul li video {
     object-fit: cover;
     width: 100%;
@@ -330,10 +343,21 @@ main .overlay {
 }
 
 .video-tools i {
-     z-index: 1000;
-     background: rgba(0,0,0,.45);
-     padding: 0.5rem;
-     cursor: pointer;
+    z-index: 1000;
+    background: rgba(0, 0, 0, .45);
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+span.namebadge {
+    position: absolute;
+    z-index: 1000;
+    color: #333;
+    top: 80px;
+    right: 20px;
+    background: #fff;
+    padding: 10px;
+    height: 48px;
 }
 
 .white {

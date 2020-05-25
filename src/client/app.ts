@@ -1,8 +1,7 @@
 import adapter from 'webrtc-adapter';
 import { Factory, WebRTC, BinaryMessage, Message, DataChannel, PeerChannel, Utils } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
-import { AppParticipant } from './AppParticipant';
-import { PeerConnection } from 'thor-io.vnext';
+import { AppParticipantComponent } from './Components/AppParticipantComponent';
 import { ReadFile } from './Helpers/ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
@@ -16,6 +15,8 @@ import { Transcriber } from './Audio/Transcriber';
 import { JournalComponent } from './Components/JournalComponent';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 import hotkeys, { HotkeysEvent } from 'hotkeys-js';
+import { MediaUtils } from './Helpers/MediaUtils';
+import { SpeechDetector } from './Audio/SpeechDetector';
 
 
 export class App {
@@ -33,7 +34,7 @@ export class App {
     rtcClient: WebRTC;
     localMediaStream: MediaStream;
     slug: string;
-    participants: Map<string, AppParticipant>;
+    participants: Map<string, AppParticipantComponent>;
     isRecording: boolean;
     transcriber: Transcriber;
     preferredLanguage: string;
@@ -60,8 +61,8 @@ export class App {
     textToSpeech: HTMLInputElement;
     textToSpeechMessage: HTMLInputElement;
 
-
     journal: JournalComponent;
+    speechDetector: SpeechDetector;
 
 
     /**
@@ -80,6 +81,9 @@ export class App {
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
+
+          
+
         }).catch(err => {
             // unable to get camera, show camera dialog ?
             DOMUtils.get("#await-need-error").classList.toggle("hide");
@@ -242,44 +246,19 @@ export class App {
             track.enabled = !track.enabled;
 
         });
-
-
-
-
     }
     /**
+     * Record all streams, including local
      *
-     *
-     * @param {string} id
-     * @param {MediaStream} mediaStream
      * @memberof App
      */
-    recordSingleStream(id: string) {
-        if (!this.isRecording) {
-            let tracks = this.participants.get(id).getTracks();
-            this.singleStreamRecorder = new MediaStreamRecorder(tracks);
-            this.singleStreamRecorder.start(10);
-            this.isRecording = true;
-        } else {
-            DOMUtils.get("i.is-recording").classList.remove("flash");
-            this.isRecording = false;
-            this.singleStreamRecorder.stop();
-            this.singleStreamRecorder.flush().then((blobUrl: string) => {
-                this.displayRecording(blobUrl);
-            });
-        }
-    }
-
     recordAllStreams() {
         if (!this.mediaStreamBlender.isRecording) {
-
-            // clear al prior tracks
-            // temp fix due to mediaStreamBlender missing method
 
             this.mediaStreamBlender.audioSources.clear();
             this.mediaStreamBlender.videosSources.clear();
 
-            Array.from(this.participants.values()).forEach((p: AppParticipant) => {
+            Array.from(this.participants.values()).forEach((p: AppParticipantComponent) => {
                 this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
             });
             this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
@@ -295,7 +274,6 @@ export class App {
         }
     }
 
-
     /**
      * Display the number of participants & room name in page title
      *
@@ -303,27 +281,6 @@ export class App {
      */
     updatePageTitle() {
         document.title = `(${this.numOfPeers + 1}) Kollokvium  - ${this.slug} | A free multi-party video conference for you and your friends!`;
-    }
-    /**
-     * Display recording results
-     *
-     * @param {string} blobUrl
-     * @memberof App
-     */
-    displayRecording(blobUrl: string) {
-        let p = document.createElement("p");
-
-        const download = document.createElement("a");
-        download.setAttribute("href", blobUrl);
-        download.textContent = "Your recording has ended, here is the file. ( click to download )";
-        download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
-
-        p.append(download);
-
-        DOMUtils.get("#recorder-download").append(p);
-
-        $("#recorder-result").modal("show");
-
     }
 
     /**
@@ -356,7 +313,6 @@ export class App {
 
 
     }
-
     /**
      * PeerConnection configuration
      *
@@ -414,107 +370,40 @@ export class App {
     connectToServer(url: string, config: any): Factory {
         return new Factory(url, ["broker"]);
     }
-
-    /**
-     * Add remote video stream 
-     *
-     * @param {string} id
-     * @param {MediaStream} mediaStream
-     * @memberof App
-     */
-    addRemoteVideo(id: string, mediaStream: MediaStream, trackId: string) {
-
-        if (!this.shareContainer.classList.contains("hide")) {
-            this.shareContainer.classList.add("hide");
-        }
-        let videoTools = document.createElement("div");
-        videoTools.classList.add("video-tools", "p2", "darken");
-        let item = document.createElement("li");
-
-        item.classList.add("p" + id);
-
-        item.classList.add("s" + trackId);
-
-        let f = document.createElement("i");
-        f.classList.add("fas", "fa-arrows-alt", "fa-2x", "white")
-        let r = document.createElement("i");
-        r.classList.add("fas", "fa-circle", "fa-2x", "red")
-        r.addEventListener("click", () => {
-            if (!this.isRecording)
-                r.classList.add("flash", "is-recording");
-            this.recordSingleStream(id);
-        });
-        videoTools.append(f);
-        videoTools.append(r);
-        item.prepend(videoTools);
-
-        let video = document.createElement("video");
-        video.poster = "/img/novideo.png";
-        video.srcObject = mediaStream;
-        video.width = 1280;
-        video.height = 720;
-        video.autoplay = true;
-        video.setAttribute("playsinline", '');
-
-        let subtitles = document.createElement("div");
-        subtitles.classList.add("subtitles");
-        subtitles.classList.add("subs" + id);
-
-        item.append(subtitles);
-        item.append(video);
-        // listener for fullscreen view of a participants video
-        f.addEventListener("click", (e) => {
-            let elem = video;
-            if (!document.fullscreenElement) {
-                elem.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        });
-        DOMUtils.get("#remote-videos").append(item);
-    }
-    /**
-     * Get this clients media devices
-     *
-     * @returns {Promise<Array<MediaDeviceInfo>>}
-     * @memberof App
-     */
-    getMediaDevices(): Promise<Array<MediaDeviceInfo>> {
-        return new Promise<Array<MediaDeviceInfo>>((resolve: any, reject: any) => {
-            navigator.mediaDevices.enumerateDevices().then((devices: Array<MediaDeviceInfo>) => {
-                resolve(devices);
-            }).catch(reject);
-        });
-    };
-    /**
+      /**
      *  Add a participant to the "conference"
      *
      * @param {string} id
-     * @returns {AppParticipant}
+     * @returns {AppParticipantComponent}
      * @memberof App
      */
-    tryAddParticipant(id: string): AppParticipant {
+    tryAddParticipant(id: string): AppParticipantComponent {
         if (this.participants.has(id)) {
             return this.participants.get(id);
         } else {
-            this.participants.set(id, new AppParticipant(id));
-            let p = this.participants.get(id);
-            p.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
-                this.addRemoteVideo(id, mediaStream, mediaStreamTrack.id);
+            let participant = new AppParticipantComponent(id);
+
+            participant.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
+                participant.addVideo(id, mediaStream);
+                //     this.addParticipant(id, mediaStream, mediaStreamTrack.id);
             }
-            p.onAudioTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
+            participant.onAudioTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
                 this.audioNodes.add(id, mediaStream);
             };
-            p.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
+            participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
                 let p = DOMUtils.get(".p" + id);
                 if (p) p.remove();
             }
-            p.onAudioTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
+            participant.onAudioTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
                 this.audioNodes.remove(id);
             }
-            return p;
+            this.participants.set(id, participant);
+
+            participant.render(DOMUtils.get("#remote-videos"));
+
+            return participant;
+
+
         }
     }
 
@@ -618,6 +507,19 @@ export class App {
         DOMUtils.get(".join").classList.add("d-none");
     }
 
+
+    displayRecording(blobUrl: string) {
+        let p = document.createElement("p");
+        const download = document.createElement("a");
+        download.setAttribute("href", blobUrl);
+        download.textContent = "Your recording has ended, here is the file. ( click to download )";
+        download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
+        p.append(download);
+        DOMUtils.get("#recorder-download").append(p);
+        $("#recorder-result").modal("show");
+    }
+
+
     /**
      * Creates an instance of App - Kollokvium
      * @memberof App
@@ -650,7 +552,7 @@ export class App {
         UserSettings.cameraResolutions(this.userSettings.videoResolution);
 
         // add language options to UserSettings 
-        DOMUtils.get("#languages").append(Transcriber.getLanguagePicker());
+        DOMUtils.get("#languages").append(Transcriber.getlanguagePicker());
         DOMUtils.get("#appDomain").textContent = this.appDomain.domain;
         DOMUtils.get("#appVersion").textContent = this.appDomain.version;
 
@@ -696,7 +598,7 @@ export class App {
 
 
         this.numOfChatMessagesUnread = 0;
-        this.participants = new Map<string, AppParticipant>();
+        this.participants = new Map<string, AppParticipantComponent>();
 
         this.slug = location.hash.replace("#", "");
 
@@ -811,7 +713,7 @@ export class App {
                 this.mediaStreamBlender.audioSources.clear();
                 this.mediaStreamBlender.videosSources.clear();
 
-                Array.from(this.participants.values()).forEach((p: AppParticipant) => {
+                Array.from(this.participants.values()).forEach((p: AppParticipantComponent) => {
                     this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
                 });
                 this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
@@ -838,31 +740,29 @@ export class App {
             this.factory.GetController("broker").Invoke("lockContext", {});
         });
 
-        this.getMediaDevices().then((devices: Array<MediaDeviceInfo>) => {
-
+        MediaUtils.getMediaDevices().then((devices: Array<MediaDeviceInfo>) => {
             // Another option to get the devices
             // let deviceHash = {
             //     'videoinput': [videoDevice, this.userSettings.videoDevice],
             //     'audioinput': [audioDeviceIn, this.userSettings.audioDeviceIn],
             //     'audiooutput': [audioDeviceOut, this.userSettings.audioDeviceOut]
             // };
-
             devices.forEach((d: MediaDeviceInfo, index: number) => {
                 let option = document.createElement("option");
 
                 option.textContent = d.label || `Device #${index} (name unknown)`;
                 option.value = d.deviceId;
 
-                switch(d.kind){
+                switch (d.kind) {
                     case 'videoinput':
                         option.selected = option.value === this.userSettings.videoDevice;
                         videoDevice.append(option);
                         break;
-                    case 'audioinput':  
+                    case 'audioinput':
                         option.selected = option.value === this.userSettings.audioDeviceIn;
                         audioDeviceIn.append(option);
                         break;
-                    case 'audiooutput':  
+                    case 'audiooutput':
                         option.selected = option.value === this.userSettings.audioDeviceOut;
                         audioDeviceOut.append(option);
                         break;
@@ -898,7 +798,6 @@ export class App {
 
                 this.localMediaStream.getTracks().forEach(track => {
                     this.localMediaStream.removeTrack(track);
-                    console.log("remove track",track);
                 });
                 this.getLocalStream(UserSettings.createConstraints(
                                                     this.userSettings.videoDevice, 
@@ -1120,8 +1019,20 @@ export class App {
             this.journal = new JournalComponent();
             this.userSettings.slugHistory.addToHistory(slug.value);
             this.userSettings.saveSetting();
-            this.factory.GetController("broker").Invoke("changeContext", { context: this.appDomain.getSlug(slug.value)});
+            this.factory.GetController("broker").Invoke("changeContext", {
+                context: this.appDomain.getSlug(slug.value),
+                audio: MediaUtils.CheckStream(this.localMediaStream.getAudioTracks(), "live"),
+                video: MediaUtils.CheckStream(this.localMediaStream.getVideoTracks(), "live")
+            });
+
+            console.log(this.localMediaStream);
+
             window.history.pushState({}, window.document.title, `#${slug.value}`);
+
+            setTimeout(() => {
+                DOMUtils.get("#share-container").classList.toggle("d-none");
+            }, 5000)
+
         });
 
 
@@ -1271,12 +1182,21 @@ export class App {
                 }
             });
 
+            
             broker.On("onliners", (data) => {
                 console.log("onliners", data);
             });
 
-
-
+            broker.On("nicknameChange",(data) => {
+                let n =DOMUtils.get(`.n${data.peerId}`);
+                if(n) 
+                    n.textContent = data.nickname;
+            });
+            broker.On("whois",(data) => {
+                let n =DOMUtils.get(`.n${data.peerId}`);
+                if(n) 
+                    n.textContent = data.nickname;
+            });
             this.rtcClient.OnLocalStream = (mediaStream: MediaStream) => {
             }
             this.rtcClient.OnContextCreated = (ctx) => {
@@ -1290,44 +1210,63 @@ export class App {
                 this.numOfPeers--;
                 this.updatePageTitle();
                 this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
+
+
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 DOMUtils.get(".remote").classList.add("hide");
                 this.numOfPeers++;
                 this.updatePageTitle();
                 this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
+                
             }
             this.rtcClient.OnRemoteTrack = (track: MediaStreamTrack, connection: any) => {
                 let participant = this.tryAddParticipant(connection.id);
                 participant.addTrack(track);
+                // who is?
+                this.factory.GetController("broker").Invoke("whois",connection.id);            
             }
 
             broker.OnOpen = (ci: any) => {
-
-
                 if (slug.value.length >= 6) {
                     this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
                 }
-
                 this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
-
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
                     UserSettings.defaultConstraints(
                         this.userSettings.videoDevice, this.userSettings.videoResolution
                     ),
                     (mediaStream: MediaStream) => {
+                        //  remove local video track
+                        if(location.search.includes("novideo"))
+                                mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
+
+
+                        this.speechDetector = new SpeechDetector(mediaStream,5,512);
+
+                        this.speechDetector.start(2000);
+
+                        this.speechDetector.onspeechstarted = (rms) => {
+                            console.log("speaking",rms,this.rtcClient.LocalPeerId);
+                        
+                        }
+                        this.speechDetector.onspeechended = (rms) => {
+                            console.log("not speaking",rms,this.rtcClient.LocalPeerId);
+                        }
+
+
                         DOMUtils.get("#await-streams").classList.toggle("hide");
                         DOMUtils.get("#has-streams").classList.toggle("hide");
                         this.localMediaStream = mediaStream;
                         this.rtcClient.AddLocalStream(this.localMediaStream);
                         this.addLocalVideo(this.localMediaStream, true);
-
                         if (location.hash.length <= 6)
                             $("#random-slug").popover("show");
+    
+
+
                     });
-
-
 
             }
             broker.Connect();
@@ -1346,11 +1285,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const instrumentationKey = process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
-    if(!!instrumentationKey){
-        const appInsights = new ApplicationInsights({ config: { instrumentationKey: instrumentationKey }});
+    if (!!instrumentationKey) {
+        const appInsights = new ApplicationInsights({ config: { instrumentationKey: instrumentationKey } });
         appInsights.loadAppInsights();
         appInsights.trackPageView();
-    }     
+    }
 
     App.getInstance();
 });

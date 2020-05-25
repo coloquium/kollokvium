@@ -1,4 +1,3 @@
-import { Utils } from 'thor-io.client-vnext';
 declare var webkitSpeechRecognition: any;
 
 export class Transcriber {
@@ -180,13 +179,13 @@ export class Transcriber {
         });
     }
 
-    static getLanguagePicker(): HTMLElement {
+    static getlanguagePicker(): HTMLElement {
         let selectLanguage = document.createElement("select");
         selectLanguage.classList.add("selected-language", "form-control");
-        let notSet = document.createElement("option");
-        notSet.value = "";
-        notSet.textContent = "Not set (use browser language)";
-        selectLanguage.append(notSet);
+        let notset = document.createElement("option");
+        notset.value = "";
+        notset.textContent = "Not set (use browser language)";
+        selectLanguage.append(notset);
         Transcriber.languages.forEach((entry: any) => {
             let country = entry[0];
             let dialects = entry[1];
