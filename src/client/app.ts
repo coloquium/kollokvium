@@ -81,9 +81,6 @@ export class App {
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
-
-
-
         }).catch(err => {
             // unable to get camera, show camera dialog ?
             DOMUtils.get("#await-need-error").classList.toggle("hide");
@@ -293,22 +290,16 @@ export class App {
         video.autoplay = true;
         video.muted = true;
         video.poster = "/img/novideo.png";;
-        video.srcObject = mediaStream;
-        video.setAttribute("playsinline", '');
-        let t = mediaStream.getVideoTracks()[0];
-        video.classList.add("l-" + t.id)
-        t.onended = () => {
-
-            this.rtcClient.removeTrackFromPeers(t);
-            // this.rtcClient.Peers.forEach(p => {
-            //     let sender = p.RTCPeer.getSenders().find((sender: RTCRtpSender) => {
-            //         return sender.track.id === t.id;
-            //     });
-            //     p.RTCPeer.removeTrack(sender);
-            // });
-            DOMUtils.get(".l-" + t.id).remove();
-        };
+        video.srcObject = isCam ? mediaStream : mediaStream.clone();
         if (isCam) video.classList.add("local-cam");
+        video.setAttribute("playsinline", '');
+        let track = mediaStream.getVideoTracks()[0];
+        video.classList.add("l-" + track.id)
+        track.onended = () => {
+            this.rtcClient.removeTrackFromPeers(track);
+            this.localMediaStream.removeTrack(track);            
+            DOMUtils.get(".l-" + track.id).remove();
+        };
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
     }
@@ -386,6 +377,9 @@ export class App {
                 let node = participant.render();
                 participant.addVideo(id, mediaStream, node);
                 DOMUtils.get("#remote-videos").append(node);
+                this.numOfPeers++;
+                this.updatePageTitle();
+
             }
             participant.onAudioTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
                 this.audioNodes.add(id, mediaStream);
@@ -393,14 +387,13 @@ export class App {
             participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
                 let p = DOMUtils.getAll(`li video.s${stream.id}`);
                 p.forEach(n => n.parentElement.remove());
-
+                this.numOfPeers--
+                this.updatePageTitle();
             }
             participant.onAudioTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
                 this.audioNodes.remove(id);
             }
             this.participants.set(id, participant);
-
-
 
             return participant;
 
@@ -1090,17 +1083,16 @@ export class App {
                 }));
             });
             this.arbitraryChannel.On("lowresRequest", (data: any) => {
-
                 let rtpsenders = this.rtcClient.getRtpSenders(data.peerId);
                 rtpsenders.forEach((sender: RTCRtpSender) => {
                     if (sender.track.kind === "video") {
+                        // apply (240p ~ youTube "240p" mode)
                         sender.track.applyConstraints({
-                            width: 320,
+                            width: 426,
                             height: 240,
                         })
                     }
                 });
-
             });
 
             this.arbitraryChannel.On("textToSpeech", (data: any) => {
@@ -1208,14 +1200,11 @@ export class App {
             this.rtcClient.OnContextDisconnected = (peer) => {
                 this.participants.delete(peer.id);
                 DOMUtils.getAll(`li.p${peer.id}`).forEach(n => n.remove());
-                this.numOfPeers--;
-                this.updatePageTitle();
+              
                 this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
             };
             this.rtcClient.OnContextConnected = (peer) => {
                 DOMUtils.get(".remote").classList.add("hide");
-                this.numOfPeers++;
-                this.updatePageTitle();
                 this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
 
             }
@@ -1263,12 +1252,9 @@ export class App {
                         DOMUtils.get("#has-streams").classList.toggle("hide");
                         this.localMediaStream = mediaStream;
                         this.rtcClient.AddLocalStream(this.localMediaStream);
-                        this.addLocalVideo(this.localMediaStream, true);
+                        this.addLocalVideo(this.localMediaStream,true);
                         if (location.hash.length <= 6)
                             $("#random-slug").popover("show");
-
-
-
                     });
 
             }
