@@ -292,24 +292,23 @@ export class App {
         let video = document.createElement("video") as HTMLVideoElement;
         video.autoplay = true;
         video.muted = true;
-        video.poster = "/img/novideo.png";    ;
+        video.poster = "/img/novideo.png";;
         video.srcObject = mediaStream;
         video.setAttribute("playsinline", '');
         let t = mediaStream.getVideoTracks()[0];
         video.classList.add("l-" + t.id)
         t.onended = () => {
-            this.rtcClient.Peers.forEach(p => {
-                console.log(p.RTCPeer.getSenders());
-                let sender = p.RTCPeer.getSenders().find((sender: RTCRtpSender) => {
-                    return sender.track.id === t.id;
-                });
-                p.RTCPeer.removeTrack(sender);
-            });
+
+            this.rtcClient.removeTrackFromPeers(t);
+            // this.rtcClient.Peers.forEach(p => {
+            //     let sender = p.RTCPeer.getSenders().find((sender: RTCRtpSender) => {
+            //         return sender.track.id === t.id;
+            //     });
+            //     p.RTCPeer.removeTrack(sender);
+            // });
             DOMUtils.get(".l-" + t.id).remove();
         };
-
         if (isCam) video.classList.add("local-cam");
-
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
     }
@@ -1070,6 +1069,10 @@ export class App {
             event.preventDefault()
         });
 
+        hotkeys("ctrl+l", (e: KeyboardEvent, h: HotkeysEvent) => {
+            this.arbitraryChannel.Invoke("lowresRequest", { peerId: this.rtcClient.LocalPeerId });
+            event.preventDefault()
+        });
 
 
         this.factory.OnClose = (reason: any) => {
@@ -1078,16 +1081,26 @@ export class App {
         this.factory.OnOpen = (broker: Controller) => {
 
             this.rtcClient = new WebRTC(broker, this.rtcConfig);
-
             // set up peer dataChannels 
-            this.arbitraryChannel = this.rtcClient.CreateDataChannel(`chat-${this.appDomain.contextPrefix}-dc`);
-            this.fileChannel = this.rtcClient.CreateDataChannel(`file-${this.appDomain.contextPrefix}-dc`);
-
-
+            this.arbitraryChannel = this.rtcClient.CreateDataChannel(`arbitrary-${this.appDomain.contextPrefix}-dc`);
+            this.fileChannel = this.rtcClient.CreateDataChannel(`blob-${this.appDomain.contextPrefix}-dc`);
             this.fileChannel.On("fileShare", (fileInfo: any, arrayBuffer: ArrayBuffer) => {
                 this.displayReceivedFile(fileInfo, new Blob([arrayBuffer], {
                     type: fileInfo.mimeType
                 }));
+            });
+            this.arbitraryChannel.On("lowresRequest", (data: any) => {
+
+                let rtpsenders = this.rtcClient.getRtpSenders(data.peerId);
+                rtpsenders.forEach((sender: RTCRtpSender) => {
+                    if (sender.track.kind === "video") {
+                        sender.track.applyConstraints({
+                            width: 320,
+                            height: 240,
+                        })
+                    }
+                });
+
             });
 
             this.arbitraryChannel.On("textToSpeech", (data: any) => {
