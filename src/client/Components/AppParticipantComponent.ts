@@ -115,7 +115,6 @@ export class AppParticipantComponent {
 
     }
 
-
     getTracks(): Array<MediaStreamTrack> {
         let tracks = new Array<MediaStreamTrack>();
         tracks.push(this.videoTracks[0]);
@@ -138,10 +137,7 @@ export class AppParticipantComponent {
     addVideoTrack(t: MediaStreamTrack) {
         this.videoTracks.push(t);
         let stream = new MediaStream([t]);
-        
-     
         stream.getVideoTracks()[0].onended = () => {  
-            console.log("this track has ended");
             if (this.onVideoTrackLost)
                 this.onVideoTrackLost(this.id, stream, t);
         };
