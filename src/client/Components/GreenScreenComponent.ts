@@ -13,6 +13,7 @@ export class GreenScreenComponent extends AppComponent {
     gss: GreenScreenStream;
     handle: number;
     capturedStream: MediaStream;
+    canvas: HTMLCanvasElement;
 
     constructor(public id: string) {
         super()
@@ -23,11 +24,13 @@ export class GreenScreenComponent extends AppComponent {
         this.backgrounds.push('/img/greenscreen/desert.jpg');
         this.backgrounds.push('/img/greenscreen/beach.jpg');
         this.background = this.backgrounds[0]; // set first as default
+        this.canvas =document.createElement("canvas") as HTMLCanvasElement;
+        this.canvas.width = 640; this.canvas.height = 360;
 
     }
 
     start(src: string) {
-        this.gss = new GreenScreenStream(true,src);
+        this.gss = new GreenScreenStream(true,src,this.canvas);
        
         this.gss.bufferVert =`
         uniform float time;
@@ -121,7 +124,7 @@ export class GreenScreenComponent extends AppComponent {
                 </div>
                 <div class="col-md-9">
                 <h5>Preview</h5>
-                <video width="800" height="450" id="preview" autoplay muted class="img-thumbnail greenscreen-preview -mt-2"
+                <video width="640" height="360" id="preview" autoplay muted class="img-thumbnail greenscreen-preview -mt-2"
                 poster="/img/800x450.png">
                 </video>
              

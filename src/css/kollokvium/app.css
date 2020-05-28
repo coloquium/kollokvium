@@ -478,6 +478,11 @@ i.fa-lock {
     max-width: 100%;
 }
 
+.greenscreen-preview{
+    width: 100%;
+    
+}
+
 #palette {
     font-size: 1.2rem;
     color: #000;

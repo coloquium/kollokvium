@@ -643,13 +643,14 @@ export class App {
         DOMUtils.get("#apply-virtual-bg").addEventListener("click", () => {
             $("#settings-modal").modal("toggle");
             const track = this.localMediaStream.getVideoTracks()[0]
-            track.applyConstraints({ width: 800, height: 450 });
+            track.applyConstraints({ width: 640, height: 360 });
             this.greenScreen.setMediaTrack(track);
             $("#gss").modal("toggle");
         });
 
         DOMUtils.get("#remove-virtual-bg").addEventListener("click", () => {
-            this.getLocalStream(UserSettings.defaultConstraints(), (mediaStream: MediaStream) => {
+            this.getLocalStream(UserSettings.defaultConstraints(this.userSettings.videoDevice, this.userSettings.videoResolution,true
+                ), (mediaStream: MediaStream) => {
                 const track = this.localMediaStream.getVideoTracks()[0];
                 this.localMediaStream.removeTrack(track);
                 this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);

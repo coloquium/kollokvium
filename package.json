@@ -68,7 +68,7 @@
     "applicationinsights": "^1.7.4",
     "bufferutil": "^4.0.1",
     "express": "^4.17.1",
-    "greenscreenstream": "^1.0.1-beta.1",
+    "greenscreenstream": "^1.0.1-beta.2",
     "hotkeys-js": "^3.7.6",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",
