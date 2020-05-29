@@ -82,6 +82,9 @@ export class App {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
         }).catch(err => {
+            console.log("getLocalStream",err);
+
+            
             // unable to get camera, show camera dialog ?
             DOMUtils.get("#await-need-error").classList.toggle("hide");
             DOMUtils.get("#await-need-accept").classList.toggle("hide");
