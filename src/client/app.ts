@@ -82,9 +82,15 @@ export class App {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
         }).catch(err => {
-            console.log("getLocalStream",err);
+            console.log("getLocalStream error", err);
+            let supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
 
-            
+            console.log("The following media constraints are supported");
+            for (let constraint in supportedConstraints) {
+                if (supportedConstraints.hasOwnProperty(constraint)) {
+                    console.log(constraint)
+                }
+            }
             // unable to get camera, show camera dialog ?
             DOMUtils.get("#await-need-error").classList.toggle("hide");
             DOMUtils.get("#await-need-accept").classList.toggle("hide");
@@ -300,7 +306,7 @@ export class App {
         video.classList.add("l-" + track.id)
         track.onended = () => {
             this.rtcClient.removeTrackFromPeers(track);
-            this.localMediaStream.removeTrack(track);            
+            this.localMediaStream.removeTrack(track);
             DOMUtils.get(".l-" + track.id).remove();
         };
         let container = DOMUtils.get(".local") as HTMLElement;
@@ -652,8 +658,8 @@ export class App {
         });
 
         DOMUtils.get("#remove-virtual-bg").addEventListener("click", () => {
-            this.getLocalStream(UserSettings.defaultConstraints(this.userSettings.videoDevice, this.userSettings.videoResolution,true
-                ), (mediaStream: MediaStream) => {
+            this.getLocalStream(UserSettings.defaultConstraints(this.userSettings.videoDevice, this.userSettings.videoResolution, true
+            ), (mediaStream: MediaStream) => {
                 const track = this.localMediaStream.getVideoTracks()[0];
                 this.localMediaStream.removeTrack(track);
                 this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
@@ -1204,7 +1210,7 @@ export class App {
             this.rtcClient.OnContextDisconnected = (peer) => {
                 this.participants.delete(peer.id);
                 DOMUtils.getAll(`li.p${peer.id}`).forEach(n => n.remove());
-              
+
                 this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
             };
             this.rtcClient.OnContextConnected = (peer) => {
@@ -1227,7 +1233,7 @@ export class App {
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
                 this.getLocalStream(
                     UserSettings.defaultConstraints(
-                        this.userSettings.videoDevice, this.userSettings.videoResolution,true
+                        this.userSettings.videoDevice, this.userSettings.videoResolution, true
                     ),
                     (mediaStream: MediaStream) => {
                         //  remove local video track
@@ -1256,7 +1262,7 @@ export class App {
                         DOMUtils.get("#has-streams").classList.toggle("hide");
                         this.localMediaStream = mediaStream;
                         this.rtcClient.AddLocalStream(this.localMediaStream);
-                        this.addLocalVideo(this.localMediaStream,true);
+                        this.addLocalVideo(this.localMediaStream, true);
                         if (location.hash.length <= 6)
                             $("#random-slug").popover("show");
                     });
