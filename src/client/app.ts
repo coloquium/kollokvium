@@ -21,7 +21,7 @@ import { SpeechDetector } from './Audio/SpeechDetector';
 
 export class App {
 
-    appDomain: AppDomain;
+
     userSettings: UserSettings;
     greenScreen: GreenScreenComponent;
     mediaStreamBlender: MediaStreamBlender;
@@ -43,10 +43,8 @@ export class App {
     numOfPeers: number = 0;
 
 
-    shareContainer: HTMLElement;
     videoGrid: HTMLElement;
-    fullScreenVideo: HTMLVideoElement;
-
+    
     chatWindow: HTMLElement;
     unreadBadge: HTMLElement;
     leaveContext: HTMLElement;
@@ -60,7 +58,7 @@ export class App {
     pictureInPictureElement: HTMLVideoElement;
     textToSpeech: HTMLInputElement;
     textToSpeechMessage: HTMLInputElement;
-
+    AppDomain
     journal: JournalComponent;
     speechDetector: SpeechDetector;
 
@@ -82,13 +80,14 @@ export class App {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
         }).catch(err => {
-            console.log("getLocalStream error", err);
+
+            AppDomain.logger.error("getLocalStream error", err);
             let supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
 
-            console.log("The following media constraints are supported");
+            AppDomain.logger.log("The following media constraints are supported");
             for (let constraint in supportedConstraints) {
                 if (supportedConstraints.hasOwnProperty(constraint)) {
-                    console.log(constraint)
+                    AppDomain.logger.log(constraint)
                 }
             }
             // unable to get camera, show camera dialog ?
@@ -109,7 +108,6 @@ export class App {
             this.unreadBadge.classList.remove("d-none");
             this.unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
         }
-
         let message = document.createElement("div");
         let sender = document.createElement("mark");
         let time = document.createElement("time");
@@ -216,7 +214,9 @@ export class App {
                 this.rtcClient.addTrackToPeers(t);
             });
             this.addLocalVideo(stream, false);
-        }).catch(err => console.error)
+        }).catch(err => {
+            AppDomain.logger.error("shareScreen", err)
+        })
     }
 
     /**
@@ -312,22 +312,17 @@ export class App {
         let container = DOMUtils.get(".local") as HTMLElement;
         container.append(video);
     }
-    /**
-     * PeerConnection configuration
-     *
-     * @memberof App
-     */
-    rtcConfig = {
-        "sdpSemantics": 'plan-b',
-        "iceTransports": 'all',
-        "rtcpMuxPolicy": "require",
-        "bundlePolicy": "max-bundle",
-        "iceServers": [
-            {
-                "urls": "stun:stun.l.google.com:19302"
-            }
-        ]
-    };
+    // rtcConfig = {
+    //     "sdpSemantics": 'plan-b',
+    //     "iceTransports": 'all',
+    //     "rtcpMuxPolicy": "require",
+    //     "bundlePolicy": "max-bundle",
+    //     "iceServers": [
+    //         {
+    //             "urls": "stun:stun.l.google.com:19302"
+    //         }
+    //     ]
+    // };
 
     /**
      * Send chat message
@@ -342,7 +337,7 @@ export class App {
             text: message,
             from: sender
         }
-        // this.rtcClient.DataChannels.get(`chat-${this.appDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
+        // this.rtcClient.DataChannels.get(`chat-${AppDomain.contextPrefix}-dc`).PeerChannels.forEach((pc: PeerChannel) => {
         //     if(pc.dataChannel.readyState === "open")
         //         pc.dataChannel.send(new TextMessage("chatMessage", data, pc.label).toString());
         // });
@@ -426,7 +421,6 @@ export class App {
 
     disableConferenceElements() {
         location.hash = "";
-
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
         this.generateSubtitles.classList.toggle("hide");
 
@@ -529,6 +523,34 @@ export class App {
      */
     constructor() {
 
+        this.numOfChatMessagesUnread = 0;
+        this.participants = new Map<string, AppParticipantComponent>();
+
+     
+        // add language options to UserSettings 
+        DOMUtils.get("#languages").append(Transcriber.getlanguagePicker());
+        DOMUtils.get("#appDomain").textContent = AppDomain.domain;
+        DOMUtils.get("#appVersion").textContent = AppDomain.version;
+
+        this.slug = location.hash.replace("#", "");
+
+        this.generateSubtitles = DOMUtils.get("#subtitles");
+
+
+        this.videoGrid = DOMUtils.get("#video-grid");
+        this.chatWindow = DOMUtils.get(".chat");
+
+        this.lockContext = DOMUtils.get("#context-lock");
+        this.unreadBadge = DOMUtils.get("#unread-messages");
+        this.leaveContext = DOMUtils.get("#leave-context");
+        this.startButton = DOMUtils.get<HTMLInputElement>("#join-conference");
+        this.shareSlug = DOMUtils.get("#share-slug");
+        this.languagePicker = DOMUtils.get<HTMLInputElement>(".selected-language");
+        this.pictureInPicture = DOMUtils.get("#pip");
+
+        this.textToSpeech = DOMUtils.get<HTMLInputElement>("#show-text-to-speech");
+        this.textToSpeechMessage = DOMUtils.get<HTMLInputElement>("#text-message");
+
         let slug = DOMUtils.get<HTMLInputElement>("#slug");
         let chatMessage = DOMUtils.get<HTMLInputElement>("#chat-message");
         let muteAudio = DOMUtils.get("#mute-local-audio");
@@ -544,20 +566,23 @@ export class App {
         let audioDeviceOut = DOMUtils.get<HTMLInputElement>("#sel-audio-out");
         let videoResolution = DOMUtils.get<HTMLInputElement>("#sel-video-res");
 
+        //this.appDomain = new AppDomain();
 
-        this.appDomain = new AppDomain();
-        this.factory = this.connectToServer(this.appDomain.serverUrl, {})
+        this.factory = this.connectToServer(AppDomain.serverUrl, {})
         this.userSettings = new UserSettings();
+
+        UserSettings.cameraResolutions(this.userSettings.videoResolution);
+
+
         this.audioNodes = new AudioNodes();
         this.mediaStreamBlender = new MediaStreamBlender();
 
 
-        UserSettings.cameraResolutions(this.userSettings.videoResolution);
+        if (location.hash.length >= 6) {
+            this.startButton.textContent = "JOIN";
+        }
 
-        // add language options to UserSettings 
-        DOMUtils.get("#languages").append(Transcriber.getlanguagePicker());
-        DOMUtils.get("#appDomain").textContent = this.appDomain.domain;
-        DOMUtils.get("#appVersion").textContent = this.appDomain.version;
+       
 
         // Remove screenShare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
@@ -583,7 +608,7 @@ export class App {
             try {
                 this.mediaStreamBlender.refreshCanvas();
             } catch (err) {
-                console.log(err);
+                AppDomain.logger.error("mediaStreamBlender onTrackEnded", err);
             }
         }
         this.greenScreen = new GreenScreenComponent("gss");
@@ -600,31 +625,9 @@ export class App {
         DOMUtils.get("#components").append(this.greenScreen.render());
 
 
-        this.numOfChatMessagesUnread = 0;
-        this.participants = new Map<string, AppParticipantComponent>();
+     
 
-        this.slug = location.hash.replace("#", "");
-
-        this.generateSubtitles = DOMUtils.get("#subtitles");
-
-        this.fullScreenVideo = DOMUtils.get<HTMLVideoElement>(".full");
-        this.shareContainer = DOMUtils.get("#share-container");
-
-        this.videoGrid = DOMUtils.get("#video-grid");
-        this.chatWindow = DOMUtils.get(".chat");
-
-        this.lockContext = DOMUtils.get("#context-lock");
-        this.unreadBadge = DOMUtils.get("#unread-messages");
-        this.leaveContext = DOMUtils.get("#leave-context");
-        this.startButton = DOMUtils.get<HTMLInputElement>("#join-conference");
-        this.shareSlug = DOMUtils.get("#share-slug");
-        this.languagePicker = DOMUtils.get<HTMLInputElement>(".selected-language");
-        this.pictureInPicture = DOMUtils.get("#pip");
-
-        this.textToSpeech = DOMUtils.get<HTMLInputElement>("#show-text-to-speech");
-        this.textToSpeechMessage = DOMUtils.get<HTMLInputElement>("#text-message");
-
-        DOMUtils.get("button#apply-fail-save-constraints").addEventListener("click", () => {
+        DOMUtils.on("click", "button#apply-fail-save-constraints", () => {
             this.getLocalStream(
                 UserSettings.failSafeConstraints(),
                 (mediaStream: MediaStream) => {
@@ -638,7 +641,7 @@ export class App {
                 });
         });
 
-        DOMUtils.get("#show-journal").addEventListener("click", () => {
+        DOMUtils.on("click", "#show-journal", () => {
             DOMUtils.get("#generate-journal").textContent = "Copy to clipboard";
             if (this.journal.data.length > 0)
                 DOMUtils.get("#journal-content div.journal").remove();
@@ -646,10 +649,11 @@ export class App {
             $("#meeting-journal").modal("toggle");
         });
 
-        DOMUtils.get("#generate-journal").addEventListener("click", () => {
+        DOMUtils.on("click", "#generate-journal", () => {
             this.journal.download();
         });
-        DOMUtils.get("#apply-virtual-bg").addEventListener("click", () => {
+
+        DOMUtils.on("click", "#apply-virtual-bg", () => {
             $("#settings-modal").modal("toggle");
             const track = this.localMediaStream.getVideoTracks()[0]
             track.applyConstraints({ width: 640, height: 360 });
@@ -657,7 +661,7 @@ export class App {
             $("#gss").modal("toggle");
         });
 
-        DOMUtils.get("#remove-virtual-bg").addEventListener("click", () => {
+        DOMUtils.on("click", "#remove-virtual-bg", () => {
             this.getLocalStream(UserSettings.defaultConstraints(this.userSettings.videoDevice, this.userSettings.videoResolution, true
             ), (mediaStream: MediaStream) => {
                 const track = this.localMediaStream.getVideoTracks()[0];
@@ -671,29 +675,24 @@ export class App {
 
         DOMUtils.makeDraggable(DOMUtils.get(".local"));
 
-        this.textToSpeech.addEventListener("click", () => {
-
+        DOMUtils.on("click", this.textToSpeech, () => {
             if (this.textToSpeech.checked) {
                 DOMUtils.get(".text-to-speech").classList.remove("hide");
             } else {
                 DOMUtils.get(".text-to-speech").classList.add("hide");
             }
-
         });
 
-        let toggleRecord = DOMUtils.get("#record-all") as HTMLAudioElement;
+        let toggleRecord = DOMUtils.get<HTMLAudioElement>("#record-all");
 
+        this.pictureInPictureElement = DOMUtils.get<HTMLVideoElement>("#pip-stream");
 
-        this.pictureInPictureElement = DOMUtils.get("#pip-stream") as HTMLVideoElement;
-
-        this.pictureInPictureElement.addEventListener('enterpictureinpicture', () => {
+        DOMUtils.on("enterpictureinpicture", this.pictureInPictureElement, () => {
             this.pictureInPictureElement.play();
             this.pictureInPicture.classList.toggle("flash");
-
-
         });
 
-        this.pictureInPictureElement.addEventListener('leavepictureinpicture', () => {
+        DOMUtils.on("leavepictureinpicture", this.pictureInPictureElement, () => {
             this.pictureInPicture.classList.toggle("flash");
             this.mediaStreamBlender.render(0);
             this.mediaStreamBlender.audioSources.clear();
@@ -702,27 +701,22 @@ export class App {
             this.pictureInPictureElement.pause();
         });
 
-        this.pictureInPicture.addEventListener("click", () => {
-
+        DOMUtils.on("click", this.pictureInPictureElement, () => {
             if (this.isRecording) return;
             this.pictureInPicture.classList.toggle("flash");
-
-
             if (document["pictureInPictureElement"]) {
                 document["exitPictureInPicture"]()
-                    .catch(error => {
+                    .catch(err => {
+                        AppDomain.logger.error("exitPictureInPicture", err)
                         // Error handling
                     })
             } else {
                 this.mediaStreamBlender.audioSources.clear();
                 this.mediaStreamBlender.videosSources.clear();
-
                 Array.from(this.participants.values()).forEach((p: AppParticipantComponent) => {
                     this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
                 });
                 this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
-
-
                 this.mediaStreamBlender.refreshCanvas();
 
                 this.mediaStreamBlender.render(15);
@@ -736,11 +730,12 @@ export class App {
         nickname.value = this.userSettings.nickname;
         this.languagePicker.value = this.userSettings.language;
 
-        this.videoGrid.addEventListener("click", () => {
-            this.videoGrid.classList.remove("blur");
+        DOMUtils.on("change", this.languagePicker, () => {
+            this.userSettings.language = this.languagePicker.value;
         });
 
-        this.lockContext.addEventListener("click", () => {
+
+        DOMUtils.on("click", this.lockContext, () => {
             this.factory.GetController("broker").Invoke("lockContext", {});
         });
 
@@ -777,9 +772,13 @@ export class App {
                 // (device as HTMLInputElement).append(option);
             });
 
-        }).catch(console.error);
+        }).catch(err => {
+            AppDomain.logger.error("getMediaDevices", err)
+        }
+        );
 
-        saveSettings.addEventListener("click", () => {
+
+        DOMUtils.on("click", saveSettings, () => {
             this.userSettings.nickname = nickname.value;
             this.userSettings.audioDeviceIn = audioDeviceIn.value;
             this.userSettings.audioDeviceOut = audioDeviceOut.value;
@@ -811,28 +810,25 @@ export class App {
                         ms.getTracks().forEach(track => this.localMediaStream.addTrack(track))
                     });
             }
-
-
             this.userSettings.saveSetting();
 
             $("#settings-modal").modal("toggle");
         });
-        settings.addEventListener("click", () => {
+
+
+        DOMUtils.on("click", settings, () => {
             $("#settings-modal").modal("toggle");
         })
+
         // jQuery hacks for file share etc
         $('.modal').on('shown.bs.modal', function () {
             $(".popover").popover("hide");
         });
 
-
-
-        DOMUtils.get<HTMLInputElement>("input.file-selected").addEventListener("change", (evt: any) => {
+        DOMUtils.on("change", "input.file-selected", (evt: any) => {
             const file = evt.target.files[0];
             this.sendFile(file);
         });
-
-
 
 
         this.userSettings.slugHistory.getHistory().forEach((slug: string) => {
@@ -841,16 +837,14 @@ export class App {
             DOMUtils.get("#slug-history").prepend(option);
         });
 
-        generateSlug.addEventListener("click", () => {
+        DOMUtils.on("click", generateSlug, () => {
             slug.value = Math.random().toString(36).substring(2).toLocaleLowerCase();
             this.startButton.disabled = false;
             $("#random-slug").popover("hide");
         });
 
 
-        this.generateSubtitles.addEventListener("click", () => {
-
-
+        DOMUtils.on("click", this.generateSubtitles, () => {
             if (!this.transcriber) {
                 this.transcriber = new Transcriber(this.rtcClient.LocalPeerId,
                     new MediaStream(this.rtcClient.LocalStreams[0].getAudioTracks()), this.userSettings.language
@@ -880,47 +874,50 @@ export class App {
                 }
             } else {
                 if (this.transcriber)
-
                     this.transcriber.stop();
-
             }
         });
 
-
-
-        muteSpeakers.addEventListener("click", () => {
+        DOMUtils.on("click", muteSpeakers, () => {
             muteSpeakers.classList.toggle("fa-volume-mute");
             muteSpeakers.classList.toggle("fa-volume-up");
             this.audioNodes.toggleMuteAll();
         });
 
-        muteAudio.addEventListener("click", (e) => {
+        if (location.hash.length >= 6) {
+            this.startButton.textContent = "JOIN";
+        }
+
+        DOMUtils.on("click", muteAudio, (e) => {
             if (!this.textToSpeech.checked)
                 DOMUtils.get(".text-to-speech").classList.toggle("hide")
             this.muteAudio(e)
         });
-        muteVideo.addEventListener("click", (e) => {
+
+
+        DOMUtils.on("click", muteVideo, (e) => {
             this.muteVideo(e)
         });
 
-        toggleRecord.addEventListener("click", () => {
+        DOMUtils.on("click", toggleRecord, () => {
             toggleRecord.classList.toggle("flash");
             this.recordAllStreams();
 
         });
 
-        startScreenShare.addEventListener("click", () => {
+        DOMUtils.on("click", startScreenShare, () => {
             this.shareScreen();
         });
 
-        DOMUtils.get("button#share-link").addEventListener("click", (e: any) => {
-            navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
+        DOMUtils.on("click", "button#share-link", (e: any) => {
+            navigator.clipboard.writeText(`${AppDomain.host}/#${slug.value}`).then(() => {
                 e.target.textContent = "Copied!"
             });
         });
 
-        this.shareSlug.addEventListener("click", () => {
-            navigator.clipboard.writeText(`${this.appDomain.host}/#${slug.value}`).then(() => {
+
+        DOMUtils.on("click", this.shareSlug, () => {
+            navigator.clipboard.writeText(`${AppDomain.host}/#${slug.value}`).then(() => {
                 $("#share-slug").popover("show");
                 setTimeout(() => {
                     $("#share-slug").popover("hide");
@@ -934,14 +931,15 @@ export class App {
             DOMUtils.get("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
         }
 
-        DOMUtils.get("#close-chat").addEventListener("click", () => {
+        DOMUtils.on("click", "#close-chat", () => {
             this.chatWindow.classList.toggle("d-none");
             this.unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
             this.unreadBadge.textContent = "0";
 
         });
-        DOMUtils.get("#show-chat").addEventListener("click", () => {
+
+        DOMUtils.on("click", "#show-chat", () => {
             this.chatWindow.classList.toggle("d-none");
             this.unreadBadge.classList.add("d-none");
             this.numOfChatMessagesUnread = 0;
@@ -951,11 +949,8 @@ export class App {
             }
         });
 
-        this.languagePicker.addEventListener("change", () => {
-            this.userSettings.language = this.languagePicker.value;
-        });
 
-        DOMUtils.get("#sel-video").addEventListener("change", (evt: any) => {
+        DOMUtils.on("change", "#sel-video", (evt: any) => {
             const deviceId = evt.target.value;
             const constraints = UserSettings.createConstraints(deviceId);
             this.getLocalStream(constraints, (cs: MediaStream) => {
@@ -964,7 +959,7 @@ export class App {
             });
         });
 
-        DOMUtils.get("#sel-video-res").addEventListener("change", (evt: any) => {
+        DOMUtils.on("change", "#sel-video-res", (evt: any) => {
 
             const deviceId = DOMUtils.get<HTMLInputElement>("#sel-video").value;
 
@@ -988,63 +983,57 @@ export class App {
             });
         });
 
-        slug.addEventListener("click", () => {
+
+        DOMUtils.on("click", slug, () => {
             $("#slug").popover('show');
             $("#random-slug").popover("hide");
         });
 
-        if (location.hash.length >= 6) {
-            this.startButton.textContent = "JOIN";
-        }
 
-        slug.addEventListener("keyup", () => {
+        DOMUtils.on("keyup", slug, () => {
             if (slug.value.length >= 6) {
-                this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
-
+                this.factory.GetController("broker").Invoke("isRoomLocked", AppDomain.getSlug(slug.value));
             } else {
                 this.startButton.disabled = true;
             }
         });
 
 
-        nickname.addEventListener("change", () => {
+        DOMUtils.on("change", nickname, () => {
             this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
         });
 
-        this.leaveContext.addEventListener("click", () => {
+        DOMUtils.on("click", this.leaveContext, () => {
             this.factory.GetController("broker").Invoke("leaveContext", {})
+            this.speechDetector.stop();
         })
 
-        this.startButton.addEventListener("click", () => {
+        DOMUtils.on("click", this.startButton, () => {
             this.enableConferenceElements();
             this.journal = new JournalComponent();
             this.userSettings.slugHistory.addToHistory(slug.value);
             this.userSettings.saveSetting();
             this.factory.GetController("broker").Invoke("changeContext", {
-                context: this.appDomain.getSlug(slug.value),
+                context: AppDomain.getSlug(slug.value),
                 audio: MediaUtils.CheckStream(this.localMediaStream.getAudioTracks(), "live"),
                 video: MediaUtils.CheckStream(this.localMediaStream.getVideoTracks(), "live")
             });
-
             window.history.pushState({}, window.document.title, `#${slug.value}`);
-
             setTimeout(() => {
                 DOMUtils.get("#share-container").classList.toggle("d-none");
             }, 5000)
-
         });
 
 
-        chatMessage.addEventListener("keydown", (e) => {
+        DOMUtils.on("keydown", chatMessage, (e) => {
             if (e.keyCode == 13) {
                 this.sendMessage(this.userSettings.nickname, chatMessage.value)
                 chatMessage.value = "";
             }
         });
 
-        this.textToSpeechMessage.addEventListener("keydown", (e) => {
+        DOMUtils.on("keydown", this.textToSpeechMessage, (e) => {
             if (e.keyCode == 13) {
-                //this.sendMessage(this.userSettings.nickname, chatMessage.value)
                 this.arbitraryChannel.Invoke("textToSpeech", {
                     text: this.textToSpeechMessage.value,
                     peerId: this.rtcClient.LocalPeerId,
@@ -1079,14 +1068,15 @@ export class App {
 
 
         this.factory.OnClose = (reason: any) => {
-            console.error(reason);
+            AppDomain.logger.error("factory closed", reason);
         }
         this.factory.OnOpen = (broker: Controller) => {
 
-            this.rtcClient = new WebRTC(broker, this.rtcConfig);
+            this.rtcClient = new WebRTC(broker, AppDomain.rtcConfig);
             // set up peer dataChannels 
-            this.arbitraryChannel = this.rtcClient.CreateDataChannel(`arbitrary-${this.appDomain.contextPrefix}-dc`);
-            this.fileChannel = this.rtcClient.CreateDataChannel(`blob-${this.appDomain.contextPrefix}-dc`);
+            
+            this.arbitraryChannel = this.rtcClient.CreateDataChannel(`arbitrary-${AppDomain.contextPrefix}-dc`);
+            this.fileChannel = this.rtcClient.CreateDataChannel(`blob-${AppDomain.contextPrefix}-dc`);
             this.fileChannel.On("fileShare", (fileInfo: any, arrayBuffer: ArrayBuffer) => {
                 this.displayReceivedFile(fileInfo, new Blob([arrayBuffer], {
                     type: fileInfo.mimeType
@@ -1109,12 +1099,13 @@ export class App {
                 let targetLanguage =
                     this.userSettings.language
                     || navigator.language;
-                if (data.lang !== targetLanguage && this.appDomain.translateKey) {
-                    Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                if (data.lang !== targetLanguage && AppDomain.translateKey) {
+                    Transcriber.translateCaptions(AppDomain.translateKey, data.text, data.lang, this.userSettings.language
                         || navigator.language).then((result) => {
                             Transcriber.textToSpeech(result, targetLanguage);
                             // this.addSubtitles(parent, result, data.lang, data.text);
-                        }).catch(() => {
+                        }).catch(err => {
+
                             //this.addSubtitles(parent, data.text, data.lang);
                         });
                 } else {
@@ -1130,8 +1121,8 @@ export class App {
                         || navigator.language;
                     targetLanguage = targetLanguage.indexOf("-") > -1 ? targetLanguage.substr(0, 2) : targetLanguage;
 
-                    if (data.lang !== targetLanguage && this.appDomain.translateKey) {
-                        Transcriber.translateCaptions(this.appDomain.translateKey, data.text, data.lang, this.userSettings.language
+                    if (data.lang !== targetLanguage && AppDomain.translateKey) {
+                        Transcriber.translateCaptions(AppDomain.translateKey, data.text, data.lang, this.userSettings.language
                             || navigator.language).then((result) => {
                                 this.addSubtitles(parent, result, data.lang, data.text);
                                 this.journal.add(data.sender, result, data.text, data.lang);
@@ -1187,7 +1178,7 @@ export class App {
 
 
             broker.On("onliners", (data) => {
-                console.log("onliners", data);
+                AppDomain.logger.log("onliners", data);
             });
 
             broker.On("nicknameChange", (data) => {
@@ -1227,7 +1218,7 @@ export class App {
 
             broker.OnOpen = (ci: any) => {
                 if (slug.value.length >= 6) {
-                    this.factory.GetController("broker").Invoke("isRoomLocked", this.appDomain.getSlug(slug.value));
+                    this.factory.GetController("broker").Invoke("isRoomLocked", AppDomain.getSlug(slug.value));
                 }
                 this.factory.GetController("broker").Invoke("setNickname", `@${nickname.value}`);
                 //this.userSettings.createConstraints(this.userSettings.videoResolution)
@@ -1236,14 +1227,19 @@ export class App {
                         this.userSettings.videoDevice, this.userSettings.videoResolution, true
                     ),
                     (mediaStream: MediaStream) => {
-                        //  remove local video track
+
+                        AppDomain.logger.log(`OnOpen - Mediastream ${mediaStream.id}`)
+
                         if (location.search.includes("novideo"))
                             mediaStream.removeTrack(mediaStream.getVideoTracks()[0]);
 
+                        AppDomain.logger.log(`OnOpen mediastream has ${mediaStream.getTracks().length} tracks`)
 
                         this.speechDetector = new SpeechDetector(mediaStream, 5, 512);
-
                         this.speechDetector.start(2000);
+
+                        AppDomain.logger.log(`OnOpen speechDetector has started`)
+
 
                         this.speechDetector.onspeechstarted = (rms) => {
                             this.arbitraryChannel.Invoke("isSpeaking", {
@@ -1266,7 +1262,6 @@ export class App {
                         if (location.hash.length <= 6)
                             $("#random-slug").popover("show");
                     });
-
             }
             broker.Connect();
         };
@@ -1282,13 +1277,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!(location.href.includes("file://"))) { // temp hack for electron
         if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
     }
-
     const instrumentationKey = process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
     if (!!instrumentationKey) {
         const appInsights = new ApplicationInsights({ config: { instrumentationKey: instrumentationKey } });
         appInsights.loadAppInsights();
         appInsights.trackPageView();
     }
+    let app = App.getInstance();
 
-    App.getInstance();
+    window["_logger"] = AppDomain.logger // expose logger to window ,
+
 });
