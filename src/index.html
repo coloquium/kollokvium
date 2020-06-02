@@ -246,20 +246,18 @@
 
                     <div class="input-group mb-3 col-md-6 mx-auto hide" id="has-streams">
 
-                        <div class="input-group-prepend" id="random-slug" data-container="body" data-toggle="popover"
-                            data-placement="top" data-trigger="none"
-                            data-content="Click this button to create a random-room name, unique just for you!.. Otherwise, enter any name in the text field!">
+                        <div class="input-group-prepend" id="random-slug">
                             <button class="btn btn-secondary bt-lg" title="Generate a random room name..."
                                 id="generate-slug">
                                 <i class="fas fa-dice fa-2x"></i>
                             </button>
                         </div>
-                        <input list="slug-history" type="text" id="slug" placeholder="Enter any room name..." value=""
+                        <input list="slug-history" type="text" id="context-name" placeholder="Enter any room name..." value=""
                             class="form-control form-control-lg" data-container="body" data-toggle="popover"
                             data-placement="top" data-trigger="none"
                             data-content="Ahoy! Your room name should be six characters minimum. It can be many things such as company name, meeting occasion or whatever you want... Have a nice day!">
 
-                        <datalist id="slug-history">
+                        <datalist id="context-history">
 
                         </datalist>
 

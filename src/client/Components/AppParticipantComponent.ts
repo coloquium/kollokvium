@@ -83,7 +83,7 @@ export class AppParticipantComponent {
         let fullscreen = document.createElement("i");
         fullscreen.classList.add("fas", "fa-arrows-alt", "fa-2x", "white")
         fullscreen.addEventListener("click", (e) => {
-            let elem = DOMUtils.get("video",item);
+            let elem = DOMUtils.get("video", item);
             if (!document.fullscreenElement) {
                 elem.requestFullscreen().catch(err => {
                     alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
@@ -137,7 +137,7 @@ export class AppParticipantComponent {
     addVideoTrack(t: MediaStreamTrack) {
         this.videoTracks.push(t);
         let stream = new MediaStream([t]);
-        stream.getVideoTracks()[0].onended = () => {  
+        stream.getVideoTracks()[0].onended = () => {
             if (this.onVideoTrackLost)
                 this.onVideoTrackLost(this.id, stream, t);
         };
@@ -146,8 +146,6 @@ export class AppParticipantComponent {
     addAudioTrack(t: MediaStreamTrack): void {
         this.audioTracks.push(t);
         let stream = new MediaStream([t]);
-
-
         t.onended = () => {
             // todo: would be an delagated event
             if (this.onAudioTrackLost)

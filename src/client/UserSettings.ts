@@ -3,16 +3,15 @@ import { DetectResolutions } from "./Helpers/DetectResolutions";
 import { DOMUtils } from './Helpers/DOMUtils';
 export class UserSettings {
 
-    slugHistory: SlugHistory;
-    videoDevice: string;
-    audioDeviceIn: string;
-    audioDeviceOut: string;
-    videoResolution: string;
-    showQuickStart: boolean;
-    facingMode: string; // should be enums?
-    language: string;
-    nickname: string;
-
+    static slugHistory: SlugHistory;
+    static videoDevice: string;
+    static audioDeviceIn: string;
+    static  audioDeviceOut: string;
+    static videoResolution: string;
+    static showQuickStart: boolean;
+    static  facingMode: string; // should be enums?
+    static  language: string;
+    static nickname: string;
     static failSafeConstraints(): MediaStreamConstraints {
         return {
             video: true, audio: true,
@@ -21,7 +20,6 @@ export class UserSettings {
     static cameraResolutions(current?:string) {
         let parent = DOMUtils.get("#sel-video-res");
         DetectResolutions.candidates.forEach ( (candidate:any) => {
-
             let option = document.createElement("option");
             option.textContent = `${candidate.label} ${candidate.width} x ${candidate.height} ${candidate.ratio}`;
             option.value = candidate.label;
@@ -35,7 +33,7 @@ export class UserSettings {
         return UserSettings.createConstraints(videoDeviceId, resolution, shouldFaceUser);
     }
 
-    saveSetting() {
+    static save() {
         const data = {
             slugHistory: this.slugHistory.history,
             videoDevice: this.videoDevice,
@@ -100,30 +98,33 @@ export class UserSettings {
         }
         return constraints;
     }
-    constructor() {
-        this.slugHistory = new SlugHistory();
+
+  
+
+    static load() {
+        UserSettings.slugHistory = new SlugHistory();
         const ls = localStorage.getItem("settings");
         if (ls) {
             let settings = JSON.parse(ls);
-            this.audioDeviceIn = settings.audioDeviceIn;
-            this.audioDeviceOut = settings.audioDeviceOut;
-            this.videoDevice = settings.videoDevice;
-            this.videoResolution = settings.videoResolution;
-            this.nickname = settings.nickname;
-            this.slugHistory.history = settings.slugHistory;
-            this.showQuickStart = settings.showQuickStart;
-            this.language = settings.language || "";
+            UserSettings.audioDeviceIn = settings.audioDeviceIn;
+            UserSettings.audioDeviceOut = settings.audioDeviceOut;
+            UserSettings.videoDevice = settings.videoDevice;
+            UserSettings.videoResolution = settings.videoResolution;
+            UserSettings.nickname = settings.nickname;
+            UserSettings.slugHistory.history = settings.slugHistory;
+            UserSettings.showQuickStart = settings.showQuickStart;
+            UserSettings.language = settings.language || "";
 
         }
         else {
-            this.slugHistory.history = new Array<string>();
-            this.nickname = Math.random().toString(36).substring(8);
-            this.audioDeviceIn = ""; 
-            this.audioDeviceOut = ""; 
-            this.videoDevice = "";
-            this.videoResolution = "";
-            this.showQuickStart = true;
-            this.language = ""
+            UserSettings.slugHistory.history = new Array<string>();
+            UserSettings.nickname = Math.random().toString(36).substring(8);
+            UserSettings.audioDeviceIn = ""; 
+            UserSettings.audioDeviceOut = ""; 
+            UserSettings.videoDevice = "";
+            UserSettings.videoResolution = "";
+            UserSettings.showQuickStart = true;
+            UserSettings.language = ""
         }
     }
 }

@@ -7,9 +7,11 @@
 
 import { ILogger } from "./Helpers/ILogger";
 import { AppLogger } from './Helpers/AppLogger';
+import { Factory } from "thor-io.client-vnext";
 
 const appConfig = require("./settings.json");
 export class AppDomain {
+
     
     static logger: ILogger = new AppLogger(appConfig.logToConsole);
 
