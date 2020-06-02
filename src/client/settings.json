@@ -1,8 +1,20 @@
 {
     "domain": "Kollokvium",
-    "host": "", 
+    "host": "",
     "contextPrefix": "kollokvium",
     "serverUrl": "",
     "version": "1.6.9",
-    "translateKey":"AIzaSyC79hpb4DKEUgGc6qk3AyTv3ysba2bR_94"
+    "translateKey": "AIzaSyC79hpb4DKEUgGc6qk3AyTv3ysba2bR_94",
+    "logToConsole": true,
+    "rtcConfig": {
+        "sdpSemantics": "plan-b",
+        "iceTransports": "all",
+        "rtcpMuxPolicy": "require",
+        "bundlePolicy": "max-bundle",
+        "iceServers": [
+            {
+                "urls": "stun:stun.l.google.com:19302"
+            }
+        ]
+    }
 }

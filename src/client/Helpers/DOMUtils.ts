@@ -9,9 +9,14 @@ export class DOMUtils {
         for (let i = 0; i < queryResult.length; i++) results.push(queryResult.item(i));
         return results;
     }
-    static create(p: string | HTMLElement, textContent?: string, attr?: Object): HTMLElement {
-        let node: HTMLElement;
-        typeof (p) === "string" ? node = document.createElement(p) : node = p;
+    static on<T extends HTMLElement>(event:string,element: string | HTMLElement,fn:(event?:any)=>void,options?:AddEventListenerOptions):T{
+        typeof (element) === "string" ? element = DOMUtils.get<T>(element) : element = element;
+        element.addEventListener(event,fn,options);
+        return element as T;
+    }
+    static create<T extends HTMLElement>(p: string | T, textContent?: string, attr?: Object): T {
+        let node: T;
+        typeof (p) === "string" ? node = document.createElement(p) as T : node = p;
         if (textContent)
             node.textContent = textContent;
         if (attr) {

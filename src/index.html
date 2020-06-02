@@ -229,15 +229,9 @@
                         <div class="alert alert-danger hide" role="alert" id="await-need-error">
                             <h4 class="alert-heading">Failed to access camera</h4>
                             <p>
-                                <strong>Damn!</strong>
-                                Kollokvium.se failed to get hold of your camera.,Please try use
-                                <button class="btn btn-primary" id="apply-fail-save-constraints">
-                                    <i class="fas fa-life-ring"></i> Try fail-safe settings</button> for a start.
-                                <hr>
-                                You can later change settings using <i class="fa fa-cog"></i>.
-                                But first please make sure you see yourself in the lower right corner
-                            </p>
-
+                                <strong>Your shit out of luck!</strong>
+                                Kollokvium failed to get hold of your camera, it will not work for you!
+                                </p>    
                         </div>
 
 
@@ -246,20 +240,18 @@
 
                     <div class="input-group mb-3 col-md-6 mx-auto hide" id="has-streams">
 
-                        <div class="input-group-prepend" id="random-slug" data-container="body" data-toggle="popover"
-                            data-placement="top" data-trigger="none"
-                            data-content="Click this button to create a random-room name, unique just for you!.. Otherwise, enter any name in the text field!">
+                        <div class="input-group-prepend" id="random-slug">
                             <button class="btn btn-secondary bt-lg" title="Generate a random room name..."
                                 id="generate-slug">
                                 <i class="fas fa-dice fa-2x"></i>
                             </button>
                         </div>
-                        <input list="slug-history" type="text" id="slug" placeholder="Enter any room name..." value=""
+                        <input list="slug-history" type="text" id="context-name" placeholder="Enter any room name..." value=""
                             class="form-control form-control-lg" data-container="body" data-toggle="popover"
                             data-placement="top" data-trigger="none"
                             data-content="Ahoy! Your room name should be six characters minimum. It can be many things such as company name, meeting occasion or whatever you want... Have a nice day!">
 
-                        <datalist id="slug-history">
+                        <datalist id="context-history">
 
                         </datalist>
 
