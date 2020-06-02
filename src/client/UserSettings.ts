@@ -3,6 +3,7 @@ import { DetectResolutions } from "./Helpers/DetectResolutions";
 import { DOMUtils } from './Helpers/DOMUtils';
 export class UserSettings {
 
+    
     static slugHistory: SlugHistory;
     static videoDevice: string;
     static audioDeviceIn: string;
