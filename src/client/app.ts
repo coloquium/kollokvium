@@ -88,7 +88,8 @@ export class App extends AppBase {
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
-        }).catch(err => {            
+        }).catch(err => {
+
             navigator.mediaDevices.getUserMedia(UserSettings.failSafeConstraints()).then((mediaStream: MediaStream) => {
                 cb(mediaStream);
             }).catch(err => {
@@ -405,7 +406,6 @@ export class App extends AppBase {
     }
 
     private onContextChanged(context: any) {
-        console.log("onContextChanged", context, this);
         this.rtc.ConnectContext();
     }
 
@@ -740,7 +740,7 @@ export class App extends AppBase {
         // });
 
         DOMUtils.on("click", "#show-journal", () => {
-            DOMUtils.get("#generate-journal").textContent = "Copy to clipboard";
+            DOMUtils.get("#generate-journal").textContent = "Download";
             if (this.journalComponent.data.length > 0)
                 DOMUtils.get("#journal-content div.journal").remove();
             DOMUtils.get("#journal-content").append(this.journalComponent.render());
@@ -1122,6 +1122,9 @@ export class App extends AppBase {
     Launch the application
 */
 document.addEventListener("DOMContentLoaded", () => {
+
+    window.AudioContext = window.AudioContext || window["webkitAudioContext"];
+
     if (!(location.href.includes("file://"))) { // temp hack for electron
         if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
     }
