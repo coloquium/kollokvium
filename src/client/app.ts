@@ -293,7 +293,7 @@ export class App extends AppBase {
         let slug = DOMUtils.get("#context-name") as HTMLInputElement;
 
         if ('pictureInPictureEnabled' in document)
-            DOMUtils.get("#pip").classList.toggle("hide");
+            DOMUtils.get("#toggle-pip").classList.toggle("hide");
 
         slug.value = "";
 
@@ -336,7 +336,7 @@ export class App extends AppBase {
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
 
         if ('pictureInPictureEnabled' in document)
-            DOMUtils.get("#pip").classList.toggle("hide");
+            DOMUtils.get("#toggle-pip").classList.toggle("hide");
 
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
@@ -668,7 +668,7 @@ export class App extends AppBase {
 
         // Remove screenShare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
-            DOMUtils.get(".only-desktop").classList.add("hide");
+            DOMUtils.getAll(".only-desktop").forEach (el => el.classList.add("hide"));
         }
 
         let blenderWaterMark = DOMUtils.get<HTMLImageElement>("#watermark");
@@ -763,26 +763,26 @@ export class App extends AppBase {
 
         DOMUtils.on("enterpictureinpicture", this.pictureInPictureElement, () => {
             this.pictureInPictureElement.play();
-            DOMUtils.get("#pip").classList.toggle("flash");
+            DOMUtils.get("#toggle-pip").classList.toggle("flash");
         });
 
         DOMUtils.on("leavepictureinpicture", this.pictureInPictureElement, () => {
-            DOMUtils.get("#pip").classList.toggle("flash");
+            DOMUtils.get("#toggle-pip").classList.toggle("flash");
             this.mediaStreamBlender.render(0);
             this.mediaStreamBlender.audioSources.clear();
             this.mediaStreamBlender.videosSources.clear();
-            DOMUtils.get("#pip").classList.toggle("flash");
+            DOMUtils.get("#toggle-pip").classList.toggle("flash");
             this.pictureInPictureElement.pause();
         });
 
-        DOMUtils.on("click", DOMUtils.get("#pip"), () => {
+        DOMUtils.on("click", DOMUtils.get("#toggle-pip"), () => {
             if (this.isRecording) return;
             if (document["pictureInPictureElement"]) {
                 document["exitPictureInPicture"]().then(() => {
-                    DOMUtils.get("#pip").classList.remove("flash");
+                    DOMUtils.get("#toggle-pip").classList.remove("flash");
                 })
                     .catch(err => {
-                        DOMUtils.get("#pip").classList.remove("flash");
+                        DOMUtils.get("#toggle-pip").classList.remove("flash");
                         AppDomain.logger.error("exitPictureInPicture", err)
                     });
             } else {
@@ -799,7 +799,7 @@ export class App extends AppBase {
                     this.pictureInPictureElement["requestPictureInPicture"]();
                 }
                 this.pictureInPictureElement.srcObject = this.mediaStreamBlender.captureStream();
-                DOMUtils.get("#pip").classList.add("flash");
+                DOMUtils.get("#toggle-pip").classList.add("flash");
             }
         });
 

@@ -64,26 +64,26 @@ export class AppParticipantComponent {
 
     render(): HTMLElement {
 
-        let item = document.createElement("li");
-        item.classList.add("p" + this.id);
+        let container = document.createElement("li");
+        container.classList.add("p" + this.id);
 
         let namebadge = document.createElement("span");
         namebadge.classList.add("namebadge");
         namebadge.classList.add("n" + this.id)
-        namebadge.textContent = "...";
-        item.append(namebadge);
+        namebadge.textContent = "Unkown";
+        container.append(namebadge);
 
         let novideoImage = document.createElement("img");
         novideoImage.src = "/img/novideo.png";
 
-        item.append(novideoImage);
+        container.append(novideoImage);
 
         let tools = document.createElement("div");
         tools.classList.add("video-tools", "p2", "darken", "d-none");
         let fullscreen = document.createElement("i");
         fullscreen.classList.add("fas", "fa-arrows-alt", "fa-2x", "white")
         fullscreen.addEventListener("click", (e) => {
-            let elem = DOMUtils.get("video", item);
+            let elem = DOMUtils.get("video", container);
             if (!document.fullscreenElement) {
                 elem.requestFullscreen().catch(err => {
                     alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
@@ -94,24 +94,28 @@ export class AppParticipantComponent {
         });
         let record = document.createElement("i");
         record.classList.add("fas", "fa-circle", "fa-2x", "red")
+       
+
         record.addEventListener("click", () => {
             if (!this.isRecording)
                 record.classList.add("flash", "is-recording");
             this.recordStream(this.id);
         });
 
-        tools.append(fullscreen);
-        tools.append(record);
-        item.prepend(tools);
+    
+        if(typeof window.orientation === 'undefined')
+                tools.append(record);
 
+        tools.append(fullscreen);
+        container.prepend(tools);
 
         let subtitles = document.createElement("div");
         subtitles.classList.add("subtitles");
         subtitles.classList.add("subs" + this.id);
 
-        item.append(subtitles);
+        container.append(subtitles);
 
-        return item;
+        return container;
 
     }
 
