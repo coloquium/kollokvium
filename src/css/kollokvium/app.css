@@ -161,8 +161,9 @@ main .overlay {
     float: left;
     z-index: 1200;
     color: #fff;
+    min-height: 70px;
     background: rgba(0, 0, 0, 0.7);
-    ;
+    
 }
 
 .controls i {

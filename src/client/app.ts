@@ -570,6 +570,7 @@ export class App extends AppBase {
             this.numOfChatMessagesUnread++;
             if (this.chatWindow.classList.contains("d-none")) {
                 this.unreadBadge.classList.remove("d-none");
+                
                 this.unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
             }
         }
