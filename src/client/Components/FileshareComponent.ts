@@ -6,7 +6,7 @@ import { AppComponent } from './AppComponent';
 
 export class FileShareComponent extends AppComponent {
 
-    onFileReceived:(fileInfo:any) =>void
+    onFileReceived?:(fileInfo:any) =>void
 
     constructor(public dataChannel: DataChannel,private userSettings:UserSettings) {
         super();
@@ -45,7 +45,7 @@ export class FileShareComponent extends AppComponent {
     }
     render(fileInfo: any, blob: Blob) {
         if(this.onFileReceived)
-                this.onFileReceived(fileInfo);    
+                this.onFileReceived(fileInfo); 
         let message = document.createElement("div");
         let sender = document.createElement("mark");
         let time = document.createElement("time");

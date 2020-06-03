@@ -161,8 +161,9 @@ main .overlay {
     float: left;
     z-index: 1200;
     color: #fff;
+    min-height: 70px;
     background: rgba(0, 0, 0, 0.7);
-    ;
+    
 }
 
 .controls i {
@@ -360,12 +361,10 @@ span.namebadge {
     height: 48px;
 }
 
-span.namebadge.is-speaking{
-    background:green;
-    color:#fff;
+span.namebadge.is-speaking {
+    background: green;
+    color: #fff;
 }
-
-
 
 .white {
     color: #fff;
@@ -393,94 +392,12 @@ i.fa-lock {
     }
 }
 
-#dungeon-messages {
-    position: relative;
-    top: -20px;
-    left: -20px;
-}
-
-.dungeon-thumbs canvas {
-    max-width: 120px;
-}
-
-.dungeon-participant {
-    border: 2px solid #ff0000;
-    filter: none;
-}
-
-.dungeons {
-    position: absolute;
-    z-index: 9;
-    width: 400px;
-    height: auto;
-    opacity: 0.7;
-    background: #000;
-    top: 130px;
-    left: 1rem;
-    padding: 1rem;
-}
-
-.dungeons-focus {
-    background: red
-}
-
-.dungeon-header {
-    height: 2rem;
-    width: 100% !important;
-}
-
-.dungeon-header i {
-    float: right;
-}
-
-.dungeon {
-    width: 100%;
-    color: #fff;
-}
-
-.dungeon ul {
-    list-style: none outside none;
-    margin: 0;
-    padding: 0;
-}
-
-.dungeon li {
-    float: left;
-    width: 33%;
-    height: 100px;
-    overflow: hidden;
-    padding: 2px;
-}
-
-.dungeon img {
-    width: 100%;
-    height: auto;
-}
-
-.toasters {
-    position: absolute;
-    top: 80px;
-    right: 10px;
-    z-index: 10000
-}
-
-#quick-start-containe.modal-box {
-    position: absolute !important;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background-color: transparent;
-    z-index: 99999;
-    padding: 50px;
-}
-
 .greenscreen-option {
     max-width: 100%;
 }
 
-.greenscreen-preview{
+.greenscreen-preview {
     width: 100%;
-    
 }
 
 #palette {
@@ -581,3 +498,16 @@ i.fa-lock {
     height: 200px;
 }
 
+@media (max-width: 768px) {
+    .local {
+        position: absolute;
+        top: 80px;
+        right: 1rem;
+        z-index: 2000;
+        cursor: none;
+        max-height: 100px;
+    }
+    .local video{
+        max-width: 100px;
+    }
+}

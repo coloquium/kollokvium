@@ -7,13 +7,14 @@ export class ChatComponent extends AppComponent {
 
 
         onChatMessage:(args:any) =>void
-        chatMessage: HTMLInputElement;
+        chatMessage?: HTMLInputElement;
 
         constructor(public dc:DataChannel,private userSettings:UserSettings){
 
             super();
 
             this.dc.On("chatMessage", (data: any) => {
+                if(this.onChatMessage) this.onChatMessage(data);
                 this.render(data);
             });
 
