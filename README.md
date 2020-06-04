@@ -37,7 +37,8 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 1. /broadcast view - Create a room where you can do lectures etc 1-many
 2. /advanced    - A view that let's the "organizer" ( meeting creator) mute video/audio remotly,kick, ban, lock and as meeting pin-codes etc.
-3. Finalize the electron builds for Windows, OSX and Linux   
+3. Finalize the electron builds for Windows, OSX and Linux  
+4. E2EE encryption  
 
 ## Install 
 Clone the repository and run npm install & npm run build & npm start
