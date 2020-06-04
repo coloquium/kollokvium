@@ -115,6 +115,10 @@ export class Broker extends ControllerBase {
         this.invoke(onliners, "onliners");
         appInsightsClient && appInsightsClient.trackTrace({ message: "onliners" });
     }
+    @CanInvoke(true) 
+    ping(ts:number){
+        this.invoke({ ts: ts  }, "pong");
+    }    
     @CanInvoke(true)
     isAlive() {
         this.invoke({ timestamp: Date.now() }, "isAlive");

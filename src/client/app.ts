@@ -2,7 +2,6 @@ import adapter from 'webrtc-adapter';
 import { Factory, WebRTC, BinaryMessage, Message, DataChannel, PeerChannel, Utils, Listener } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipantComponent } from './Components/AppParticipantComponent';
-import { ReadFile } from './Helpers/ReadFile';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
 import { MediaStreamBlender, MediaStreamRecorder, StreamSource } from 'mediastreamblender'
@@ -34,16 +33,15 @@ export class App extends AppBase {
     fileChannel: DataChannel;
     arbitraryChannel: DataChannel;
 
-    singleStreamRecorder: MediaStreamRecorder
-
     participants: Map<string, AppParticipantComponent>;
     transcriber: Transcriber;
 
-    numOfChatMessagesUnread: number = 0;
+    numUnreadMessages: number = 0;
     numOfPeers: number = 0;
+    heartbeat: number = 0;
+
     slug: string;
     isRecording: boolean;
-
 
     videoGrid: HTMLElement;
     chatWindow: HTMLElement;
@@ -59,7 +57,6 @@ export class App extends AppBase {
     textToSpeech: HTMLInputElement;
     textToSpeechMessage: HTMLInputElement;
 
-
     contextName: HTMLInputElement;
 
     nickname: HTMLInputElement;
@@ -68,7 +65,7 @@ export class App extends AppBase {
     journalComponent: JournalComponent;
     fileshareComponent: FileShareComponent;
     chatComponent: ChatComponent;
-    greenScreen: GreenScreenComponent;
+    greenScreenComponent: GreenScreenComponent;
 
     speechDetector: SpeechDetector;
 
@@ -372,21 +369,28 @@ export class App extends AppBase {
 
 
     createSpeechDetecor(ms: MediaStream, interval: number) {
-        this.speechDetector = new SpeechDetector(ms, 5, 512);
-        this.speechDetector.start(interval);
-        AppDomain.logger.log(`OnOpen speechDetector has started`)
-        this.speechDetector.onspeechstarted = (rms) => {
-            this.arbitraryChannel.Invoke("isSpeaking", {
-                state: true,
-                rms: rms, peerId: this.rtc.LocalPeerId
-            });
-        };
-        this.speechDetector.onspeechended = (rms) => {
-            this.arbitraryChannel.Invoke("isSpeaking", {
-                state: false,
-                rms: rms, peerId: this.rtc.LocalPeerId
-            });
-        };
+        try {
+
+            this.speechDetector = new SpeechDetector(ms, 5, 512);
+            this.speechDetector.start(interval);
+            AppDomain.logger.log(`SpeechDetector has started`)
+            this.speechDetector.onspeechstarted = (rms) => {
+                this.arbitraryChannel.Invoke("isSpeaking", {
+                    state: true,
+                    rms: rms, peerId: this.rtc.LocalPeerId
+                });
+            };
+            this.speechDetector.onspeechended = (rms) => {
+                this.arbitraryChannel.Invoke("isSpeaking", {
+                    state: false,
+                    rms: rms, peerId: this.rtc.LocalPeerId
+                });
+            };
+
+        } catch (err) {
+            AppDomain.logger.log(`failed to create SpeechDetector has started`, err)
+        }
+
     }
 
     private onContextDisconnected(peer: any) {
@@ -518,11 +522,13 @@ export class App extends AppBase {
 
 
     private onBrokerOpen(connectionInfo: any) {
+
+
         this.factory.GetController("broker").Invoke("setNickname", `@${this.nickname.value}`);
 
-        let slug = DOMUtils.get<HTMLInputElement>("#context-name");
-        if (slug.value.length >= 6) {
-            this.factory.GetController("broker").Invoke("isRoomLocked", AppDomain.getSlug(slug.value));
+        let contextName = DOMUtils.get<HTMLInputElement>("#context-name");
+        if (contextName.value.length >= 6) {
+            this.factory.GetController("broker").Invoke("isRoomLocked", AppDomain.getSlug(contextName.value));
         }
 
         this.getLocalStream(
@@ -544,6 +550,16 @@ export class App extends AppBase {
                 this.addLocalVideo(this.localMediaStream, true);
 
             });
+
+
+        this.factory.GetController("broker").On("pong", (data: any) => {
+            this.heartbeat = data.ts;
+        });
+
+
+        setInterval(() => {
+            this.factory.GetController("broker").Invoke("ping", performance.now().toFixed(0));
+        }, 1000*20);
 
     }
 
@@ -567,19 +583,19 @@ export class App extends AppBase {
         );
 
         this.chatComponent.onChatMessage = () => {
-            this.numOfChatMessagesUnread++;
+            this.numUnreadMessages++;
             if (this.chatWindow.classList.contains("d-none")) {
                 this.unreadBadge.classList.remove("d-none");
-                
-                this.unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
+
+                this.unreadBadge.textContent = this.numUnreadMessages.toString();
             }
         }
 
         this.fileshareComponent.onFileReceived = () => {
-            this.numOfChatMessagesUnread++;
+            this.numUnreadMessages++;
             if (this.chatWindow.classList.contains("d-none")) {
                 this.unreadBadge.classList.remove("d-none");
-                this.unreadBadge.textContent = this.numOfChatMessagesUnread.toString();
+                this.unreadBadge.textContent = this.numUnreadMessages.toString();
             }
         }
 
@@ -607,7 +623,7 @@ export class App extends AppBase {
     constructor() {
         super();
 
-        this.numOfChatMessagesUnread = 0;
+        this.numUnreadMessages = 0;
         this.participants = new Map<string, AppParticipantComponent>();
 
         // add language options to UserSettings 
@@ -669,7 +685,7 @@ export class App extends AppBase {
 
         // Remove screenShare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
-            DOMUtils.getAll(".only-desktop").forEach (el => el.classList.add("hide"));
+            DOMUtils.getAll(".only-desktop").forEach(el => el.classList.add("hide"));
         }
 
         let blenderWaterMark = DOMUtils.get<HTMLImageElement>("#watermark");
@@ -696,8 +712,8 @@ export class App extends AppBase {
                 AppDomain.logger.error("mediaStreamBlender onTrackEnded", err);
             }
         }
-        this.greenScreen = new GreenScreenComponent("gss");
-        this.greenScreen.onApply = (mediaStream) => {
+        this.greenScreenComponent = new GreenScreenComponent("gss");
+        this.greenScreenComponent.onApply = (mediaStream) => {
             DOMUtils.get("video#preview").remove()
             let a = this.localMediaStream.getVideoTracks()[0];
             this.localMediaStream.removeTrack(a);
@@ -706,13 +722,13 @@ export class App extends AppBase {
             DOMUtils.get("#remove-virtual-bg").classList.toggle("hide");
         };
 
-        DOMUtils.get("#components").append(this.greenScreen.render());
+        DOMUtils.get("#components").append(this.greenScreenComponent.render());
 
         DOMUtils.on("click", "#apply-virtual-bg", () => {
             $("#settings-modal").modal("toggle");
             const track = this.localMediaStream.getVideoTracks()[0]
             track.applyConstraints({ width: 640, height: 360 });
-            this.greenScreen.setMediaTrack(track);
+            this.greenScreenComponent.setMediaTrack(track);
             $("#gss").modal("toggle");
         });
 
@@ -724,7 +740,7 @@ export class App extends AppBase {
                 this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
                 DOMUtils.get("#apply-virtual-bg").classList.toggle("hide");
                 DOMUtils.get("#remove-virtual-bg").classList.toggle("hide");
-                this.greenScreen.stop();
+                this.greenScreenComponent.stop();
             });
         });
 
@@ -977,7 +993,7 @@ export class App extends AppBase {
         DOMUtils.on("click", "#close-chat", () => {
             this.chatWindow.classList.toggle("d-none");
             this.unreadBadge.classList.add("d-none");
-            this.numOfChatMessagesUnread = 0;
+            this.numUnreadMessages = 0;
             this.unreadBadge.textContent = "0";
 
         });
@@ -985,7 +1001,7 @@ export class App extends AppBase {
         DOMUtils.on("click", "#show-chat", () => {
             this.chatWindow.classList.toggle("d-none");
             this.unreadBadge.classList.add("d-none");
-            this.numOfChatMessagesUnread = 0;
+            this.numUnreadMessages = 0;
             this.unreadBadge.textContent = "0";
             if (!this.chatWindow.classList.contains("d-none")) {
                 this.chatComponent.chatMessage.focus();
@@ -1101,7 +1117,6 @@ export class App extends AppBase {
             event.preventDefault()
         });
 
-
         this.initialize().then((broker: any) => {
             if (this.slug.length <= 6)
                 $("#random-slug").popover("show");
@@ -1109,7 +1124,7 @@ export class App extends AppBase {
 
             this.onInitlialized(broker);
         }).catch(err => {
-            AppDomain.logger.error("Connnct to broker/signaling error", err);
+            AppDomain.logger.error("Connect to broker/signaling error", err);
         });
 
 
@@ -1135,8 +1150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         appInsights.loadAppInsights();
         appInsights.trackPageView();
     }
-    let app = App.getInstance();
-
+    App.getInstance();
     window["_logger"] = AppDomain.logger // expose logger to window ,
 
 });
