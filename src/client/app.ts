@@ -25,6 +25,7 @@ import { ChatComponent } from './Components/ChatComponent';
 
 
 export class App extends AppBase {
+   
 
 
     mediaStreamBlender: MediaStreamBlender;
@@ -68,6 +69,7 @@ export class App extends AppBase {
     greenScreenComponent: GreenScreenComponent;
 
     speechDetector: SpeechDetector;
+    isPipActive: boolean;
 
     /**
      *
@@ -125,6 +127,24 @@ export class App extends AppBase {
         }).catch(err => {
             AppDomain.logger.error("shareScreen", err)
         })
+    }
+
+
+    refreshPiP() {
+       
+   
+        this.mediaStreamBlender.audioSources.clear();
+        this.mediaStreamBlender.videosSources.clear();
+        Array.from(this.participants.values()).forEach((p: AppParticipantComponent) => {
+            this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
+        });
+        this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
+        this.mediaStreamBlender.refreshCanvas();
+        this.pictureInPictureElement.srcObject = this.mediaStreamBlender.captureStream();
+
+        if(!this.mediaStreamBlender.isRendering)
+            this.mediaStreamBlender.render(15);
+      
     }
 
     /**
@@ -395,6 +415,8 @@ export class App extends AppBase {
 
     private onContextDisconnected(peer: any) {
         this.participants.delete(peer.id);
+        if(this.isPipActive) this.refreshPiP();
+    
         DOMUtils.getAll(`li.p${peer.id}`).forEach(n => n.remove());
 
         this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliner
@@ -481,6 +503,7 @@ export class App extends AppBase {
         let participant = this.tryAddParticipant(connection.id);
         participant.addTrack(track);
         this.factory.GetController("broker").Invoke("whois", connection.id);
+        if(this.isPipActive) this.refreshPiP();
     }
 
     private onLeaveContext() {
@@ -490,6 +513,7 @@ export class App extends AppBase {
         this.participants.clear();
         DOMUtils.get("#remote-videos").innerHTML = "";
         this.disableConferenceElements();
+
     }
 
     private onLockContext() {
@@ -796,26 +820,29 @@ export class App extends AppBase {
             if (this.isRecording) return;
             if (document["pictureInPictureElement"]) {
                 document["exitPictureInPicture"]().then(() => {
+                    
+                    this.isPipActive = true;
+                    
                     DOMUtils.get("#toggle-pip").classList.remove("flash");
                 })
                     .catch(err => {
+                        this.isPipActive = false;                    
                         DOMUtils.get("#toggle-pip").classList.remove("flash");
                         AppDomain.logger.error("exitPictureInPicture", err)
                     });
             } else {
-                this.mediaStreamBlender.audioSources.clear();
-                this.mediaStreamBlender.videosSources.clear();
-                Array.from(this.participants.values()).forEach((p: AppParticipantComponent) => {
-                    this.mediaStreamBlender.addTracks(p.id, p.videoTracks.concat(p.audioTracks), false);
-                });
-                this.mediaStreamBlender.addTracks("self", this.localMediaStream.getTracks(), true)
-                this.mediaStreamBlender.refreshCanvas();
+                
+           
 
-                this.mediaStreamBlender.render(15);
                 this.pictureInPictureElement.onloadeddata = () => {
                     this.pictureInPictureElement["requestPictureInPicture"]();
                 }
-                this.pictureInPictureElement.srcObject = this.mediaStreamBlender.captureStream();
+
+                this.refreshPiP()
+
+                this.isPipActive = true;
+               
+
                 DOMUtils.get("#toggle-pip").classList.add("flash");
             }
         });

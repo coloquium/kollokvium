@@ -35,10 +35,10 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 ## Planned features / addons
 
-1. /broadcast view - Create a room where you can do lectures etc 1-many
-2. /advanced    - A view that let's the "organizer" ( meeting creator) mute video/audio remotly,kick, ban, lock and as meeting pin-codes etc.
+1. `/broadcast` - A view where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
+2. `/adnanced`    - A view that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.
 3. Finalize the electron builds for Windows, OSX and Linux  
-4. E2EE encryption.  
+4. E2EE encryption (will be implemented in thor-io.vnext)
 
 ## Install 
 Clone the repository and run npm install & npm run build & npm start
