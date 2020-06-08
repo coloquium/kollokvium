@@ -503,13 +503,17 @@ i.fa-lock {
     }
     .local {
         position: absolute;
-        top: 80px;
+        top: 60px;
         right: 1rem;
         z-index: 2000;
         cursor: none;
         max-height: 100px;
+        object-fit: cover;
     }
     .local video{
         max-width: 100px;
+        max-height: 100px;
+        object-fit: cover;        
     }
+  
 }
