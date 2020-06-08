@@ -504,7 +504,7 @@ i.fa-lock {
     .local {
         position: absolute;
         top: 60px;
-        right: 1rem;
+        right: 10px;
         z-index: 2000;
         cursor: none;
         max-height: 100px;
