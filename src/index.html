@@ -34,12 +34,12 @@
     <div id="remote-audio-node" class="hide">
         <audio></audio>
     </div>
-
-
     <div class="our-brand" id="appVersion">
-        ...
+        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive mr-1"
+        style="max-height:22px;filter:invert()" id="watermark">
+        Kollokvium        
     </div>
-
+    
     <div class="modal fade" id="meeting-journal" tabindex="-1" role="dialog"
         aria-labelledby="Meeting journal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
@@ -205,13 +205,14 @@
         <div class="container h-100 join">
             <div class="d-flex h-100 text-center align-items-center">
                 <div class="w-100 text-white">
+                    <div id="splash" class="d-none d-md-block">
                     <h1 class="display-4 custom-heading">
                         <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive"
                             style="max-height:80px;filter:invert()" id="watermark">
                         <span id="appDomain">Kollokvium</span></h1>
-                    <p class="lead my-5">A free multi-party video conference for you and your friends, family and
+                    <p class="lead my-3">A free multi-party video conference for you and your friends, family and
                         colleagues!</p>
-
+                    </div>
 
                     <div class="text-left" id="await-streams">
 

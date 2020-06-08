@@ -653,7 +653,7 @@ export class App extends AppBase {
         // add language options to UserSettings 
         DOMUtils.get("#languages").append(Transcriber.getlanguagePicker());
         DOMUtils.get("#appDomain").textContent = AppDomain.domain;
-        DOMUtils.get("#appVersion").textContent = AppDomain.version;
+        DOMUtils.get("#appVersion").title = AppDomain.version;
 
         this.slug = location.hash.replace("#", "");
 
