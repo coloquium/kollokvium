@@ -12,7 +12,7 @@ const package = require('./package.json');
 module.exports = {
   watch: false,
  /// mode: process.env.WEBPACK_DEV_SERVER ? "development" : "production",
-  mode:"production",
+  mode:"development",
   entry: {
     kollkovium: Path.join(sourceFolder, 'client', 'app'),
   },

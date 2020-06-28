@@ -21,6 +21,8 @@ let rtc = new ThorIO(
         Broker,
     ]
 );
+
+
 let argv = yargs.boolean('s').alias('s', 'use-ssl').argv;
 let rootPath = path.resolve('.');
 if (fs.existsSync(path.join(rootPath, 'dist'))) {
@@ -77,6 +79,13 @@ else {
 
 const ws = new webSocket.Server({ server });
 ws.on('connection', (ws, req) => {
+
+
+
+
+//    console.log(req.headers, req["query"]);
+
+
     rtc.addWebSocket (ws, req);
     appInsightsClient && appInsightsClient.trackEvent({ name: 'new client', time: new Date()});
 });

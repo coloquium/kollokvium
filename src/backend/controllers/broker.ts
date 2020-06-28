@@ -12,9 +12,7 @@ import { defaultClient as appInsightsClient } from 'applicationinsights';
 
 @ControllerProperties("broker", false, 5 * 1000)
 export class Broker extends ControllerBase {
-
     peer: ExtendedPeerConnection;
-    // localPeerId: string;
     nickname: string;
     isOrganizer: boolean;
     connections: Array<ExtendedPeerConnection>;
@@ -23,9 +21,15 @@ export class Broker extends ControllerBase {
         this.connections = new Array<ExtendedPeerConnection>();
     }
     onopen() {
-        this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
+        if (this.queryParameters.has("context") && this.queryParameters.has("peerId")) {
+            this.peer = new ExtendedPeerConnection(this.queryParameters.get("context"),
+                this.queryParameters.get("peerId"));
+            appInsightsClient && appInsightsClient.trackTrace({ message: "contecrReconnected" });
+        } else {
+            this.peer = new ExtendedPeerConnection(Utils.newGuid(), Utils.newGuid());
+            appInsightsClient && appInsightsClient.trackTrace({ message: "contextCreated" });
+        }
         this.invoke(this.peer, "contextCreated", this.alias);
-        appInsightsClient && appInsightsClient.trackTrace({ message: "contextCreated" });
     }
     @CanInvoke(true)
     lockContext() {
@@ -49,7 +53,7 @@ export class Broker extends ControllerBase {
     }
     @CanInvoke(true)
     leaveContext() {
-        this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.connection.id);
+        this.peer = new ExtendedPeerConnection(Utils.newGuid(), this.peer.peerId);
         this.invoke(this.peer, "leaveContext", this.alias);
         appInsightsClient && appInsightsClient.trackTrace({ message: "leaveContext" });
     }
@@ -58,9 +62,7 @@ export class Broker extends ControllerBase {
         let match = this.getExtendedPeerConnections(this.peer).find((pre: Broker) => {
             return pre.peer.locked == false && pre.peer.context == change.context;
         });
-
         if (!match) {
-
             const isOrganizer = this.findOn(this.alias, (pre: Broker) => {
                 return pre.peer.context === change.context && pre.isOrganizer == true;
             }).length == 0 ? true : false;
@@ -78,7 +80,7 @@ export class Broker extends ControllerBase {
     @CanInvoke(true)
     contextSignal(signal: Signal) {
         let expression = (pre: Broker) => {
-            return pre.connection.id === signal.recipient;
+            return pre.peer.peerId === signal.recipient;
         };
         this.invokeTo(expression, signal, "contextSignal", this.alias);
         appInsightsClient && appInsightsClient.trackTrace({ message: "contextSignal" });
@@ -115,10 +117,10 @@ export class Broker extends ControllerBase {
         this.invoke(onliners, "onliners");
         appInsightsClient && appInsightsClient.trackTrace({ message: "onliners" });
     }
-    @CanInvoke(true) 
-    ping(ts:number){
-        this.invoke({ ts: ts  }, "pong");
-    }    
+    @CanInvoke(true)
+    ping(ts: number) {
+        this.invoke({ ts: ts }, "pong");
+    }
     @CanInvoke(true)
     isAlive() {
         this.invoke({ timestamp: Date.now() }, "isAlive");
@@ -139,8 +141,6 @@ export class Broker extends ControllerBase {
             this.invoke(match, "whois");
         }
     }
-
-
     getOnliners(): Array<any> {
         return this.getExtendedPeerConnections(this.peer).map((p: Broker) => {
             return {
@@ -149,8 +149,6 @@ export class Broker extends ControllerBase {
             };
         });
     }
-
-
     getExtendedPeerConnections(peerConnetion: ExtendedPeerConnection): Array<ControllerBase> {
         let match = this.findOn(this.alias, (pre: Broker) => {
             return pre.peer.context === this.peer.context && pre.peer.peerId !== peerConnetion.peerId;

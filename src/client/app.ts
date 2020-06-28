@@ -25,8 +25,6 @@ import { ChatComponent } from './Components/ChatComponent';
 
 
 export class App extends AppBase {
-   
-
 
     mediaStreamBlender: MediaStreamBlender;
     audioNodes: AudioNodes;
@@ -131,8 +129,8 @@ export class App extends AppBase {
 
 
     refreshPiP() {
-       
-   
+
+
         this.mediaStreamBlender.audioSources.clear();
         this.mediaStreamBlender.videosSources.clear();
         Array.from(this.participants.values()).forEach((p: AppParticipantComponent) => {
@@ -142,9 +140,9 @@ export class App extends AppBase {
         this.mediaStreamBlender.refreshCanvas();
         this.pictureInPictureElement.srcObject = this.mediaStreamBlender.captureStream();
 
-        if(!this.mediaStreamBlender.isRendering)
+        if (!this.mediaStreamBlender.isRendering)
             this.mediaStreamBlender.render(15);
-      
+
     }
 
     /**
@@ -413,10 +411,31 @@ export class App extends AppBase {
 
     }
 
+
+    onConnectionLost() {
+        this.initialize({
+            peerId: this.rtc.LocalPeerId, context: AppDomain.getSlug(this.contextName.value)
+        }).then((broker: Controller) => {
+            this.rtc.Peers.forEach((peer: WebRTCConnection) => {
+                peer.RTCPeer.close();
+            });    
+            DOMUtils.getAll("video",DOMUtils.get(".local")).forEach( e => e.remove());
+            this.rtc.LocalStreams = new Array<MediaStream>();
+    
+            this.speechDetector.stop();
+
+            this.onInitlialized(broker, true);
+        }).catch(reason => {
+            AppDomain.logger.log(`failed to reconnect to context`, reason);
+
+        });
+    }
+
+
     private onContextDisconnected(peer: any) {
         this.participants.delete(peer.id);
-        if(this.isPipActive) this.refreshPiP();
-    
+        if (this.isPipActive) this.refreshPiP();
+
         DOMUtils.getAll(`li.p${peer.id}`).forEach(n => n.remove());
 
         this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliner
@@ -503,7 +522,7 @@ export class App extends AppBase {
         let participant = this.tryAddParticipant(connection.id);
         participant.addTrack(track);
         this.factory.GetController("broker").Invoke("whois", connection.id);
-        if(this.isPipActive) this.refreshPiP();
+        if (this.isPipActive) this.refreshPiP();
     }
 
     private onLeaveContext() {
@@ -582,12 +601,13 @@ export class App extends AppBase {
 
 
         setInterval(() => {
-            this.factory.GetController("broker").Invoke("ping", performance.now().toFixed(0));
-        }, 1000*20);
+            if (this.factory.IsConnected)
+                this.factory.GetController("broker").Invoke("ping", performance.now().toFixed(0));
+        }, 1000 * 20);
 
     }
 
-    onInitlialized(broker: Controller) {
+    onInitlialized(broker: Controller, isReconnecting?: boolean) {
 
         this.rtc.OnLocalStream = this.onLocalStream.bind(this);
         this.rtc.OnContextCreated = this.onContextCreated.bind(this);
@@ -595,8 +615,11 @@ export class App extends AppBase {
         this.rtc.OnContextDisconnected = this.onContextDisconnected.bind(this);
         this.rtc.OnContextConnected = this.onContextConnected.bind(this);
 
-        this.rtc.OnRemoteTrack = this.onRemoteTrack.bind(this);
+        this.rtc.OnError = (err) => {
+            AppDomain.logger.error(err);
+        };
 
+        this.rtc.OnRemoteTrack = this.onRemoteTrack.bind(this);
         this.arbitraryChannel = this.rtc.CreateDataChannel(`arbitrary-${AppDomain.contextPrefix}-dc`);
 
         this.chatComponent = new ChatComponent(this.arbitraryChannel, UserSettings);
@@ -636,6 +659,12 @@ export class App extends AppBase {
         broker.On("isRoomLocked", this.onIsRoomLocked.bind(this));
         broker.On("nicknameChange", this.onNicknameChange.bind(this));
         broker.On("whois", this.onWhoIs.bind(this));
+
+        broker.On("contextReconnect", (data: any) => {
+            console.log("contextReconnect", data);
+        AppDomain.logger.log(`Client reconnected to server..`,data)
+        })
+
 
         broker.Connect();
 
@@ -820,19 +849,19 @@ export class App extends AppBase {
             if (this.isRecording) return;
             if (document["pictureInPictureElement"]) {
                 document["exitPictureInPicture"]().then(() => {
-                    
+
                     this.isPipActive = true;
-                    
+
                     DOMUtils.get("#toggle-pip").classList.remove("flash");
                 })
                     .catch(err => {
-                        this.isPipActive = false;                    
+                        this.isPipActive = false;
                         DOMUtils.get("#toggle-pip").classList.remove("flash");
                         AppDomain.logger.error("exitPictureInPicture", err)
                     });
             } else {
-                
-           
+
+
 
                 this.pictureInPictureElement.onloadeddata = () => {
                     this.pictureInPictureElement["requestPictureInPicture"]();
@@ -841,7 +870,7 @@ export class App extends AppBase {
                 this.refreshPiP()
 
                 this.isPipActive = true;
-               
+
 
                 DOMUtils.get("#toggle-pip").classList.add("flash");
             }
@@ -1105,6 +1134,7 @@ export class App extends AppBase {
                 audio: MediaUtils.CheckStream(this.localMediaStream.getAudioTracks(), "live"),
                 video: MediaUtils.CheckStream(this.localMediaStream.getVideoTracks(), "live")
             });
+            console.log("connecting context", this.rtc);
             window.history.pushState({}, window.document.title, `#${this.contextName.value}`);
             setTimeout(() => {
                 DOMUtils.get("#share-container").classList.toggle("d-none");
@@ -1130,32 +1160,48 @@ export class App extends AppBase {
             const keys = el.dataset.hotkey;
             hotkeys(keys, function (e: KeyboardEvent, h: HotkeysEvent) {
                 el.click();
-                event.preventDefault()
+                e.preventDefault()
             });
         });
 
         hotkeys("ctrl+o", (e: KeyboardEvent, h: HotkeysEvent) => {
+            // todo pull in stats so we know ...
+            AppDomain.logger.log(`User requests low res from remotes`);
             this.factory.GetController("broker").Invoke("onliners", {});
-            event.preventDefault()
+            e.preventDefault()
         });
 
         hotkeys("ctrl+l", (e: KeyboardEvent, h: HotkeysEvent) => {
             this.arbitraryChannel.Invoke("lowresRequest", { peerId: this.rtc.LocalPeerId });
-            event.preventDefault()
+            e.preventDefault()
         });
 
-        this.initialize().then((broker: any) => {
+        hotkeys("ctrl+g",(e:KeyboardEvent,h:HotkeysEvent) => {
+            e.preventDefault();
+            AppDomain.logger.log(`Toggle speaker-view mode, number of participants is ${this.participants.size}`)
+            DOMUtils.get("#video-grid").classList.toggle("speaker-view");
+        });
+
+
+        this.initialize({ts:performance.now()}).then((broker: any) => {
             if (this.slug.length <= 6)
                 $("#random-slug").popover("show");
-
-
             this.onInitlialized(broker);
+            this.factory.OnClose = (reason: any) => {
+                AppDomain.logger.error("Lost connection", reason);
+                if (this.numReconnects < 10) {
+                    window.setTimeout(() => {
+                        AppDomain.logger.log(`Reconnect #${this.numReconnects}`);
+                        this.onConnectionLost();
+                        this.numReconnects++;
+                    }, 10000);
+                } else {
+                    AppDomain.logger.error("Failed to recconect")
+                }
+            };
         }).catch(err => {
             AppDomain.logger.error("Connect to broker/signaling error", err);
         });
-
-
-
     }
     static getInstance(): App {
         return new App()
@@ -1165,9 +1211,7 @@ export class App extends AppBase {
     Launch the application
 */
 document.addEventListener("DOMContentLoaded", () => {
-
     window.AudioContext = window.AudioContext || window["webkitAudioContext"];
-
     if (!(location.href.includes("file://"))) { // temp hack for electron
         if (!(location.href.includes("https://") || location.href.includes("http://localhost"))) location.href = location.href.replace("http://", "https://")
     }
@@ -1178,6 +1222,5 @@ document.addEventListener("DOMContentLoaded", () => {
         appInsights.trackPageView();
     }
     App.getInstance();
-    window["_logger"] = AppDomain.logger // expose logger to window ,
-
+    window["_logger"] = AppDomain.logger // expose logger to window 
 });
