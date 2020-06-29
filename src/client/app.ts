@@ -482,12 +482,12 @@ export class App extends AppBase {
     }
 
     private onSpeaking(data: any) {
-        let m = DOMUtils.get(`.n${data.peerId}`);
-        if (m) {
+        let match = DOMUtils.get(`li.p${data.peerId}`);
+        if (match) {
             if (data.state) {
-                m.classList.add("is-speaking");
+                match.classList.add("is-speaking");
             } else {
-                m.classList.remove("is-speaking");
+                match.classList.remove("is-speaking");
             }
         }
     }
@@ -661,13 +661,9 @@ export class App extends AppBase {
         broker.On("whois", this.onWhoIs.bind(this));
 
         broker.On("contextReconnect", (data: any) => {
-            console.log("contextReconnect", data);
         AppDomain.logger.log(`Client reconnected to server..`,data)
-        })
-
-
+        });
         broker.Connect();
-
     }
     /**
      *Creates an instance of App.
@@ -685,14 +681,9 @@ export class App extends AppBase {
         DOMUtils.get("#appVersion").title = AppDomain.version;
 
         this.slug = location.hash.replace("#", "");
-
-
         this.generateSubtitles = DOMUtils.get("#subtitles");
-
-
         this.videoGrid = DOMUtils.get("#video-grid");
         this.chatWindow = DOMUtils.get(".chat");
-
         this.lockContext = DOMUtils.get("#context-lock");
         this.unreadBadge = DOMUtils.get("#unread-messages");
         this.leaveContext = DOMUtils.get("#leave-context");
@@ -717,13 +708,9 @@ export class App extends AppBase {
         let audioDeviceOut = DOMUtils.get<HTMLInputElement>("#sel-audio-out");
         let videoResolution = DOMUtils.get<HTMLInputElement>("#sel-video-res");
 
-
-        UserSettings.load()
-
+        UserSettings.load();
         UserSettings.cameraResolutions(UserSettings.videoResolution);
-
         this.nickname.value = UserSettings.nickname;
-
 
         this.audioNodes = new AudioNodes();
         this.mediaStreamBlender = new MediaStreamBlender();
@@ -734,13 +721,10 @@ export class App extends AppBase {
             this.startButton.textContent = "JOIN";
             DOMUtils.get("#random-slug").classList.add("d-none"); // if slug predefined, no random option...
         }
-
-
         // Remove screenShare on tables / mobile hack..
         if (typeof window.orientation !== 'undefined') {
             DOMUtils.getAll(".only-desktop").forEach(el => el.classList.add("hide"));
         }
-
         let blenderWaterMark = DOMUtils.get<HTMLImageElement>("#watermark");
 
         this.mediaStreamBlender.onFrameRendered = (ctx: CanvasRenderingContext2D) => {
@@ -1134,7 +1118,7 @@ export class App extends AppBase {
                 audio: MediaUtils.CheckStream(this.localMediaStream.getAudioTracks(), "live"),
                 video: MediaUtils.CheckStream(this.localMediaStream.getVideoTracks(), "live")
             });
-            console.log("connecting context", this.rtc);
+           AppDomain.logger.log("Start/joining a a meeting");
             window.history.pushState({}, window.document.title, `#${this.contextName.value}`);
             setTimeout(() => {
                 DOMUtils.get("#share-container").classList.toggle("d-none");
@@ -1155,7 +1139,6 @@ export class App extends AppBase {
         /*
             Parse hotkeys
         */
-
         DOMUtils.getAll("*[data-hotkey]").forEach((el: HTMLElement) => {
             const keys = el.dataset.hotkey;
             hotkeys(keys, function (e: KeyboardEvent, h: HotkeysEvent) {
@@ -1163,7 +1146,6 @@ export class App extends AppBase {
                 e.preventDefault()
             });
         });
-
         hotkeys("ctrl+o", (e: KeyboardEvent, h: HotkeysEvent) => {
             // todo pull in stats so we know ...
             AppDomain.logger.log(`User requests low res from remotes`);

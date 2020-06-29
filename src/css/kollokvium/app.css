@@ -1,469 +1,556 @@
 /* nanum-gothic-regular - latin */
+
 @font-face {
-    font-family: 'Nanum Gothic';
-    font-style: normal;
-    font-weight: 400;
-    src: url('../webfonts/nanum-gothic-v17-latin-regular.eot');
-    /* IE9 Compat Modes */
-    src: local('NanumGothic'), url('../webfonts/nanum-gothic-v17-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../webfonts/nanum-gothic-v17-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */ url('../webfonts/nanum-gothic-v17-latin-regular.woff') format('woff'), /* Modern Browsers */ url('../webfonts/nanum-gothic-v17-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */ url('../webfonts/nanum-gothic-v17-latin-regular.svg#NanumGothic') format('svg');
-    /* Legacy iOS */
+  font-family: 'Nanum Gothic';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../webfonts/nanum-gothic-v17-latin-regular.eot');
+  /* IE9 Compat Modes */
+  src: local('NanumGothic'), url('../webfonts/nanum-gothic-v17-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('../webfonts/nanum-gothic-v17-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+  url('../webfonts/nanum-gothic-v17-latin-regular.woff') format('woff'), /* Modern Browsers */
+  url('../webfonts/nanum-gothic-v17-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('../webfonts/nanum-gothic-v17-latin-regular.svg#NanumGothic') format('svg');
+  /* Legacy iOS */
+}
+
+/* nanum-gothic-800 - latin */
+
+@font-face {
+  font-family: 'Nanum Gothic';
+  font-style: normal;
+  font-weight: 800;
+  src: url('../webfonts/nanum-gothic-v17-latin-800.eot');
+  /* IE9 Compat Modes */
+  src: local('NanumGothic ExtraBold'), local('NanumGothic-ExtraBold'), url('../webfonts/nanum-gothic-v17-latin-800.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('../webfonts/nanum-gothic-v17-latin-800.woff2') format('woff2'), /* Super Modern Browsers */
+  url('../webfonts/nanum-gothic-v17-latin-800.woff') format('woff'), /* Modern Browsers */
+  url('../webfonts/nanum-gothic-v17-latin-800.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('../webfonts/nanum-gothic-v17-latin-800.svg#NanumGothic') format('svg');
+  /* Legacy iOS */
+}
+
+/* nanum-gothic-700 - latin */
+
+@font-face {
+  font-family: 'Nanum Gothic';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../webfonts/nanum-gothic-v17-latin-700.eot');
+  /* IE9 Compat Modes */
+  src: local('NanumGothic Bold'), local('NanumGothic-Bold'), url('../webfonts/nanum-gothic-v17-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('../webfonts/nanum-gothic-v17-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+  url('../webfonts/nanum-gothic-v17-latin-700.woff') format('woff'), /* Modern Browsers */
+  url('../webfonts/nanum-gothic-v17-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('../webfonts/nanum-gothic-v17-latin-700.svg#NanumGothic') format('svg');
+  /* Legacy iOS */
+}
+
+body {
+  font-family: 'Nanum Gothic', sans-serif;
+}
+
+.right {
+  float: right;
+}
+
+main {
+  position: relative;
+  background-image: url(../../img/background.jpg);
+  background-size: cover;
+  height: 100vh;
+  min-height: 25rem;
+  width: 100%;
+  overflow: hidden;
+}
+
+main .full {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: 0;
+  -ms-transform: translateX(-50%) translateY(-50%);
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+}
+
+main .container {
+  position: relative;
+  z-index: 2;
+}
+
+main .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.chat {
+  opacity: 0.95;
+  height: 70%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  z-index: 4000;
+}
+
+.remote {
+  height: auto;
+  position: absolute;
+  top: 80px;
+  left: 0;
+  z-index: 10;
+}
+
+.hide {
+  display: none;
+}
+
+.text-to-speech {
+  width: 50%;
+  position: absolute;
+  bottom: 80px;
+  left: 1rem;
+  height: 80px;
+  z-index: 2000;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.local {
+  position: absolute;
+  bottom: 80px;
+  right: 1rem;
+  z-index: 2000;
+  cursor: move;
+}
+
+.local:first-child {
+  transform: rotateY(180deg);
+}
+
+.local video {
+  right: 0;
+  float: left;
+  margin: 1rem;
+  max-height: 100px;
+  border: 2px solid #333;
+}
+
+.local video:hover {
+  right: 0;
+  float: left;
+  margin: 1rem;
+  max-height: 100px;
+  border: 2px solid #eee;
+}
+
+.controls {
+  position: absolute;
+  bottom: 0px;
+  float: left;
+  z-index: 1200;
+  color: #fff;
+  min-height: 70px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.controls i {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.controls i:hover {
+  color: #fff;
+}
+
+.controls span.badge {
+  float: right;
+  position: absolute;
+  z-index: 100;
+  /* right: 0; */
+  bottom: 40;
+  margin-left: 20px;
+}
+
+#chat-messages div {
+  padding: 0.5rem;
+}
+
+#chat-messages div mark {
+  padding: 0.5rem;
+}
+
+#chat-messages div time {
+  padding: 0.5rem;
+}
+
+#chat-messages div span {
+  padding: 0.5rem;
+}
+
+.custom-heading {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-weight: 800;
+}
+
+.our-brand {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  padding: 1rem;
+  z-index: 100;
+  color: #fff;
+}
+
+.top-bar {
+  position: absolute;
+  top: 0rem;
+  width: 100% !important;
+  z-index: 8;
+  min-height: 70px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.top-bar i {
+  color: #fff;
+  margin-right: 16px;
+  cursor: pointer;
+}
+
+#file-form {
+  position: absolute;
+  z-index: 200;
+}
+
+.video-grid {
+  position: relative;
+  height: auto;
+}
+
+.video-grid ul {
+  list-style: none;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.video-grid ul li {
+  margin: 0;
+  padding: 0;
+  perspective: 720px;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  /* two items */
+  /* three items */
+  /* four items */
+}
+
+.video-grid ul li img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 50%;
+  /* % of surrounding element */
+  top: 50%;
+  transform: translate(-50%, -50%);
+  /* % of current element */
+  /*filter: blur(20px); */
+}
+
+.video-grid ul li video {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 50%;
+  /* % of surrounding element */
+  top: 50%;
+  transform: translate(-50%, -50%);
+  /* % of current element */
+}
+
+.video-grid ul li:first-child:nth-last-child(1) {
+  /* -or- li:only-child { */
+  width: 100%;
+}
+
+.video-grid ul li:first-child:nth-last-child(2), .video-grid ul li:first-child:nth-last-child(2)~li {
+  width: 50%;
+  height: 100%;
+}
+
+.video-grid ul li:first-child:nth-last-child(3), .video-grid ul li:first-child:nth-last-child(3)~li {
+  width: 50%;
+  height: 50%;
+}
+
+.video-grid ul li:first-child:nth-last-child(4), .video-grid ul li:first-child:nth-last-child(4)~li {
+  width: 50%;
+  height: 50%;
+}
+
+.video-grid ul li:first-child:nth-last-child(5), .video-grid ul li:first-child:nth-last-child(5)~li {
+  width: 50%;
+  height: 33%;
+}
+
+.video-grid ul li:first-child:nth-last-child(6), .video-grid ul li:first-child:nth-last-child(6)~li {
+  width: 50%;
+  height: 33%;
+}
+
+.video-grid ul li:first-child:nth-last-child(7), .video-grid ul li:first-child:nth-last-child(7)~li {
+  width: 33%;
+  height: 33%;
+}
+
+.video-grid ul li:first-child:nth-last-child(8), .video-grid ul li:first-child:nth-last-child(8)~li {
+  width: 33%;
+  height: 33%;
+}
+
+.video-grid ul li:first-child:nth-last-child(9), .video-grid ul li:first-child:nth-last-child(9)~li {
+  width: 33%;
+  height: 33%;
+}
+
+.video-grid.speaker-view ul {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end;
+  overflow-x: auto;
+  margin-bottom: 85px;
+}
+
+.video-grid.speaker-view ul li {
+  width: 320px !important;
+  height: 180px !important;
+  flex: none;
+  margin: 0;
+  z-index: 22;
+}
+
+.video-grid.speaker-view ul li:first-child, .video-grid.speaker-view ul li.is-speaking:first-child+li {
+  margin-left: auto;
+}
+
+.video-grid.speaker-view ul li:last-child {
+  margin-right: auto !important;
+}
+
+.video-grid.speaker-view ul li:nth-last-child(2) {
+  margin-right: auto;
+}
+
+.video-grid.speaker-view ul li.is-speaking~li {
+  margin-right: 0;
+}
+
+.video-grid.speaker-view ul li.is-speaking {
+  order: -1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 20;
+}
+
+.video-tools {
+  position: absolute;
+  z-index: 1000;
+  margin-top: 80px;
+  margin-left: 20px;
+}
+
+.video-tools i {
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+span.namebadge {
+  position: absolute;
+  z-index: 1000;
+  color: #333;
+  top: 80px;
+  right: 20px;
+  background: #fff;
+  padding: 10px;
+  height: 48px;
+}
+
+.is-speaking span.namebadge {
+  background: green;
+  color: #fff;
+}
+
+.white {
+  color: #fff;
+}
+
+.red, .record {
+  color: #ff0000;
+}
+
+i.fa-lock {
+  color: #ff0000;
+}
+
+.flash {
+  animation: blinker 1s linear infinite;
+}
+
+.blur {
+  filter: blur(20px);
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
   }
-  /* nanum-gothic-800 - latin */
-  @font-face {
-    font-family: 'Nanum Gothic';
-    font-style: normal;
-    font-weight: 800;
-    src: url('../webfonts/nanum-gothic-v17-latin-800.eot');
-    /* IE9 Compat Modes */
-    src: local('NanumGothic ExtraBold'), local('NanumGothic-ExtraBold'), url('../webfonts/nanum-gothic-v17-latin-800.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../webfonts/nanum-gothic-v17-latin-800.woff2') format('woff2'), /* Super Modern Browsers */ url('../webfonts/nanum-gothic-v17-latin-800.woff') format('woff'), /* Modern Browsers */ url('../webfonts/nanum-gothic-v17-latin-800.ttf') format('truetype'), /* Safari, Android, iOS */ url('../webfonts/nanum-gothic-v17-latin-800.svg#NanumGothic') format('svg');
-    /* Legacy iOS */
+}
+
+.greenscreen-option {
+  max-width: 100%;
+}
+
+.greenscreen-preview {
+  width: 100%;
+}
+
+#palette {
+  font-size: 1.2rem;
+  color: #000;
+}
+
+.detected-color {
+  cursor: pointer;
+}
+
+.greenscreen-optimal {
+  background-color: #009933;
+  color: #fff;
+}
+
+.transcript-bar {
+  position: absolute;
+  top: 100px;
+  z-index: 2000;
+  width: 100%;
+  height: 80px;
+  opacity: 0.95;
+}
+
+#transcript-results {
+  background: #fff;
+  opacity: 0.8s;
+}
+
+.final {
+  color: #000;
+}
+
+.final:first-letter {
+  text-transform: uppercase;
+}
+
+.interim {
+  color: gray;
+}
+
+.interim:first-letter {
+  text-transform: uppercase;
+}
+
+.subtitles {
+  bottom: 100px;
+  position: absolute;
+  z-index: 40000;
+  color: #fff;
+  opacity: 0.8;
+  padding: 20px;
+  left: 20px;
+  font-weight: 400;
+}
+
+.subtitles p {
+  background: black;
+  opacity: 0.9;
+  padding: 5px;
+  color: #fff;
+  animation: fadeOut 2s forwards;
+  animation-delay: 10s;
+  font-size: 1.2rem;
+}
+
+.subtitles p:first-letter {
+  text-transform: uppercase;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
   }
-  /* nanum-gothic-700 - latin */
-  @font-face {
-    font-family: 'Nanum Gothic';
-    font-style: normal;
-    font-weight: 700;
-    src: url('../webfonts/nanum-gothic-v17-latin-700.eot');
-    /* IE9 Compat Modes */
-    src: local('NanumGothic Bold'), local('NanumGothic-Bold'), url('../webfonts/nanum-gothic-v17-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../webfonts/nanum-gothic-v17-latin-700.woff2') format('woff2'), /* Super Modern Browsers */ url('../webfonts/nanum-gothic-v17-latin-700.woff') format('woff'), /* Modern Browsers */ url('../webfonts/nanum-gothic-v17-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */ url('../webfonts/nanum-gothic-v17-latin-700.svg#NanumGothic') format('svg');
-    /* Legacy iOS */
+  to {
+    opacity: 0;
   }
-  body {
-    font-family: 'Nanum Gothic', sans-serif;
-  }
-  .right {
-    float: right;
-  }
-  main {
-    position: relative;
-    background-image: url(../../img/background.jpg);
-    background-size: cover;
-    height: 100vh;
-    min-height: 25rem;
-    width: 100%;
-    overflow: hidden;
-  }
-  main .full {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    z-index: 0;
-    -ms-transform: translateX(-50%) translateY(-50%);
-    -moz-transform: translateX(-50%) translateY(-50%);
-    -webkit-transform: translateX(-50%) translateY(-50%);
-    transform: translateX(-50%) translateY(-50%);
-  }
-  main .container {
-    position: relative;
-    z-index: 2;
-  }
-  main .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    background-color: black;
-    opacity: 0.5;
-    z-index: 1;
-  }
-  .chat {
-    opacity: 0.95;
-    height: 70%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 10;
-    z-index: 4000;
-  }
+}
+
+#pip-stream {
+  max-width: 320px;
+}
+
+#file-progress {
+  height: 38px;
+}
+
+#video-preview-container {
+  height: 250px;
+}
+
+#video-preview {
+  min-width: 100%;
+  width: 100%;
+  max-height: 240px;
+  height: 200px;
+}
+
+@media (max-width: 768px) {
   .remote {
-    height: auto;
-    position: absolute;
-    top: 80px;
-    left: 0;
-    z-index: 10;
+    top: 180px;
   }
-  .hide {
-    display: none;
-  }
-  .text-to-speech {
-    width: 50%;
-    position: absolute;
-    bottom: 80px;
-    left: 1rem;
-    height: 80px;
-    z-index: 2000;
-    background: rgba(255, 255, 255, 0.3);
+  .fa-2x {
+    font-size: 1.2rem;
   }
   .local {
     position: absolute;
-    bottom: 80px;
-    right: 1rem;
+    top: 60px;
+    right: 10px;
     z-index: 2000;
-    cursor: move;
-  }
-  .local:first-child {
-    transform: rotateY(180deg);
+    cursor: none;
+    max-height: 100px;
+    object-fit: cover;
   }
   .local video {
-    right: 0;
-    float: left;
-    margin: 1rem;
+    max-width: 100px;
     max-height: 100px;
-    border: 2px solid #333;
-  }
-  .local video:hover {
-    right: 0;
-    float: left;
-    margin: 1rem;
-    max-height: 100px;
-    border: 2px solid #eee;
-  }
-  .controls {
-    position: absolute;
-    bottom: 0px;
-    float: left;
-    z-index: 1200;
-    color: #fff;
-    min-height: 70px;
-    background: rgba(0, 0, 0, 0.7);
-  }
-  .controls i {
-    opacity: 0.7;
-    cursor: pointer;
-  }
-  .controls i:hover {
-    color: #fff;
-  }
-  .controls span.badge {
-    float: right;
-    position: absolute;
-    z-index: 100;
-    /* right: 0; */
-    bottom: 40;
-    margin-left: 20px;
-  }
-  #chat-messages div {
-    padding: 0.5rem;
-  }
-  #chat-messages div mark {
-    padding: 0.5rem;
-  }
-  #chat-messages div time {
-    padding: 0.5rem;
-  }
-  #chat-messages div span {
-    padding: 0.5rem;
-  }
-  .custom-heading {
-    font-family: 'Nanum Gothic', sans-serif;
-    font-weight: 800;
-  }
-  .our-brand {
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    padding: 1rem;
-    z-index: 100;
-    color: #fff;
-  }
-  .top-bar {
-    position: absolute;
-    top: 0rem;
-    width: 100% !important;
-    z-index: 8;
-    min-height: 70px;
-    background: rgba(0, 0, 0, 0.7);
-  }
-  .top-bar i {
-    color: #fff;
-    margin-right: 16px;
-    cursor: pointer;
-  }
-  #file-form {
-    position: absolute;
-    z-index: 200;
-  }
-  .video-grid {
-    position: relative;
-    height: auto;
-  }
-  .video-grid ul {
-    list-style: none;
-    display: block;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  .video-grid ul li {
-    margin: 0;
-    padding: 0;
-    perspective: 720px;
-    position: relative;
-    display: block;
-    overflow: hidden;
-    /* two items */
-    /* three items */
-    /* four items */
-  }
-  .video-grid ul li img {
     object-fit: cover;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    left: 50%;
-    /* % of surrounding element */
-    top: 50%;
-    transform: translate(-50%, -50%);
-    /* % of current element */
-    /*filter: blur(20px); */
   }
-  .video-grid ul li video {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    left: 50%;
-    /* % of surrounding element */
-    top: 50%;
-    transform: translate(-50%, -50%);
-    /* % of current element */
-  }
-  .video-grid ul li:first-child:nth-last-child(1) {
-    /* -or- li:only-child { */
-    width: 100%;
-  }
-  .video-grid ul li:first-child:nth-last-child(2),
-  .video-grid ul li:first-child:nth-last-child(2) ~ li {
-    width: 50%;
-    height: 100%;
-  }
-  .video-grid ul li:first-child:nth-last-child(3),
-  .video-grid ul li:first-child:nth-last-child(3) ~ li {
-    width: 50%;
-    height: 50%;
-  }
-  .video-grid ul li:first-child:nth-last-child(4),
-  .video-grid ul li:first-child:nth-last-child(4) ~ li {
-    width: 50%;
-    height: 50%;
-  }
-  .video-grid ul li:first-child:nth-last-child(5),
-  .video-grid ul li:first-child:nth-last-child(5) ~ li {
-    width: 50%;
-    height: 33%;
-  }
-  .video-grid ul li:first-child:nth-last-child(6),
-  .video-grid ul li:first-child:nth-last-child(6) ~ li {
-    width: 50%;
-    height: 33%;
-  }
-  .video-grid ul li:first-child:nth-last-child(7),
-  .video-grid ul li:first-child:nth-last-child(7) ~ li {
-    width: 33%;
-    height: 33%;
-  }
-  .video-grid ul li:first-child:nth-last-child(8),
-  .video-grid ul li:first-child:nth-last-child(8) ~ li {
-    width: 33%;
-    height: 33%;
-  }
-  .video-grid ul li:first-child:nth-last-child(9),
-  .video-grid ul li:first-child:nth-last-child(9) ~ li {
-    width: 33%;
-    height: 33%;
-  }
-  .video-grid.speaker-view ul {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-end;
-    overflow-x: scroll;
-  }
-  .video-grid.speaker-view ul li {
-    width: 320px !important;
-    height: 180px !important;
-    flex: none;
-    margin: 0;
-  }
-  .video-grid.speaker-view ul li:first-child,
-  .video-grid.speaker-view ul li.is-speaking:first-child + li {
-    margin-left: auto;
-  }
-  .video-grid.speaker-view ul li:last-child {
-    margin-right: auto !important;
-  }
-  .video-grid.speaker-view ul li:nth-last-child(2) {
-    margin-right: auto;
-  }
-  .video-grid.speaker-view ul li.is-speaking ~ li {
-    margin-right: 0;
-  }
-  .video-grid.speaker-view ul li.is-speaking {
-    order: -1;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    height: 100% !important;
-    z-index: -1;
-  }
-  .video-tools {
-    position: absolute;
-    z-index: 1000;
-    margin-top: 80px;
-    margin-left: 20px;
-  }
-  .video-tools i {
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.45);
-    padding: 0.5rem;
-    cursor: pointer;
-  }
-  span.namebadge {
-    position: absolute;
-    z-index: 1000;
-    color: #333;
-    top: 80px;
-    right: 20px;
-    background: #fff;
-    padding: 10px;
-    height: 48px;
-  }
-  .is-speaking span.namebadge {
-    background: green;
-    color: #fff;
-  }
-  .white {
-    color: #fff;
-  }
-  .red,
-  .record {
-    color: #ff0000;
-  }
-  i.fa-lock {
-    color: #ff0000;
-  }
-  .flash {
-    animation: blinker 1s linear infinite;
-  }
-  .blur {
-    filter: blur(20px);
-  }
-  @keyframes blinker {
-    50% {
-      opacity: 0;
-    }
-  }
-  .greenscreen-option {
-    max-width: 100%;
-  }
-  .greenscreen-preview {
-    width: 100%;
-  }
-  #palette {
-    font-size: 1.2rem;
-    color: #000;
-  }
-  .detected-color {
-    cursor: pointer;
-  }
-  .greenscreen-optimal {
-    background-color: #009933;
-    color: #fff;
-  }
-  .transcript-bar {
-    position: absolute;
-    top: 100px;
-    z-index: 2000;
-    width: 100%;
-    height: 80px;
-    opacity: 0.95;
-  }
-  #transcript-results {
-    background: #fff;
-    opacity: 0.8s;
-  }
-  .final {
-    color: #000;
-  }
-  .final:first-letter {
-    text-transform: uppercase;
-  }
-  .interim {
-    color: gray;
-  }
-  .interim:first-letter {
-    text-transform: uppercase;
-  }
-  .subtitles {
-    bottom: 100px;
-    position: absolute;
-    z-index: 40000;
-    color: #fff;
-    opacity: 0.8;
-    padding: 20px;
-    left: 20px;
-    font-weight: 400;
-  }
-  .subtitles p {
-    background: black;
-    opacity: 0.9;
-    padding: 5px;
-    color: #fff;
-    animation: fadeOut 2s forwards;
-    animation-delay: 10s;
-    font-size: 1.2rem;
-  }
-  .subtitles p:first-letter {
-    text-transform: uppercase;
-  }
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-  #pip-stream {
-    max-width: 320px;
-  }
-  #file-progress {
-    height: 38px;
-  }
-  #video-preview-container {
-    height: 250px;
-  }
-  #video-preview {
-    min-width: 100%;
-    width: 100%;
-    max-height: 240px;
-    height: 200px;
-  }
-  @media (max-width: 768px) {
-    .remote {
-      top: 180px;
-    }
-    .fa-2x {
-      font-size: 1.2rem;
-    }
-    .local {
-      position: absolute;
-      top: 60px;
-      right: 10px;
-      z-index: 2000;
-      cursor: none;
-      max-height: 100px;
-      object-fit: cover;
-    }
-    .local video {
-      max-width: 100px;
-      max-height: 100px;
-      object-fit: cover;
-    }
-  }
+}
