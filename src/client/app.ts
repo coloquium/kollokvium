@@ -305,7 +305,11 @@ export class App extends AppBase {
         DOMUtils.get("#toggle-top").classList.toggle("d-none");
 
         DOMUtils.get("#brand-top").classList.toggle("d-inline-flex");
+
         DOMUtils.get("#brand-top").classList.toggle("hide");
+
+        DOMUtils.get(".top-bar").classList.remove("d-inline-flex")
+        DOMUtils.get(".top-bar").classList.add("hide")
 
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
         this.generateSubtitles.classList.toggle("hide");
@@ -1165,7 +1169,7 @@ export class App extends AppBase {
             e.preventDefault()
         });
 
-        DOMUtils.on("click", "#toggle-grid", (e) => {    
+        DOMUtils.on("click", "#toggle-grid", (e) => {
             AppDomain.logger.log(`Toggle speaker-view mode, number of participants is ${this.participants.size}`)
             DOMUtils.get("#video-grid").classList.toggle("speaker-view");
             DOMUtils.get("#toggle-grid").classList.toggle("fa-th-large");
