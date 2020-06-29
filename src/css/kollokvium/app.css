@@ -54,9 +54,11 @@ body {
   float: right;
 }
 
+
+
 main {
   position: relative;
-  background-image: url(../../img/background.jpg);
+  background-image: url(../../img/background.png);
   background-size: cover;
   height: 100vh;
   min-height: 25rem;
@@ -209,21 +211,34 @@ main .overlay {
   top: 0.5rem;
   right: 1rem;
   padding: 1rem;
-  z-index: 100;
+  z-index: 2000;
   color: #fff;
 }
 
-.top-bar {
-  position: absolute;
-  top: 0rem;
-  width: 100% !important;
-  z-index: 80;
+#brand-top {
   min-height: 70px;
   background: rgba(0, 0, 0, 0.7);
 }
 
+#brand-top i{
+    cursor: pointer;
+}
+
+.top-bar {
+  position: absolute;
+  top: 70px;
+  width: 100% !important;
+  z-index: 80;
+  min-height: 70px;
+  background: rgba(255, 255, 255, 0.9);
+  left: 50%;
+  transform: translate(-50%, 0);
+  max-width: 50%;
+  margin-top: 20px;
+}
+
 .top-bar i {
-  color: #fff;
+  color: #000;
   margin-right: 16px;
   cursor: pointer;
 }

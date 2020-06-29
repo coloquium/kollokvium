@@ -302,6 +302,11 @@ export class App extends AppBase {
      */
     disableConferenceElements() {
         location.hash = "";
+        DOMUtils.get("#toggle-top").classList.toggle("d-none");
+
+        DOMUtils.get("#brand-top").classList.toggle("d-inline-flex");
+        DOMUtils.get("#brand-top").classList.toggle("hide");
+
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
         this.generateSubtitles.classList.toggle("hide");
 
@@ -347,6 +352,12 @@ export class App extends AppBase {
      * @memberof App
      */
     enableConferenceElements() {
+
+        DOMUtils.get("#toggle-top").classList.toggle("d-none");
+
+        DOMUtils.get("#brand-top").classList.toggle("d-inline-flex");
+
+        DOMUtils.get("#brand-top").classList.toggle("hide");
 
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
 
@@ -418,10 +429,10 @@ export class App extends AppBase {
         }).then((broker: Controller) => {
             this.rtc.Peers.forEach((peer: WebRTCConnection) => {
                 peer.RTCPeer.close();
-            });    
-            DOMUtils.getAll("video",DOMUtils.get(".local")).forEach( e => e.remove());
+            });
+            DOMUtils.getAll("video", DOMUtils.get(".local")).forEach(e => e.remove());
             this.rtc.LocalStreams = new Array<MediaStream>();
-    
+
             this.speechDetector.stop();
 
             this.onInitlialized(broker, true);
@@ -659,9 +670,8 @@ export class App extends AppBase {
         broker.On("isRoomLocked", this.onIsRoomLocked.bind(this));
         broker.On("nicknameChange", this.onNicknameChange.bind(this));
         broker.On("whois", this.onWhoIs.bind(this));
-
         broker.On("contextReconnect", (data: any) => {
-        AppDomain.logger.log(`Client reconnected to server..`,data)
+            AppDomain.logger.log(`Client reconnected to server..`, data)
         });
         broker.Connect();
     }
@@ -781,17 +791,14 @@ export class App extends AppBase {
             });
         });
 
-        // DOMUtils.on("click", "button#apply-fail-save-constraints", () => {
-        //     this.getLocalStream(
-        //         UserSettings.failSafeConstraints(),
-        //         (mediaStream: MediaStream) => {
-        //             DOMUtils.get("#await-streams").classList.toggle("hide");
-        //             DOMUtils.get("#has-streams").classList.toggle("hide");
-        //             this.localMediaStream = mediaStream;
-        //             this.rtc.AddLocalStream(this.localMediaStream);
-        //             this.addLocalVideo(this.localMediaStream, true);
-        //         });
-        // });
+
+        DOMUtils.get("#toggle-top").addEventListener("click", () => {
+            DOMUtils.get(".top-bar").classList.toggle("d-inline-flex")
+            DOMUtils.get(".top-bar").classList.toggle("hide")
+            DOMUtils.get("#toggle-top").classList.toggle("fa-caret-square-up");
+            DOMUtils.get("#toggle-top").classList.toggle("fa-caret-square-down");
+        });
+
 
         DOMUtils.on("click", "#show-journal", () => {
             DOMUtils.get("#generate-journal").textContent = "Download";
@@ -1118,7 +1125,7 @@ export class App extends AppBase {
                 audio: MediaUtils.CheckStream(this.localMediaStream.getAudioTracks(), "live"),
                 video: MediaUtils.CheckStream(this.localMediaStream.getVideoTracks(), "live")
             });
-           AppDomain.logger.log("Start/joining a a meeting");
+            AppDomain.logger.log("Start/joining a a meeting");
             window.history.pushState({}, window.document.title, `#${this.contextName.value}`);
             setTimeout(() => {
                 DOMUtils.get("#share-container").classList.toggle("d-none");
@@ -1158,14 +1165,15 @@ export class App extends AppBase {
             e.preventDefault()
         });
 
-        hotkeys("ctrl+g",(e:KeyboardEvent,h:HotkeysEvent) => {
-            e.preventDefault();
+        DOMUtils.on("click", "#toggle-grid", (e) => {    
             AppDomain.logger.log(`Toggle speaker-view mode, number of participants is ${this.participants.size}`)
             DOMUtils.get("#video-grid").classList.toggle("speaker-view");
+            DOMUtils.get("#toggle-grid").classList.toggle("fa-th-large");
+            DOMUtils.get("#toggle-grid").classList.toggle("fa-users");
         });
 
 
-        this.initialize({ts:performance.now()}).then((broker: any) => {
+        this.initialize({ ts: performance.now() }).then((broker: any) => {
             if (this.slug.length <= 6)
                 $("#random-slug").popover("show");
             this.onInitlialized(broker);

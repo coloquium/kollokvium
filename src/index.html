@@ -34,14 +34,10 @@
     <div id="remote-audio-node" class="hide">
         <audio></audio>
     </div>
-    <div class="our-brand" id="appVersion">
-        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive mr-1"
-        style="max-height:22px;filter:invert()" id="watermark">
-        Kollokvium        
-    </div>
-    
-    <div class="modal fade" id="meeting-journal" tabindex="-1" role="dialog"
-        aria-labelledby="Meeting journal" aria-hidden="true">
+
+
+    <div class="modal fade" id="meeting-journal" tabindex="-1" role="dialog" aria-labelledby="Meeting journal"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -89,14 +85,28 @@
         </div>
     </div>
 
+    <div class="our-brand" id="appVersion">
+        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive mr-1"
+            style="max-height:22px;filter:invert()" id="watermark">
+        Kollokvium
+    </div>
 
     <main>
+        <nav class="navbar navbar-light fixed-top" id="brand-top">
+           
+            
+            <i class="fas fa-2x fa-caret-square-down justify-content-center mx-auto text-light d-none" id="toggle-top"></i></li>
+        </nav>
 
-        <div class="top-bar d-inline-flex flex-row align-items-center w-100 justify-content-center">
+        <div class="top-bar flex-row align-items-center w-100 justify-content-center hide">
 
 
             <div class="p-1 only-desktop">
-                <i class="far fa-minus-square fa-2x hide " id="toggle-pip" title="toggle picture-in-picture mode"></i>
+                <i class="far fas fa-th-large fa-2x" id="toggle-grid" data-hotkey="ctrl+g" title="toggle active speaker / grid view"></i>
+            </div>
+
+            <div class="p-1 only-desktop">
+                    <i class="far fa-minus-square fa-2x hide " id="toggle-pip" title="toggle picture-in-picture mode"></i>
             </div>
 
 
@@ -169,7 +179,8 @@
                                 <div class="custom-file" id="share-file-box">
                                     <input type="file" class="file-selected custom-file-input" class="form-control"
                                         id="share-file">
-                                    <label class="custom-file-label" for="inputGroupFile01">Select file to share..</label>
+                                    <label class="custom-file-label" for="inputGroupFile01">Select file to
+                                        share..</label>
                                 </div>
 
 
@@ -185,7 +196,7 @@
         </div>
 
         <div class="container-fluid remote hide my-2" id="share-container">
-            <div class="alert alert-warning">
+            <div class="alert alert-light">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -206,12 +217,12 @@
             <div class="d-flex h-100 text-center align-items-center">
                 <div class="w-100 text-white">
                     <div id="splash" class="d-none d-md-block">
-                    <h1 class="display-4 custom-heading">
-                        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive"
-                            style="max-height:80px;filter:invert()" id="watermark">
-                        <span id="appDomain">Kollokvium</span></h1>
-                    <p class="lead my-3">A free multi-party video conference for you and your friends, family and
-                        colleagues!</p>
+                        <h1 class="display-4 custom-heading">
+                            <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive"
+                                style="max-height:80px;filter:invert()" id="watermark">
+                            <span id="appDomain">Kollokvium</span></h1>
+                        <p class="lead my-3">A free multi-party video conference for you and your friends, family and
+                            colleagues!</p>
                     </div>
 
                     <div class="text-left" id="await-streams">
@@ -229,9 +240,9 @@
                             <h4 class="alert-heading">Failed to access camera</h4>
                             <p>
                                 <strong>Damn!</strong>
-                                Kollokvium failed to get hold of your camera, it will not work for you! 
+                                Kollokvium failed to get hold of your camera, it will not work for you!
                                 We automaticly reported the issue to the Kollokvium Team.
-                                </p>    
+                            </p>
                         </div>
 
 
@@ -246,8 +257,8 @@
                                 <i class="fas fa-dice fa-2x"></i>
                             </button>
                         </div>
-                        <input list="slug-history" type="text" id="context-name" placeholder="Enter any room name..." value=""
-                            class="form-control form-control-lg" data-container="body" data-toggle="popover"
+                        <input list="slug-history" type="text" id="context-name" placeholder="Enter any room name..."
+                            value="" class="form-control form-control-lg" data-container="body" data-toggle="popover"
                             data-placement="top" data-trigger="none"
                             data-content="Ahoy! Your room name should be six characters minimum. It can be many things such as company name, meeting occasion or whatever you want... Have a nice day!">
 
@@ -297,7 +308,8 @@
                 <i class="fas fa-microphone fa-2x" id="mute-local-audio" data-hotkey="ctrl+m"></i>
             </div>
             <div class="p-3 d-none only-desktop" id="record">
-                <i class="fas fa-circle fa-2x record" title="Record all meeting participants" id="record-all" data-hotkey="ctrl+r">
+                <i class="fas fa-circle fa-2x record" title="Record all meeting participants" id="record-all"
+                    data-hotkey="ctrl+r">
                 </i>
             </div>
             <div class="p-3 only-desktop">
