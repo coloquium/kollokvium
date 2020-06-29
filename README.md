@@ -6,7 +6,7 @@ Engaging in digital meetings should be simple, secure and not require installati
 
 Unnecessary logins, user registrations and data should not flow through third parties, but between the peers involved in the meeting, this makes the connection private and also resilient against overloaded servers that applications like skype and discord may experience under high load, which often happens in a crisis.
 
->Our digital meetings should be flexible, resilient and protected!
+> Our digital meetings should be flexible, resilient and protected!
 
 Kollokvium target companies, associations and individuals, both young and old, perhaps especially those without any deeper computer experience as it requires no installation or signup and can be started simply by following a link and clicking start.
 
@@ -30,21 +30,45 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 10. Auto translate of Subtitles / captions ( from source to prefered langugee )
 11. Picture-In-Picture support (renders all streams into PiP element)
 12. Active speaker - Indication of who is talking
+13. Active speaker view / Grid view
+14. E2EE ( commin in 2.0 , currently in dev and will require Chrome 84+)
 
 ..and more
 
+## Hotkeys aka keyboard shortcuts  
+
+`ctrl-l` Request low resolution media streams from all connected participanyts.
+
+`ctrl-r` Start / stop recording of meeting ( applies to recoring o.f everyone participating)
+
+`ctrl-g`  Toogle active-speaker vide / grid view (default).
+
+`ctrl-m`  Mute / un-mute microphone.
+
+`ctrl-v`  Mute / un-mute camera.
+
+`ctrl+q`  Mute / un-mute all audio.
+
+`ctrl+s`  Enable / disable subtitles (captions).
+
+`ctrl+i`  Hide / show chat & fileshare window.
+
+
 ## Planned features / addons
 
-1. `/broadcast` - A view where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
-2. `/adnanced`    - A view that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.
+1. `broadcast mode` - A view/mode where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
+2. `advanced mode`  - A view/mode that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.
 3. Finalize the electron builds for Windows, OSX and Linux  
-4. E2EE encryption (will be implemented in thor-io.vnext)
+4. `e2ee mode`  - a mode where E2EE encryption wrapps all existing features (will be implemented in thor-io.vnext)
 
 ## Install 
-Clone the repository and run npm install & npm run build & npm start
+Clone the repository and run `npm install`  see package.json for build scripts.
 
-## Quick deploy guides.
-To run the application locally run npm start and then browse to localhost:1337 
+## Quick deploy guides
+
+## Local development
+
+Build and and luanch using `npm start` and then browse to `localhost:1337` 
 
 ### Azure deploy
 To deploy to Azure you need an Azure account, and you need to create an Azure Wep Application, and a storage account to host the Static Website.
