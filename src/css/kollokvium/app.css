@@ -217,7 +217,7 @@ main .overlay {
   position: absolute;
   top: 0rem;
   width: 100% !important;
-  z-index: 8;
+  z-index: 80;
   min-height: 70px;
   background: rgba(0, 0, 0, 0.7);
 }
