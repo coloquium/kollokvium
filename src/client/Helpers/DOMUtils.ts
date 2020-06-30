@@ -9,9 +9,11 @@ export class DOMUtils {
         for (let i = 0; i < queryResult.length; i++) results.push(queryResult.item(i));
         return results;
     }
-    static on<T extends HTMLElement>(event:string,element: string | HTMLElement,fn:(event?:any)=>void,options?:AddEventListenerOptions):T{
+    static on<T extends HTMLElement>(event: string, element: string | HTMLElement, fn: (event?: any, el?: HTMLElement | any) => void, options?: AddEventListenerOptions): T {
         typeof (element) === "string" ? element = DOMUtils.get<T>(element) : element = element;
-        element.addEventListener(event,fn,options);
+        element.addEventListener(event, (e: Event) => {
+            fn(e, element);
+        }, options);
         return element as T;
     }
     static create<T extends HTMLElement>(p: string | T, textContent?: string, attr?: Object): T {
@@ -55,7 +57,7 @@ export class DOMUtils {
                 document.onmousemove = null;
             };
             document.onmousemove = elementDrag;
-        };     
+        };
     }
 
 

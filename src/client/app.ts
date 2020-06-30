@@ -68,6 +68,7 @@ export class App extends AppBase {
 
     speechDetector: SpeechDetector;
     isPipActive: boolean;
+    speakerViewMode: boolean;
 
     /**
      *
@@ -400,10 +401,8 @@ export class App extends AppBase {
         $("#recorder-result").modal("show");
     }
 
-
     createSpeechDetecor(ms: MediaStream, interval: number) {
         try {
-
             this.speechDetector = new SpeechDetector(ms, 5, 512);
             this.speechDetector.start(interval);
             AppDomain.logger.log(`SpeechDetector has started`)
@@ -412,12 +411,17 @@ export class App extends AppBase {
                     state: true,
                     rms: rms, peerId: this.rtc.LocalPeerId
                 });
+                if (this.speakerViewMode)
+                    DOMUtils.get("#video-grid").classList.remove("speaker-view");
             };
+
             this.speechDetector.onspeechended = (rms) => {
                 this.arbitraryChannel.Invoke("isSpeaking", {
                     state: false,
                     rms: rms, peerId: this.rtc.LocalPeerId
                 });
+                if (this.speakerViewMode)
+                    DOMUtils.get("#video-grid").classList.add("speaker-view");
             };
 
         } catch (err) {
@@ -840,23 +844,19 @@ export class App extends AppBase {
             this.pictureInPictureElement.pause();
         });
 
-        DOMUtils.on("click", DOMUtils.get("#toggle-pip"), () => {
+        DOMUtils.on("click", DOMUtils.get("#toggle-pip"), (e, el: HTMLElement) => {
             if (this.isRecording) return;
             if (document["pictureInPictureElement"]) {
                 document["exitPictureInPicture"]().then(() => {
-
                     this.isPipActive = true;
-
-                    DOMUtils.get("#toggle-pip").classList.remove("flash");
+                    el.classList.remove("flash");
                 })
-                    .catch(err => {
+                    .catch((err: any) => {
                         this.isPipActive = false;
-                        DOMUtils.get("#toggle-pip").classList.remove("flash");
+                        el.classList.remove("flash");
                         AppDomain.logger.error("exitPictureInPicture", err)
                     });
             } else {
-
-
 
                 this.pictureInPictureElement.onloadeddata = () => {
                     this.pictureInPictureElement["requestPictureInPicture"]();
@@ -866,8 +866,7 @@ export class App extends AppBase {
 
                 this.isPipActive = true;
 
-
-                DOMUtils.get("#toggle-pip").classList.add("flash");
+                el.classList.add("flash");
             }
         });
 
@@ -966,7 +965,7 @@ export class App extends AppBase {
         });
 
 
-        DOMUtils.on("click", this.generateSubtitles, () => {
+        DOMUtils.on("click", this.generateSubtitles, (e, el: HTMLDivElement) => {
             if (!this.transcriber) {
                 this.transcriber = new Transcriber(this.rtc.LocalPeerId,
                     new MediaStream(this.rtc.LocalStreams[0].getAudioTracks()), UserSettings.language
@@ -1016,8 +1015,8 @@ export class App extends AppBase {
             this.muteVideo(e)
         });
 
-        DOMUtils.on("click", DOMUtils.get("#record-all"), () => {
-            DOMUtils.get("#record-all").classList.toggle("flash");
+        DOMUtils.on("click", DOMUtils.get("#record-all"), (e, el: HTMLLIElement) => {
+            el.classList.toggle("flash");
             this.recordAllStreams();
         });
 
@@ -1157,6 +1156,31 @@ export class App extends AppBase {
                 e.preventDefault()
             });
         });
+
+
+        hotkeys("ctrl+u", (e: KeyboardEvent, h: HotkeysEvent) => {
+            let reports = this.getRTCStatsReport();
+            reports.then( (chunks:Array<string>) => {
+                    chunks.forEach( c => {
+
+                        // Create a file for each for download
+
+                        let data = `<html><body>${c}</body></html>`
+
+                        let blob = new Blob([data], {type: "text/html"});
+                        let blobUrl = window.URL.createObjectURL(blob);
+                        var a = document.createElement("a");
+                        a.href = blobUrl;
+                        a.download = `${Math.random().toString(36).substring(8)}.html`;
+                        a.click();
+
+                        console.log(c);
+                    });
+            });
+
+            e.preventDefault()
+        });
+
         hotkeys("ctrl+o", (e: KeyboardEvent, h: HotkeysEvent) => {
             // todo pull in stats so we know ...
             AppDomain.logger.log(`User requests low res from remotes`);
@@ -1169,11 +1193,14 @@ export class App extends AppBase {
             e.preventDefault()
         });
 
-        DOMUtils.on("click", "#toggle-grid", (e) => {
+        DOMUtils.on("click", "#toggle-grid", (e, el: HTMLElement) => {
             AppDomain.logger.log(`Toggle speaker-view mode, number of participants is ${this.participants.size}`)
             DOMUtils.get("#video-grid").classList.toggle("speaker-view");
-            DOMUtils.get("#toggle-grid").classList.toggle("fa-th-large");
-            DOMUtils.get("#toggle-grid").classList.toggle("fa-users");
+
+            this.speakerViewMode = !this.speakerViewMode;
+
+            el.classList.toggle("fa-th-large");
+            el.classList.toggle("fa-users");
         });
 
 
