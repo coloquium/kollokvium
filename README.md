@@ -30,8 +30,8 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 10. Auto translate of Subtitles / captions ( from source to prefered langugee )
 11. Picture-In-Picture support (renders all streams into PiP element)
 12. Active speaker - Indication of who is talking
-13. Active speaker view / Grid view
-14. E2EE ( commin in 2.0 , currently in dev and will require Chrome 84+)
+13. Active speaker view / grid view 
+14. E2EE ( commin in 1.8 , currently in dev (canary at https://dev-wss.kollokvium.net/) and will require Chrome 84+)
 
 ..and more
 
@@ -54,6 +54,8 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 `ctrl+i`  Hide / show chat & fileshare window.
 
 `ctrl-u` Get statistics for each RTCPeerConnection. Generate 1-n HTML based reports that is passedf back to client as downloadable files.
+
+`ctrl-b` Start/stop recording of each stream individually. 
 
 ## Planned features / addons
 
