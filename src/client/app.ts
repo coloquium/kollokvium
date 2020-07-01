@@ -394,7 +394,7 @@ export class App extends AppBase {
         let p = document.createElement("p");
         const download = document.createElement("a");
         download.setAttribute("href", blobUrl);
-        download.textContent = "Your recording has ended, here is the file. ( click to download )";
+        download.textContent = "Your recording of all users has ended.(click to download)";
         download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
         p.append(download);
         DOMUtils.get("#recorder-download").append(p);
@@ -1157,6 +1157,15 @@ export class App extends AppBase {
             });
         });
 
+        hotkeys("ctrl+b",(e:KeyboardEvent,h:HotkeysEvent) => {
+
+            AppDomain.logger.log(`Recording each participant`);
+
+            this.participants.forEach( (p:AppParticipantComponent,id:string) => {
+                    p.recordStream(id);              
+            });
+
+        });
 
         hotkeys("ctrl+u", (e: KeyboardEvent, h: HotkeysEvent) => {
             let reports = this.getRTCStatsReport();

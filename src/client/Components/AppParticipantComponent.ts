@@ -20,22 +20,21 @@ export class AppParticipantComponent {
         let p = document.createElement("p");
         const download = document.createElement("a");
         download.setAttribute("href", blobUrl);
-        download.textContent = "Your recording has ended, here is the file. ( click to download )";
+        download.textContent = `Your recording has ended,click to download.`;
         download.setAttribute("download", `${Math.random().toString(36).substring(6)}.webm`);
         p.append(download);
         DOMUtils.get("#recorder-download").append(p);
         $("#recorder-result").modal("show");
     }
-
-
     recordStream(id: string) {
         if (!this.isRecording) {
+            DOMUtils.get("i.recording", DOMUtils.get(`li.p${id} .video-tools`)).classList.add("flash");
             let tracks = this.getTracks();
             this.recorder = new MediaStreamRecorder(tracks);
             this.recorder.start(10);
             this.isRecording = true;
         } else {
-            DOMUtils.get("i.is-recording").classList.remove("flash");
+            DOMUtils.get("i.recording", DOMUtils.get(`li.p${id} .video-tools`)).classList.remove("flash");
             this.isRecording = false;
             this.recorder.stop();
             this.recorder.flush().then((blobUrl: string) => {
@@ -93,18 +92,16 @@ export class AppParticipantComponent {
             }
         });
         let record = document.createElement("i");
-        record.classList.add("fas", "fa-circle", "fa-2x", "red")
-       
+        record.classList.add("fas", "fa-circle", "fa-2x", "red","recording")
+
 
         record.addEventListener("click", () => {
-            if (!this.isRecording)
-                record.classList.add("flash", "is-recording");
             this.recordStream(this.id);
         });
 
-    
-        if(typeof window.orientation === 'undefined')
-                tools.append(record);
+
+        if (typeof window.orientation === 'undefined')
+            tools.append(record);
 
         tools.append(fullscreen);
         container.prepend(tools);
