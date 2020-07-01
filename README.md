@@ -53,6 +53,7 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 `ctrl+i`  Hide / show chat & fileshare window.
 
+`ctrl-u` Get statistics for each RTCPeerConnection. Generate 1-n HTML based reports that is passedf back to client as downloadable files.
 
 ## Planned features / addons
 
