@@ -93,20 +93,22 @@
 
     <main>
         <nav class="navbar navbar-light fixed-top" id="brand-top">
-           
-            
-            <i class="fas fa-2x fa-caret-square-down justify-content-center mx-auto text-light d-none" id="toggle-top"></i></li>
+
+
+            <i class="fas fa-2x fa-caret-square-down justify-content-center mx-auto text-light d-none"
+                id="toggle-top"></i></li>
         </nav>
 
         <div class="top-bar flex-row align-items-center w-100 justify-content-center hide">
 
 
             <div class="p-1 only-desktop">
-                <i class="far fas fa-th-large fa-2x" id="toggle-grid" data-hotkey="ctrl+g" title="toggle active speaker / grid view"></i>
+                <i class="far fas fa-th-large fa-2x" id="toggle-grid" data-hotkey="ctrl+g"
+                    title="toggle active speaker / grid view"></i>
             </div>
 
             <div class="p-1 only-desktop">
-                    <i class="far fa-minus-square fa-2x hide " id="toggle-pip" title="toggle picture-in-picture mode"></i>
+                <i class="far fa-minus-square fa-2x hide " id="toggle-pip" title="toggle picture-in-picture mode"></i>
             </div>
 
 
@@ -271,11 +273,39 @@
                             <button id="join-conference" class="btn btn-primary bt-lg" type="button"
                                 disabled>START</button>
                         </div>
+
                     </div>
 
-
+                    <div class="col-md-6 mx-auto hide" id="e2ee-dialog">
+                        <div class="alert alert-light text-left">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            <h5 class="alert-heading">Dude, you can use (e2ee) mode&nbsp;<spam class="badge badge-info">beta</spam></h5>
+                            <div class="input-group mb-3 mt-1">
+                                <div class="input-group-prepend">
+                                    
+                                    <div class="input-group-text">
+                                        <input type="checkbox"  id="enable-e2ee">
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control" id="shared-secret" placeholder="your shared secret (6 characters or more...)" disabled>
+                            </div>
+                            <hr>
+                            <p class="mb-0">
+                                When using E2EE you and your friends needs to <strong>share-a-secret-key</strong> (enter above) before start/join<br>
+                            
+                            </p>
+                        </div>
+                        
+                    </div>
                 </div>
+
+
+
+
             </div>
+        </div>
         </div>
         </div>
 

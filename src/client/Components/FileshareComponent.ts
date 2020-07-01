@@ -10,7 +10,7 @@ export class FileShareComponent extends AppComponent {
 
     constructor(public dataChannel: DataChannel,private userSettings:UserSettings) {
         super();
-        dataChannel.On("fileShare", (fileInfo: any, arrayBuffer: ArrayBuffer) => {
+        dataChannel.on("fileShare", (fileInfo: any, arrayBuffer: ArrayBuffer) => {
             this.render(fileInfo, new Blob([arrayBuffer], {
                 type: fileInfo.mimeType
             }));
@@ -34,7 +34,7 @@ export class FileShareComponent extends AppComponent {
             bytes += chunkSize;
             DOMUtils.get(".progress-bar", sendProgress).style.width = `${((chunkSize / meta.size) * 100) * 1000}%`;
 
-            this.dataChannel.InvokeBinary("fileShare", meta, data, isFinal, shareId);
+            this.dataChannel.invokeBinary("fileShare", meta, data, isFinal, shareId);
             if (isFinal) {
                 setTimeout(() => {
                     DOMUtils.get("#share-file-box").classList.toggle("hide");

@@ -13,7 +13,7 @@ export class ChatComponent extends AppComponent {
 
             super();
 
-            this.dc.On("chatMessage", (data: any) => {
+            this.dc.on("chatMessage", (data: any) => {
                 if(this.onChatMessage) this.onChatMessage(data);
                 this.render(data);
             });
@@ -34,7 +34,7 @@ export class ChatComponent extends AppComponent {
                 text: message,
                 from: sender
             }
-            this.dc.Invoke("chatMessage", data);
+            this.dc.invoke("chatMessage", data);
             this.render(data);
         }
         render(msg: any) {

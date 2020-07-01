@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.7.11",
+  "version": "1.7.12",
   "description": "",
   "main": "dist/server.js",
   "repository": {
@@ -72,7 +72,7 @@
     "hotkeys-js": "^3.7.6",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",
-    "thor-io.client-vnext": "^2.0.4-beta.1",
+    "thor-io.client-vnext": "^2.1.0-beta.1",
     "thor-io.vnext": "^2.0.5-beta.3",
     "utf-8-validate": "^5.0.2",
     "webrtc-adapter": "^7.5.1",

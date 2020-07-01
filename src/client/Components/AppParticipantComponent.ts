@@ -3,19 +3,46 @@ import { DOMUtils } from '../Helpers/DOMUtils';
 import { MediaStreamRecorder } from 'mediastreamblender';
 
 export class AppParticipantComponent {
-    audioTracks: Array<MediaStreamTrack>;
-    videoTracks: Array<MediaStreamTrack>;
+    streams: Map<string, MediaStream>;
+
     onVideoTrackLost: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
     onVideoTrackAdded: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
     onAudioTrackAdded: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
     onAudioTrackLost: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
     recorder: MediaStreamRecorder;
     isRecording: boolean;
+    
+    usesE2EE:boolean;
 
     constructor(public id: string) {
-        this.videoTracks = new Array<MediaStreamTrack>();
-        this.audioTracks = new Array<MediaStreamTrack>();
+        this.streams = new Map<string, MediaStream>();
+        //  this.videoTracks = new Array<MediaStreamTrack>();
+        //  this.audioTracks = new Array<MediaStreamTrack>();
     }
+
+    get audioTracks(): Array<MediaStreamTrack> {
+
+        let r = new Array<MediaStreamTrack>();
+
+        this.streams.forEach(stream => {
+            stream.getAudioTracks().forEach(t => {
+                r.push(t);
+            });
+        });
+
+        return r;
+
+    }
+    get videoTracks(): Array<MediaStreamTrack> {
+        let r = new Array<MediaStreamTrack>();
+        this.streams.forEach(stream => {
+            stream.getVideoTracks().forEach(t => {
+                r.push(t);
+            });
+        });
+        return r;
+    }
+
     displayRecording(blobUrl: string) {
         let p = document.createElement("p");
         const download = document.createElement("a");
@@ -92,7 +119,7 @@ export class AppParticipantComponent {
             }
         });
         let record = document.createElement("i");
-        record.classList.add("fas", "fa-circle", "fa-2x", "red","recording")
+        record.classList.add("fas", "fa-circle", "fa-2x", "red", "recording")
 
 
         record.addEventListener("click", () => {
@@ -135,18 +162,19 @@ export class AppParticipantComponent {
                 .catch(reject)
         });
     }
-    addVideoTrack(t: MediaStreamTrack) {
-        this.videoTracks.push(t);
-        let stream = new MediaStream([t]);
+    addVideoTrack(t: MediaStreamTrack, stream: MediaStream) {
+        //  this.videoTracks.push(t);
+        //   let stream = new MediaStream([t]);
+
         stream.getVideoTracks()[0].onended = () => {
             if (this.onVideoTrackLost)
                 this.onVideoTrackLost(this.id, stream, t);
         };
-        this.onVideoTrackAdded(this.id, stream, stream.getVideoTracks()[0]);
+        this.onVideoTrackAdded(this.id, stream, t);
     }
-    addAudioTrack(t: MediaStreamTrack): void {
+    addAudioTrack(t: MediaStreamTrack, stream: MediaStream): void {
         this.audioTracks.push(t);
-        let stream = new MediaStream([t]);
+        //let stream = new MediaStream([t]);
         t.onended = () => {
             // todo: would be an delagated event
             if (this.onAudioTrackLost)
@@ -154,13 +182,13 @@ export class AppParticipantComponent {
 
         };
         this.onAudioTrackAdded(this.id, stream, t);
-
     }
-    addTrack(t: MediaStreamTrack) {
+    addTrack(id:string,t: MediaStreamTrack, s: MediaStream) {
+        if (!this.streams.has(id)) this.streams.set(id, s);
         if (t.kind == "video") {
-            this.addVideoTrack(t)
+            this.addVideoTrack(t, s)
         } else {
-            this.addAudioTrack(t);
+            this.addAudioTrack(t, s);
         }
     }
 }

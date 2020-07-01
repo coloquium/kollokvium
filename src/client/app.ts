@@ -1,10 +1,9 @@
-import adapter from 'webrtc-adapter';
-import { Factory, WebRTC, BinaryMessage, Message, DataChannel, PeerChannel, Utils, Listener } from 'thor-io.client-vnext'
+import { DataChannel } from 'thor-io.client-vnext'
 import { Controller } from 'thor-io.client-vnext/src/Controller';
 import { AppParticipantComponent } from './Components/AppParticipantComponent';
 import { UserSettings } from './UserSettings';
 import { AppDomain } from './AppDomain';
-import { MediaStreamBlender, MediaStreamRecorder, StreamSource } from 'mediastreamblender'
+import { MediaStreamBlender } from 'mediastreamblender'
 import { DetectResolutions } from './Helpers/DetectResolutions';
 import { DOMUtils } from './Helpers/DOMUtils';
 import { WebRTCConnection } from 'thor-io.client-vnext/src/WebRTC/WebRTCConnection';
@@ -17,12 +16,8 @@ import hotkeys, { HotkeysEvent } from 'hotkeys-js';
 import { MediaUtils } from './Helpers/MediaUtils';
 import { SpeechDetector } from './Audio/SpeechDetector';
 import { AppBase } from './AppBase';
-import { PeerConnection } from 'thor-io.client-vnext/src/WebRTC/PeerConnection';
-import 'reflect-metadata';
 import { FileShareComponent } from './Components/FileshareComponent';
 import { ChatComponent } from './Components/ChatComponent';
-
-
 
 export class App extends AppBase {
 
@@ -69,6 +64,8 @@ export class App extends AppBase {
     speechDetector: SpeechDetector;
     isPipActive: boolean;
     speakerViewMode: boolean;
+    useE2EE: boolean;
+    sharedSecret: any;
 
     /**
      *
@@ -86,7 +83,7 @@ export class App extends AppBase {
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             cb(mediaStream);
-        }).catch(err => {
+        }).catch(() => {
 
             navigator.mediaDevices.getUserMedia(UserSettings.failSafeConstraints()).then((mediaStream: MediaStream) => {
                 cb(mediaStream);
@@ -119,7 +116,7 @@ export class App extends AppBase {
         };
         navigator.mediaDevices["getDisplayMedia"](gdmOptions).then((stream: MediaStream) => {
             stream.getVideoTracks().forEach((t: MediaStreamTrack) => {
-                this.rtc.LocalStreams[0].addTrack(t);
+                this.rtc.localStreams[0].addTrack(t);
                 this.rtc.addTrackToPeers(t);
             });
             this.addLocalVideo(stream, false);
@@ -251,7 +248,7 @@ export class App extends AppBase {
         } else {
             let participant = new AppParticipantComponent(id);
 
-            participant.onVideoTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
+            participant.onVideoTrackAdded = (id: string, mediaStream: MediaStream) => {
                 let node = participant.render();
                 participant.addVideo(id, mediaStream, node);
                 DOMUtils.get("#remote-videos").append(node);
@@ -259,16 +256,16 @@ export class App extends AppBase {
                 this.updatePageTitle();
 
             }
-            participant.onAudioTrackAdded = (id: string, mediaStream: MediaStream, mediaStreamTrack: MediaStreamTrack) => {
+            participant.onAudioTrackAdded = (id: string, mediaStream: MediaStream) => {
                 this.audioNodes.add(id, mediaStream);
             };
-            participant.onVideoTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
+            participant.onVideoTrackLost = (id: string, stream: MediaStream) => {
                 let p = DOMUtils.getAll(`li video.s${stream.id}`);
                 p.forEach(n => n.parentElement.remove());
                 this.numOfPeers--
                 this.updatePageTitle();
             }
-            participant.onAudioTrackLost = (id: string, stream: MediaStream, track: MediaStreamTrack) => {
+            participant.onAudioTrackLost = (id: string) => {
                 this.audioNodes.remove(id);
             }
             this.participants.set(id, participant);
@@ -284,7 +281,7 @@ export class App extends AppBase {
      * @param {string} [title]
      * @memberof App
      */
-    addSubtitles(parent: HTMLElement, text: string, lang: string, title?: string) {
+    addSubtitles(parent: HTMLElement, text: string, title?: string) {
         if (parent) {
             let p = document.createElement("p");
             if (title)
@@ -407,18 +404,18 @@ export class App extends AppBase {
             this.speechDetector.start(interval);
             AppDomain.logger.log(`SpeechDetector has started`)
             this.speechDetector.onspeechstarted = (rms) => {
-                this.arbitraryChannel.Invoke("isSpeaking", {
+                this.arbitraryChannel.invoke("isSpeaking", {
                     state: true,
-                    rms: rms, peerId: this.rtc.LocalPeerId
+                    rms: rms, peerId: this.rtc.localPeerId
                 });
                 if (this.speakerViewMode)
                     DOMUtils.get("#video-grid").classList.remove("speaker-view");
             };
 
             this.speechDetector.onspeechended = (rms) => {
-                this.arbitraryChannel.Invoke("isSpeaking", {
+                this.arbitraryChannel.invoke("isSpeaking", {
                     state: false,
-                    rms: rms, peerId: this.rtc.LocalPeerId
+                    rms: rms, peerId: this.rtc.localPeerId
                 });
                 if (this.speakerViewMode)
                     DOMUtils.get("#video-grid").classList.add("speaker-view");
@@ -433,20 +430,19 @@ export class App extends AppBase {
 
     onConnectionLost() {
         this.initialize({
-            peerId: this.rtc.LocalPeerId, context: AppDomain.getSlug(this.contextName.value)
+            peerId: this.rtc.localPeerId, context: AppDomain.getSlug(this.contextName.value)
         }).then((broker: Controller) => {
-            this.rtc.Peers.forEach((peer: WebRTCConnection) => {
+            this.rtc.peers.forEach((peer: WebRTCConnection) => {
                 peer.RTCPeer.close();
             });
             DOMUtils.getAll("video", DOMUtils.get(".local")).forEach(e => e.remove());
-            this.rtc.LocalStreams = new Array<MediaStream>();
+            this.rtc.localStreams = new Array<MediaStream>();
 
             this.speechDetector.stop();
 
-            this.onInitlialized(broker, true);
+            this.onInitlialized(broker);
         }).catch(reason => {
             AppDomain.logger.log(`failed to reconnect to context`, reason);
-
         });
     }
 
@@ -457,20 +453,20 @@ export class App extends AppBase {
 
         DOMUtils.getAll(`li.p${peer.id}`).forEach(n => n.remove());
 
-        this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliner
+        this.factory.getController("broker").invoke("onliners", {}); // refresh onliner
     }
 
 
     private onContextConnected() {
         DOMUtils.get(".remote").classList.add("hide");
-        this.factory.GetController("broker").Invoke("onliners", {}); // refresh onliners
+        this.factory.getController("broker").invoke("onliners", {}); // refresh onliners
     }
 
-    private onContextCreated(peerConnection: PeerConnection) {
+    private onContextCreated() {
     }
 
-    private onContextChanged(context: any) {
-        this.rtc.ConnectContext();
+    private onContextChanged() {
+        this.rtc.connectContext();
     }
 
     private onLocalStream() {
@@ -486,16 +482,16 @@ export class App extends AppBase {
             if (data.lang !== targetLanguage && AppDomain.translateKey) {
                 Transcriber.translateCaptions(AppDomain.translateKey, data.text, data.lang, UserSettings.language
                     || navigator.language).then((result) => {
-                        this.addSubtitles(parent, result, data.lang, data.text);
+                        this.addSubtitles(parent, result, data.text);
                         this.journalComponent.add(data.sender, result, data.text, data.lang);
 
                     }).catch(() => {
-                        this.addSubtitles(parent, data.text, data.lang);
+                        this.addSubtitles(parent, data.text);
                         this.journalComponent.add(data.sender, data.text, "", data.lang);
                     });
             } else {
                 this.journalComponent.add(data.sender, data.text, "", data.lang);
-                this.addSubtitles(parent, data.text, data.lang);
+                this.addSubtitles(parent, data.text);
             }
         }
     }
@@ -519,7 +515,7 @@ export class App extends AppBase {
             Transcriber.translateCaptions(AppDomain.translateKey, data.text, data.lang, UserSettings.language
                 || navigator.language).then((result) => {
                     Transcriber.textToSpeech(result, targetLanguage);
-                }).catch(err => {
+                }).catch(() => {
                 });
         } else {
             Transcriber.textToSpeech(data.text, targetLanguage);
@@ -537,15 +533,27 @@ export class App extends AppBase {
             }
         });
     }
-    private onRemoteTrack(track: MediaStreamTrack, connection: WebRTCConnection) {
+    private onRemoteTrack(track: MediaStreamTrack, connection: WebRTCConnection, event: RTCTrackEvent) {
         let participant = this.tryAddParticipant(connection.id);
-        participant.addTrack(track);
-        this.factory.GetController("broker").Invoke("whois", connection.id);
+        let streams: any;
+        if (this.useE2EE) {
+            let streams = (event as any).receiver.createEncodedStreams();
+            console.log(event.streams, streams);
+            streams.readableStream
+                .pipeThrough(new TransformStream({
+                    transform: this.rtc.e2ee.decode.bind(this.rtc.e2ee),
+                }))
+                .pipeTo(streams.writableStream);
+        } else {
+            streams = event.streams[0];
+        }
+        participant.addTrack(event.streams[0].id, event.track, event.streams[0]);
+        this.factory.getController("broker").invoke("whois", connection.id);
         if (this.isPipActive) this.refreshPiP();
     }
 
     private onLeaveContext() {
-        this.rtc.Peers.forEach((connection: WebRTCConnection) => {
+        this.rtc.peers.forEach((connection: WebRTCConnection) => {
             connection.RTCPeer.close();
         });
         this.participants.clear();
@@ -583,14 +591,14 @@ export class App extends AppBase {
     }
 
 
-    private onBrokerOpen(connectionInfo: any) {
+    private onBrokerOpen() {
 
 
-        this.factory.GetController("broker").Invoke("setNickname", `@${this.nickname.value}`);
+        this.factory.getController("broker").invoke("setNickname", `@${this.nickname.value}`);
 
         let contextName = DOMUtils.get<HTMLInputElement>("#context-name");
         if (contextName.value.length >= 6) {
-            this.factory.GetController("broker").Invoke("isRoomLocked", AppDomain.getSlug(contextName.value));
+            this.factory.getController("broker").invoke("isRoomLocked", AppDomain.getSlug(contextName.value));
         }
 
         this.getLocalStream(
@@ -608,43 +616,43 @@ export class App extends AppBase {
                 DOMUtils.get("#await-streams").classList.toggle("hide");
                 DOMUtils.get("#has-streams").classList.toggle("hide");
                 this.localMediaStream = mediaStream;
-                this.rtc.AddLocalStream(this.localMediaStream);
+                this.rtc.addLocalStream(this.localMediaStream);
                 this.addLocalVideo(this.localMediaStream, true);
 
             });
 
 
-        this.factory.GetController("broker").On("pong", (data: any) => {
+        this.factory.getController("broker").on("pong", (data: any) => {
             this.heartbeat = data.ts;
         });
 
 
         setInterval(() => {
             if (this.factory.IsConnected)
-                this.factory.GetController("broker").Invoke("ping", performance.now().toFixed(0));
+                this.factory.getController("broker").invoke("ping", performance.now().toFixed(0));
         }, 1000 * 20);
 
     }
 
-    onInitlialized(broker: Controller, isReconnecting?: boolean) {
+    onInitlialized(broker: Controller) {
 
-        this.rtc.OnLocalStream = this.onLocalStream.bind(this);
-        this.rtc.OnContextCreated = this.onContextCreated.bind(this);
-        this.rtc.OnContextChanged = this.onContextChanged.bind(this);
-        this.rtc.OnContextDisconnected = this.onContextDisconnected.bind(this);
-        this.rtc.OnContextConnected = this.onContextConnected.bind(this);
+        this.rtc.onLocalStream = this.onLocalStream.bind(this);
+        this.rtc.onContextCreated = this.onContextCreated.bind(this);
+        this.rtc.onContextChanged = this.onContextChanged.bind(this);
+        this.rtc.onContextDisconnected = this.onContextDisconnected.bind(this);
+        this.rtc.onContextConnected = this.onContextConnected.bind(this);
 
-        this.rtc.OnError = (err) => {
+        this.rtc.onError = (err) => {
             AppDomain.logger.error(err);
         };
 
-        this.rtc.OnRemoteTrack = this.onRemoteTrack.bind(this);
-        this.arbitraryChannel = this.rtc.CreateDataChannel(`arbitrary-${AppDomain.contextPrefix}-dc`);
+        this.rtc.onRemoteTrack = this.onRemoteTrack.bind(this);
+        this.arbitraryChannel = this.rtc.createDataChannel(`arbitrary-${AppDomain.contextPrefix}-dc`);
 
         this.chatComponent = new ChatComponent(this.arbitraryChannel, UserSettings);
 
 
-        this.fileshareComponent = new FileShareComponent(this.rtc.CreateDataChannel(`blob-${AppDomain.contextPrefix}-dc`),
+        this.fileshareComponent = new FileShareComponent(this.rtc.createDataChannel(`blob-${AppDomain.contextPrefix}-dc`),
             UserSettings
         );
 
@@ -665,23 +673,23 @@ export class App extends AppBase {
             }
         }
 
-        this.arbitraryChannel.On("lowresRequest", this.onLowresRequest.bind(this));
-        this.arbitraryChannel.On("textToSpeech", this.onTextToSpeech.bind(this));
+        this.arbitraryChannel.on("lowresRequest", this.onLowresRequest.bind(this));
+        this.arbitraryChannel.on("textToSpeech", this.onTextToSpeech.bind(this));
 
-        this.arbitraryChannel.On("transcript", this.onTranscript.bind(this));
-        this.arbitraryChannel.On("isSpeaking", this.onSpeaking.bind(this));
+        this.arbitraryChannel.on("transcript", this.onTranscript.bind(this));
+        this.arbitraryChannel.on("isSpeaking", this.onSpeaking.bind(this));
 
-        broker.OnOpen = this.onBrokerOpen.bind(this);
+        broker.onOpen = this.onBrokerOpen.bind(this);
 
-        broker.On("leaveContext", this.onLeaveContext.bind(this));
-        broker.On("lockContext", this.onLockContext.bind(this));
-        broker.On("isRoomLocked", this.onIsRoomLocked.bind(this));
-        broker.On("nicknameChange", this.onNicknameChange.bind(this));
-        broker.On("whois", this.onWhoIs.bind(this));
-        broker.On("contextReconnect", (data: any) => {
+        broker.on("leaveContext", this.onLeaveContext.bind(this));
+        broker.on("lockContext", this.onLockContext.bind(this));
+        broker.on("isRoomLocked", this.onIsRoomLocked.bind(this));
+        broker.on("nicknameChange", this.onNicknameChange.bind(this));
+        broker.on("whois", this.onWhoIs.bind(this));
+        broker.on("contextReconnect", (data: any) => {
             AppDomain.logger.log(`Client reconnected to server..`, data)
         });
-        broker.Connect();
+        broker.connect();
     }
     /**
      *Creates an instance of App.
@@ -876,7 +884,7 @@ export class App extends AppBase {
         });
 
         DOMUtils.on("click", this.lockContext, () => {
-            this.factory.GetController("broker").Invoke("lockContext", {});
+            this.factory.getController("broker").invoke("lockContext", {});
         });
 
         MediaUtils.getMediaDevices().then((devices: Array<MediaDeviceInfo>) => {
@@ -965,19 +973,32 @@ export class App extends AppBase {
         });
 
 
-        DOMUtils.on("click", this.generateSubtitles, (e, el: HTMLDivElement) => {
+        DOMUtils.on("click", DOMUtils.get("#enable-e2ee"), (e: Event, el: HTMLInputElement) => {
+            AppDomain.logger.log('toogle e2ee', el.checked);
+            if (el.checked) {
+                DOMUtils.get<HTMLInputElement>("#shared-secret").focus();
+                this.useE2EE = true;
+                DOMUtils.get<HTMLInputElement>("#shared-secret").disabled = false;
+            } else {
+                this.useE2EE = false;
+                DOMUtils.get<HTMLInputElement>("#shared-secret").disabled = true;
+            }
+        });
+
+
+        DOMUtils.on("click", this.generateSubtitles, () => {
             if (!this.transcriber) {
-                this.transcriber = new Transcriber(this.rtc.LocalPeerId,
-                    new MediaStream(this.rtc.LocalStreams[0].getAudioTracks()), UserSettings.language
+                this.transcriber = new Transcriber(this.rtc.localPeerId,
+                    new MediaStream(this.rtc.localStreams[0].getAudioTracks()), UserSettings.language
                 );
 
-                this.transcriber.onInterim = (interim, final, lang) => {
+                this.transcriber.onInterim = (interim, final) => {
                     DOMUtils.get("#final-result").textContent = final;
                     DOMUtils.get("#interim-result").textContent = interim;
 
                 }
                 this.transcriber.onFinal = (peerId, result, lang) => {
-                    this.arbitraryChannel.Invoke("transcript", {
+                    this.arbitraryChannel.invoke("transcript", {
                         peerId: peerId,
                         text: result,
                         lang: lang,
@@ -1096,25 +1117,48 @@ export class App extends AppBase {
             $("#random-slug").popover("hide");
         });
 
+        DOMUtils.on("keyup", "#shared-secret", (e: Event, el: HTMLInputElement) => {
+            this.sharedSecret = el.value;
+            if (this.sharedSecret.length < 6) {
+                el.classList.add("is-invalid");
+                this.rtc.isEncrypted = false;
+                this.startButton.disabled = true;
+            } else {
+                if (this.contextName.value.length >= 6) {
+                    el.classList.remove("is-invalid");
+                    this.rtc.e2ee.setKey(el.value);
+                    this.rtc.isEncrypted = true;
+
+                    this.startButton.disabled = false;
+                }
+            }
+        });
 
         DOMUtils.on("keyup", this.contextName, () => {
-
-            if (this.contextName.value.length >= 6) {
+            if (this.contextName.value.length >= 6 && !this.useE2EE) {
                 $("#context-name").popover("hide");
-
-                this.factory.GetController("broker").Invoke("isRoomLocked", AppDomain.getSlug(this.contextName.value));
-            } else {
+                this.factory.getController("broker").invoke("isRoomLocked", AppDomain.getSlug(this.contextName.value));
+                this.startButton.disabled = false;
+            } else if (this.contextName.value.length <= 6 && !this.useE2EE) {
                 $("#context-name").popover("show");
                 this.startButton.disabled = true;
+            } else if (this.contextName.value.length >= 6 && this.useE2EE && this.sharedSecret.length >= 6) {
+                $("#context-name").popover("hide");
+                this.factory.getController("broker").invoke("isRoomLocked", AppDomain.getSlug(this.contextName.value));
+                this.startButton.disabled = true;
+            } else if (this.contextName.value.length <= 6 && this.useE2EE && this.sharedSecret.length < 6) {
+                $("#context-name").popover("show");
+                this.startButton.disabled = true;
+            
             }
         });
 
         DOMUtils.on("change", this.nickname, () => {
-            this.factory.GetController("broker").Invoke("setNickname", `@${this.nickname.value}`);
+            this.factory.getController("broker").invoke("setNickname", `@${this.nickname.value}`);
         });
 
         DOMUtils.on("click", this.leaveContext, () => {
-            this.factory.GetController("broker").Invoke("leaveContext", {})
+            this.factory.getController("broker").invoke("leaveContext", {})
             this.speechDetector.stop();
         })
 
@@ -1123,7 +1167,7 @@ export class App extends AppBase {
             this.journalComponent = new JournalComponent();
             UserSettings.slugHistory.addToHistory(this.contextName.value);
             UserSettings.save();
-            this.factory.GetController("broker").Invoke("changeContext", {
+            this.factory.getController("broker").invoke("changeContext", {
                 context: AppDomain.getSlug(this.contextName.value),
                 audio: MediaUtils.CheckStream(this.localMediaStream.getAudioTracks(), "live"),
                 video: MediaUtils.CheckStream(this.localMediaStream.getVideoTracks(), "live")
@@ -1136,11 +1180,16 @@ export class App extends AppBase {
         });
 
 
+        if (this.supportsE2EE) {
+            AppDomain.logger.log(`Seems like the client can do e2ee, showing dialog`);
+            DOMUtils.get("#e2ee-dialog").classList.toggle("hide");
+        }
+
         DOMUtils.on("keydown", this.textToSpeechMessage, (e) => {
             if (e.keyCode == 13) {
-                this.arbitraryChannel.Invoke("textToSpeech", {
+                this.arbitraryChannel.invoke("textToSpeech", {
                     text: this.textToSpeechMessage.value,
-                    peerId: this.rtc.LocalPeerId,
+                    peerId: this.rtc.localPeerId,
                     lang: UserSettings.language || navigator.language
                 });
                 this.textToSpeechMessage.value = "";
@@ -1151,54 +1200,54 @@ export class App extends AppBase {
         */
         DOMUtils.getAll("*[data-hotkey]").forEach((el: HTMLElement) => {
             const keys = el.dataset.hotkey;
-            hotkeys(keys, function (e: KeyboardEvent, h: HotkeysEvent) {
+            hotkeys(keys, function (e: KeyboardEvent) {
                 el.click();
                 e.preventDefault()
             });
         });
 
-        hotkeys("ctrl+b",(e:KeyboardEvent,h:HotkeysEvent) => {
+        hotkeys("ctrl+b", () => {
 
             AppDomain.logger.log(`Recording each participant`);
 
-            this.participants.forEach( (p:AppParticipantComponent,id:string) => {
-                    p.recordStream(id);              
+            this.participants.forEach((p: AppParticipantComponent, id: string) => {
+                p.recordStream(id);
             });
 
         });
 
-        hotkeys("ctrl+u", (e: KeyboardEvent, h: HotkeysEvent) => {
+        hotkeys("ctrl+u", (e: KeyboardEvent) => {
             let reports = this.getRTCStatsReport();
-            reports.then( (chunks:Array<string>) => {
-                    chunks.forEach( c => {
+            reports.then((chunks: Array<string>) => {
+                chunks.forEach(c => {
 
-                        // Create a file for each for download
+                    // Create a file for each for download
 
-                        let data = `<html><body>${c}</body></html>`
+                    let data = `<html><body>${c}</body></html>`
 
-                        let blob = new Blob([data], {type: "text/html"});
-                        let blobUrl = window.URL.createObjectURL(blob);
-                        var a = document.createElement("a");
-                        a.href = blobUrl;
-                        a.download = `${Math.random().toString(36).substring(8)}.html`;
-                        a.click();
+                    let blob = new Blob([data], { type: "text/html" });
+                    let blobUrl = window.URL.createObjectURL(blob);
+                    var a = document.createElement("a");
+                    a.href = blobUrl;
+                    a.download = `${Math.random().toString(36).substring(8)}.html`;
+                    a.click();
 
-                        console.log(c);
-                    });
+                    console.log(c);
+                });
             });
 
             e.preventDefault()
         });
 
-        hotkeys("ctrl+o", (e: KeyboardEvent, h: HotkeysEvent) => {
+        hotkeys("ctrl+o", (e: KeyboardEvent) => {
             // todo pull in stats so we know ...
             AppDomain.logger.log(`User requests low res from remotes`);
-            this.factory.GetController("broker").Invoke("onliners", {});
+            this.factory.getController("broker").invoke("onliners", {});
             e.preventDefault()
         });
 
-        hotkeys("ctrl+l", (e: KeyboardEvent, h: HotkeysEvent) => {
-            this.arbitraryChannel.Invoke("lowresRequest", { peerId: this.rtc.LocalPeerId });
+        hotkeys("ctrl+l", (e: KeyboardEvent) => {
+            this.arbitraryChannel.invoke("lowresRequest", { peerId: this.rtc.localPeerId });
             e.preventDefault()
         });
 
@@ -1217,7 +1266,7 @@ export class App extends AppBase {
             if (this.slug.length <= 6)
                 $("#random-slug").popover("show");
             this.onInitlialized(broker);
-            this.factory.OnClose = (reason: any) => {
+            this.factory.onClose = (reason: any) => {
                 AppDomain.logger.error("Lost connection", reason);
                 if (this.numReconnects < 10) {
                     window.setTimeout(() => {
@@ -1252,5 +1301,4 @@ document.addEventListener("DOMContentLoaded", () => {
         appInsights.trackPageView();
     }
     App.getInstance();
-    window["_logger"] = AppDomain.logger // expose logger to window 
 });
