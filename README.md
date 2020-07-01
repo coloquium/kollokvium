@@ -39,7 +39,7 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 `ctrl-l` Request low resolution media streams from all connected participanyts.
 
-`ctrl-r` Start / stop recording of meeting ( applies to recoring o.f everyone participating)
+`ctrl-r` Start / stop recording of meeting ( applies to recoring of everyone participating)
 
 `ctrl-g`  Toogle active-speaker vide / grid view (default).
 
