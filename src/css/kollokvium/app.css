@@ -54,8 +54,6 @@ body {
   float: right;
 }
 
-
-
 main {
   position: relative;
   background-image: url(../../img/background.png);
@@ -95,6 +93,8 @@ main .overlay {
   background-color: black;
   opacity: 0.5;
   z-index: 1;
+  margin-top: 70px;
+  overflow: hidden;
 }
 
 .chat {
@@ -105,6 +105,7 @@ main .overlay {
   left: 0;
   z-index: 10;
   z-index: 4000;
+  margin-top: 80px;
 }
 
 .remote {
@@ -207,11 +208,7 @@ main .overlay {
 }
 
 .our-brand {
-  position: absolute;
-  top: 0.5rem;
-  right: 1rem;
-  padding: 1rem;
-  z-index: 2000;
+
   color: #fff;
 }
 
@@ -220,8 +217,8 @@ main .overlay {
   background: rgba(0, 0, 0, 0.7);
 }
 
-#brand-top i{
-    cursor: pointer;
+#brand-top i {
+  cursor: pointer;
 }
 
 .top-bar {
@@ -234,13 +231,7 @@ main .overlay {
   left: 50%;
   transform: translate(-50%, 0);
   max-width: 50%;
-  margin-top: 20px;
-}
-
-.top-bar i {
-  color: #000;
-  margin-right: 16px;
-  cursor: pointer;
+ 
 }
 
 #file-form {
@@ -568,4 +559,59 @@ i.fa-lock {
     max-height: 100px;
     object-fit: cover;
   }
+}
+
+.wrapper {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
+
+#sidebar {
+  min-width: 250px;
+  max-width: 250px;
+}
+
+#sidebar.active {
+  margin-left: -80px;
+}
+
+#sidebar {
+  min-width: 80px;
+  max-width: 80px;
+  min-height: 100vh;
+ 
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    margin-left: -80px;
+  }
+  #sidebar.active {
+    margin-left: 0;
+  }
+}
+
+#sidebar {
+  /* don't forget to add all the previously mentioned styles here too */
+  color: #fff;
+  transition: all 0.3s;
+}
+
+
+
+#sidebar ul.components {
+  padding: 70px 0;
+
+}
+
+#sidebar ul p {
+  color: #fff;
+  padding: 10px;
+}
+
+#sidebar ul li a {
+  padding: 10px;
+  font-size: 1.1em;
+  display: block;
 }

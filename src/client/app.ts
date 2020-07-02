@@ -302,12 +302,10 @@ export class App extends AppBase {
         location.hash = "";
         DOMUtils.get("#toggle-top").classList.toggle("d-none");
 
-        DOMUtils.get("#brand-top").classList.toggle("d-inline-flex");
 
-        DOMUtils.get("#brand-top").classList.toggle("hide");
+        DOMUtils.get("#sidebar").classList.toggle("hide");
 
-        DOMUtils.get(".top-bar").classList.remove("d-inline-flex")
-        DOMUtils.get(".top-bar").classList.add("hide")
+        DOMUtils.get("#top-bar").classList.add("hide")
 
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
         this.generateSubtitles.classList.toggle("hide");
@@ -332,8 +330,7 @@ export class App extends AppBase {
         this.textToSpeechMessage.disabled = true;
 
         DOMUtils.get("#show-journal").classList.toggle("hide");
-        DOMUtils.get(".top-bar").classList.add("d-none");
-
+        DOMUtils.get("#toggle-grid").classList.toggle("hide");
         DOMUtils.get("#record").classList.add("d-none");
 
 
@@ -345,7 +342,6 @@ export class App extends AppBase {
 
         DOMUtils.get(".overlay").classList.remove("d-none");
         DOMUtils.get(".join").classList.remove("d-none");
-        DOMUtils.get(".our-brand").classList.toggle("hide");
 
     }
     /**
@@ -357,9 +353,9 @@ export class App extends AppBase {
 
         DOMUtils.get("#toggle-top").classList.toggle("d-none");
 
-        DOMUtils.get("#brand-top").classList.toggle("d-inline-flex");
+        DOMUtils.get("#sidebar").classList.toggle("sidebar");
 
-        DOMUtils.get("#brand-top").classList.toggle("hide");
+        DOMUtils.get("#sidebar").classList.toggle("hide");
 
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
 
@@ -375,11 +371,10 @@ export class App extends AppBase {
         this.lockContext.classList.remove("hide");
         this.leaveContext.classList.remove("hide");
 
+        DOMUtils.get("#toggle-grid").classList.toggle("hide");
         DOMUtils.get("#show-journal").classList.toggle("hide");
-        DOMUtils.get(".top-bar").classList.remove("d-none");
         DOMUtils.get("#record").classList.remove("d-none");
         DOMUtils.get("#show-chat").classList.toggle("d-none");
-        DOMUtils.get(".our-brand").classList.toggle("hide");
         DOMUtils.get(".remote").classList.remove("hide");
         DOMUtils.get(".overlay").classList.add("d-none");
         DOMUtils.get(".join").classList.add("d-none");
@@ -809,10 +804,11 @@ export class App extends AppBase {
 
 
         DOMUtils.get("#toggle-top").addEventListener("click", () => {
-            DOMUtils.get(".top-bar").classList.toggle("d-inline-flex")
-            DOMUtils.get(".top-bar").classList.toggle("hide")
-            DOMUtils.get("#toggle-top").classList.toggle("fa-caret-square-up");
-            DOMUtils.get("#toggle-top").classList.toggle("fa-caret-square-down");
+
+            DOMUtils.get("#sidebar").classList.toggle("active");
+            //$('#sidebar').toggleClass('active');
+//            DOMUtils.get("#top-bar").classList.toggle("d-inline-flex")
+  //          DOMUtils.get("#top-bar").classList.toggle("hide")
         });
 
 

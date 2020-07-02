@@ -27,466 +27,451 @@
 
 <body>
 
-    <video id="pip-stream" class="hide" autoplay></video>
-
-    <div id="components"></div>
-
-    <div id="remote-audio-node" class="hide">
-        <audio></audio>
-    </div>
-
-
-    <div class="modal fade" id="meeting-journal" tabindex="-1" role="dialog" aria-labelledby="Meeting journal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title" id="exampleModalScrollableTitle">Meeting journal
-                        <span class="text-muted mr-1"> - works best with head
-                            phones <i class="fas fa-headphones"></i> </span></div>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="journal-content">
-                    <div class="journal">Nothing in the journal. You need to activate captions.&nbsp; <i
-                            class="fas fa-closed-captioning"></i></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="generate-journal">Download</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="transcript-bar hide">
-
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-8 mx-auto p-2 my-2" id="transcript-results">
-                    <div>
-                        <div class="modal-title">
-                            Your captured speech <span class="text-muted mr-1"> - works best with head
-                                phones <i class="fas fa-headphones"></i> </span>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="p-1">
 
 
 
-                        <span class="final" id="final-result"></span> <span class="interim" id="interim-result"></span>
-                    </div>
-                </div>
 
-            </div>
-        </div>
-    </div>
+    <div class="wrapper d-flex w-100 h-100">
 
-    <div class="our-brand" id="appVersion">
-        <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive mr-1"
-            style="max-height:22px;filter:invert()" id="watermark">
-        Kollokvium
-    </div>
-
-    <main>
-        <nav class="navbar navbar-light fixed-top" id="brand-top">
-
-
-            <i class="fas fa-2x fa-caret-square-down justify-content-center mx-auto text-light d-none"
-                id="toggle-top"></i></li>
+        <nav class="hide bg-dark hide d-flex-inline justify-content-center" id="sidebar">
+            <ul id="top-bar" class="list-unstyled components text-center d-flex-inline justify-content-center">
+                <li class=" p-1 only-desktop">
+                    <i class="far fas fa-th-large fa-2x hide" id="toggle-grid" data-hotkey="ctrl+g"
+                        title="toggle active speaker / grid view"></i>
+                </li>
+                <li class="p-1 only-desktop">
+                    <i class="far fa-minus-square fa-2x hide " id="toggle-pip"
+                        title="toggle picture-in-picture mode"></i>
+                </li>
+                <li class="p-1">
+                    <i class="fas fa-volume-up fa-2x hide" title="mute/unmute all audio" id="mute-speakers"
+                        style="cursor:pointer;" data-hotkey="ctrl+q"></i>
+                </li>
+                <li class="p-1">
+                    <i class="fas fa-share-alt fa-2x hide" id="share-slug" data-container="body" data-toggle="popover"
+                        data-placement="bottom" data-trigger="click"
+                        data-content="Your room link is now in the clipboard"></i>
+                </li>
+                <li class="p-1">
+                    <i class="fas fa-lock-open fa-2x hide" id="context-lock" title="Lock / unlock this room "></i>
+                </li>
+                <div class="p-1">
+                    <i class="fas fa-closed-captioning fa-2x hide" id="subtitles"
+                        title="Generate captions and send to remote peers" data-hotkey="ctrl+s"></i>
+                    </li>
+                    <li class="p-1">
+                        <i class="fas fa-book fa-2x hide" id="show-journal"
+                            title="Show / hide journal ( meeting transcript )"></i>
+                    </li>
+                    <li class="p-1 mt-4">
+                        <i class="fas fa-door-open fa-2x hide" id="leave-context" title="leave this room now!"></i>
+                    </li>
+            </ul>
         </nav>
 
-        <div class="top-bar flex-row align-items-center w-100 justify-content-center hide">
-
-
-            <div class="p-1 only-desktop">
-                <i class="far fas fa-th-large fa-2x" id="toggle-grid" data-hotkey="ctrl+g"
-                    title="toggle active speaker / grid view"></i>
-            </div>
-
-            <div class="p-1 only-desktop">
-                <i class="far fa-minus-square fa-2x hide " id="toggle-pip" title="toggle picture-in-picture mode"></i>
-            </div>
-
-
-            <div class="p-1">
-                <i class="fas fa-volume-up fa-2x hide" title="mute/unmute all audio" id="mute-speakers"
-                    style="cursor:pointer;" data-hotkey="ctrl+q"></i>
-            </div>
-
-            <div class="p-1">
-                <i class="fas fa-share-alt fa-2x hide" id="share-slug" data-container="body" data-toggle="popover"
-                    data-placement="bottom" data-trigger="click"
-                    data-content="Your room link is now in the clipboard"></i>
-            </div>
-
-            <div class="p-1">
-                <i class="fas fa-lock-open fa-2x hide" id="context-lock" title="Lock / unlock this room "></i>
-
-            </div>
-            <div class="p-1">
-                <i class="fas fa-closed-captioning fa-2x hide" id="subtitles"
-                    title="Generate captions and send to remote peers" data-hotkey="ctrl+s"></i>
-
-            </div>
-
-            <div class="p-1">
-                <i class="fas fa-book fa-2x hide" id="show-journal"
-                    title="Show / hide journal ( meeting transcript )"></i>
-
-            </div>
-
-            <div class="p-1">
-                <i class="fas fa-door-open fa-2x right hide" id="leave-context" title="leave this room now!"></i>
-
-            </div>
-
-        </div>
-
-
-        <div class="overlay"></div>
-        <div class="container-fluid chat d-none mt-3">
-            <div class="card bg-light h-100">
-                <div class="card-header">Chat
-                    <span style="float:right" id="close-chat">
-                        <span aria-hidden="true">&times;</span>
-                    </span>
-                </div>
-                <div class="card-body" style="overflow:auto">
-                    <p class="card-text" id="chat-messages">
-                    </p>
-                </div>
-                <div class="card-footer">
-                    <div class="form">
-                        <div class="form-row">
-                            <div class="form-group col-md-8">
-
-                                <input type="text" class="form-control" id="chat-message"
-                                    placeholder="What do you want to say?">
-                            </div>
-                            <div class="form-group col-md-4" id="share-box">
-
-
-                                <div class="progress hide" id="file-progress">
-                                    <div class="progress-bar" role="progressbar" aria-valuenow="10" aria-valuemin="0"
-                                        aria-valuemax="100" style="width:0%">
-                                        <span class="sr-only">70% Complete</span>
-                                    </div>
-                                </div>
-
-
-                                <div class="custom-file" id="share-file-box">
-                                    <input type="file" class="file-selected custom-file-input" class="form-control"
-                                        id="share-file">
-                                    <label class="custom-file-label" for="inputGroupFile01">Select file to
-                                        share..</label>
-                                </div>
-
-
-
-                            </div>
-                        </div>
+        <main>
+            <nav class="navbar navbar-dark bg-dark" style="min-height:70px">
+                <div class="container-fluid">
+                    <i class="fas fa-2x fa-bars text-light d-none" id="toggle-top"></i>
+                    <div class="our-brand" id="appVersion">
+                        <img src="img/logo.png" alt="Kollokvium" class="img-responsive mr-1"
+                            style="max-height:22px;filter:invert()" id="watermark">
+                        Kollokvium
                     </div>
 
                 </div>
+            </nav>
+            <div class="overlay"></div>
+            <div class="local"></div>
+
+            <video id="pip-stream" class="hide" autoplay></video>
+            <div id="components"></div>
+            <div id="remote-audio-node" class="hide">
+                <audio></audio>
             </div>
-        </div>
-        </div>
-        </div>
 
-        <div class="container-fluid remote hide my-2" id="share-container">
-            <div class="alert alert-light">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="alert-heading">No others here right now</h4>
-                <p>
-                    <strong>You just need to share link,copy and share!</strong>
-                    <button class="mr-1 btn btn-primary mx-1 my bt-sm" id="share-link">Copy link</button>
-                </p>
+
+
+
+            <div class="video-grid h-100 w-100 d-none flex-wrap" id="video-grid">
+                <ul class="d-flex flex-wrap flex-row" id="remote-videos">
+                </ul>
             </div>
-        </div>
-
-        <div class="video-grid h-100 w-100 d-none flex-wrap" id="video-grid">
-            <ul class="d-flex flex-wrap flex-row" id="remote-videos">
-            </ul>
-        </div>
-
-        <div class="container h-100 join">
-            <div class="d-flex h-100 text-center align-items-center">
-                <div class="w-100 text-white">
-                    <div id="splash" class="d-none d-md-block">
-                        <h1 class="display-4 custom-heading">
-                            <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive"
-                                style="max-height:80px;filter:invert()" id="watermark">
-                            <span id="appDomain">Kollokvium</span></h1>
-                        <p class="lead my-3">A free multi-party video conference for you and your friends, family and
-                            colleagues!</p>
-                    </div>
-
-                    <div class="text-left" id="await-streams">
-
-                        <div class="alert alert-warning" role="alert" id="await-need-accept">
-                            <h4 class="alert-heading">Accept camera & microphone access!</h4>
-                            <p>
-                                Your device has just requested access to your webcam and microphone to enable video
-                                conferencing.
-                            </p>
-                            <p class="mb-0">Click <strong>allow</strong> if you wish to continue! </p>
-                        </div>
-
-                        <div class="alert alert-danger hide" role="alert" id="await-need-error">
-                            <h4 class="alert-heading">Failed to access camera</h4>
-                            <p>
-                                <strong>Damn!</strong>
-                                Kollokvium failed to get hold of your camera, it will not work for you!
-                                We automaticly reported the issue to the Kollokvium Team.
-                            </p>
-                        </div>
 
 
-                    </div>
-
-
-                    <div class="input-group mb-3 col-md-6 mx-auto hide" id="has-streams">
-
-                        <div class="input-group-prepend" id="random-slug">
-                            <button class="btn btn-secondary bt-lg" title="Generate a random room name..."
-                                id="generate-slug">
-                                <i class="fas fa-dice fa-2x"></i>
+            <div class="modal fade" id="meeting-journal" tabindex="-1" role="dialog" aria-labelledby="Meeting journal"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title" id="exampleModalScrollableTitle">Meeting journal
+                                <span class="text-muted mr-1"> - works best with head
+                                    phones <i class="fas fa-headphones"></i> </span></div>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <input list="slug-history" type="text" id="context-name" placeholder="Enter any room name..."
-                            value="" class="form-control form-control-lg" data-container="body" data-toggle="popover"
-                            data-placement="top" data-trigger="none"
-                            data-content="Ahoy! Your room name should be six characters minimum. It can be many things such as company name, meeting occasion or whatever you want... Have a nice day!">
+                        <div class="modal-body" id="journal-content">
+                            <div class="journal">Nothing in the journal. You need to activate captions.&nbsp; <i
+                                    class="fas fa-closed-captioning"></i></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="generate-journal">Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="transcript-bar hide">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-8 mx-auto p-2 my-2" id="transcript-results">
+                            <div>
+                                <div class="modal-title">
+                                    Your captured speech <span class="text-muted mr-1"> - works best with head
+                                        phones <i class="fas fa-headphones"></i> </span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="p-1">
+                                <span class="final" id="final-result"></span> <span class="interim"
+                                    id="interim-result"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        <datalist id="context-history">
-
-                        </datalist>
 
 
-                        <div class="input-group-append">
-                            <button id="join-conference" class="btn btn-primary bt-lg" type="button"
-                                disabled>START</button>
+            <div class="container-fluid chat d-none">
+                <div class="card bg-light h-100">
+                    <div class="card-header">Chat
+                        <span style="float:right" id="close-chat">
+                            <span aria-hidden="true">&times;</span>
+                        </span>
+                    </div>
+                    <div class="card-body" style="overflow:auto">
+                        <p class="card-text" id="chat-messages">
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="form">
+                            <div class="form-row">
+                                <div class="form-group col-md-8">
+                                    <input type="text" class="form-control" id="chat-message"
+                                        placeholder="What do you want to say?">
+                                </div>
+                                <div class="form-group col-md-4" id="share-box">
+                                    <div class="progress hide" id="file-progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="10"
+                                            aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                                            <span class="sr-only">70% Complete</span>
+                                        </div>
+                                    </div>
+                                    <div class="custom-file" id="share-file-box">
+                                        <input type="file" class="file-selected custom-file-input" class="form-control"
+                                            id="share-file">
+                                        <label class="custom-file-label" for="inputGroupFile01">Select file to
+                                            share..</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="container-fluid remote hide my-2" id="share-container">
+                <div class="alert alert-light">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="alert-heading">No others here right now</h4>
+                    <p>
+                        <strong>You just need to share link,copy and share!</strong>
+                        <button class="mr-1 btn btn-primary mx-1 my bt-sm" id="share-link">Copy link</button>
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="container h-100 join">
+                <div class="d-flex h-100 text-center align-items-center">
+                    <div class="w-100 text-white">
+                        <div id="splash" class="d-none d-md-block">
+                            <h1 class="display-4 custom-heading">
+                                <img src="img/logo.png" alt="Kollokvium logo..." class="img-responsive"
+                                    style="max-height:80px;filter:invert()" id="watermark">
+                                <span id="appDomain">Kollokvium</span></h1>
+                            <p class="lead my-3">A free multi-party video conference for you and your friends, family
+                                and
+                                colleagues!</p>
                         </div>
 
-                    </div>
+                        <div class="text-left" id="await-streams">
 
-                    <div class="col-md-6 mx-auto hide" id="e2ee-dialog">
-                        <div class="alert alert-light text-left">
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <div class="alert alert-warning" role="alert" id="await-need-accept">
+                                <h4 class="alert-heading">Accept camera & microphone access!</h4>
+                                <p>
+                                    Your device has just requested access to your webcam and microphone to enable video
+                                    conferencing.
+                                </p>
+                                <p class="mb-0">Click <strong>allow</strong> if you wish to continue! </p>
+                            </div>
+
+                            <div class="alert alert-danger hide" role="alert" id="await-need-error">
+                                <h4 class="alert-heading">Failed to access camera</h4>
+                                <p>
+                                    <strong>Damn!</strong>
+                                    Kollokvium failed to get hold of your camera, it will not work for you!
+                                    We automaticly reported the issue to the Kollokvium Team.
+                                </p>
+                            </div>
+
+
+                        </div>
+
+
+                        <div class="input-group mb-3 col-md-6 mx-auto hide" id="has-streams">
+
+                            <div class="input-group-prepend" id="random-slug">
+                                <button class="btn btn-secondary bt-lg" title="Generate a random room name..."
+                                    id="generate-slug">
+                                    <i class="fas fa-dice fa-2x"></i>
+                                </button>
+                            </div>
+                            <input list="slug-history" type="text" id="context-name"
+                                placeholder="Enter any room name..." value="" class="form-control form-control-lg"
+                                data-container="body" data-toggle="popover" data-placement="top" data-trigger="none"
+                                data-content="Ahoy! Your room name should be six characters minimum. It can be many things such as company name, meeting occasion or whatever you want... Have a nice day!">
+
+                            <datalist id="context-history">
+
+                            </datalist>
+
+
+                            <div class="input-group-append">
+                                <button id="join-conference" class="btn btn-primary bt-lg" type="button"
+                                    disabled>START</button>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6 mx-auto hide" id="e2ee-dialog">
+                            <div class="alert alert-light text-left">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h5 class="alert-heading">Dude, you can use (e2ee) mode&nbsp;<spam
+                                        class="badge badge-info">
+                                        beta</spam>
+                                </h5>
+                                <div class="input-group mb-3 mt-1">
+                                    <div class="input-group-prepend">
+
+                                        <div class="input-group-text">
+                                            <input type="checkbox" id="enable-e2ee">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" id="shared-secret"
+                                        placeholder="your shared secret (6 characters or more...)" disabled>
+                                </div>
+                                <hr>
+                                <p class="mb-0">
+                                    When using E2EE you and your friends needs to <strong>share-a-secret-key</strong>
+                                    (enter
+                                    above) before start/join<br>
+
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="text-to-speech p-3 hide">
+
+                <div>
+                    <div class="form">
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <input id="text-message" type="text"
+                                    class="form-control form-control-lg"" disabled  placeholder=" What do you want to
+                                    say?">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls d-inline-flex flex-row align-items-center w-100 justify-content-center">
+                <div class="p-3">
+                    <i class="fas fa-cog fa-2x" id="settings"></i>
+                </div>
+                <div class="p-3">
+                    <i class="fas fa-video fa-2x" id="mute-local-video" data-hotkey="ctrl+v"></i>
+                </div>
+                <div class="p-3">
+                    <i class="fas fa-microphone fa-2x" id="mute-local-audio" data-hotkey="ctrl+m"></i>
+                </div>
+                <div class="p-3 d-none only-desktop" id="record">
+                    <i class="fas fa-circle fa-2x record" title="Record all meeting participants" id="record-all"
+                        data-hotkey="ctrl+r">
+                    </i>
+                </div>
+                <div class="p-3 only-desktop">
+                    <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
+                </div>
+                <div class="p-3">
+                    <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
+                    <i id="show-chat" class="fas fa-comment-alt fa-2x d-none" data-hotkey="ctrl+i">
+                    </i>
+                </div>
+            </div>
+
+            <div id="recorder-result" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Your recordings</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
-                              </button>
-                            <h5 class="alert-heading">Dude, you can use (e2ee) mode&nbsp;<spam class="badge badge-info">beta</spam></h5>
-                            <div class="input-group mb-3 mt-1">
-                                <div class="input-group-prepend">
-                                    
-                                    <div class="input-group-text">
-                                        <input type="checkbox"  id="enable-e2ee">
-                                    </div>
-                                </div>
-                                <input type="text" class="form-control" id="shared-secret" placeholder="your shared secret (6 characters or more...)" disabled>
-                            </div>
-                            <hr>
-                            <p class="mb-0">
-                                When using E2EE you and your friends needs to <strong>share-a-secret-key</strong> (enter above) before start/join<br>
-                            
-                            </p>
+                            </button>
                         </div>
-                        
-                    </div>
-                </div>
-
-
-
-
-            </div>
-        </div>
-        </div>
-        </div>
-
-
-
-
-        <div class="text-to-speech p-3 hide">
-
-            <div>
-                <div class="form">
-                    <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <input id="text-message" type="text"
-                                class="form-control form-control-lg"" disabled  placeholder=" What do you want to say?">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class=" local">
-        </div>
-        <div class="controls d-inline-flex flex-row align-items-center w-100 justify-content-center">
-            <div class="p-3">
-                <i class="fas fa-cog fa-2x" id="settings"></i>
-            </div>
-            <div class="p-3">
-                <i class="fas fa-video fa-2x" id="mute-local-video" data-hotkey="ctrl+v"></i>
-            </div>
-            <div class="p-3">
-                <i class="fas fa-microphone fa-2x" id="mute-local-audio" data-hotkey="ctrl+m"></i>
-            </div>
-            <div class="p-3 d-none only-desktop" id="record">
-                <i class="fas fa-circle fa-2x record" title="Record all meeting participants" id="record-all"
-                    data-hotkey="ctrl+r">
-                </i>
-            </div>
-            <div class="p-3 only-desktop">
-                <i class="fas fa-desktop fa-2x " id="share-screen" title="share your screen"></i>
-            </div>
-            <div class="p-3">
-                <span id="unread-messages" class="badge badge-danger d-none" style="float:right">0</span>
-                <i id="show-chat" class="fas fa-comment-alt fa-2x d-none" data-hotkey="ctrl+i">
-                </i>
-            </div>
-        </div>
-
-        <div id="recorder-result" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Your recordings</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="recorder-download">
-
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Kollokvium settings</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="txt-nick">Nickname</label>
-                                        <input type="text" class="form-control" id="txt-nick"
-                                            placeholder="Nickname displayed in chat...">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group" id="languages">
-                                        <label for="txt-nick">Language (used by translation & subtitles) </label>
-                                    </div>
-                                    <div class="form-check">
-
-                                        <input class="form-check-input" type="checkbox" id="show-text-to-speech"
-                                            value="true">
-                                        <label for="txt-nick">Enable text to speech</label>
-                                    </div>
-                                </div>
+                        <div class="modal-body">
+                            <div id="recorder-download">
 
                             </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <hr>
 
+            <div class="modal" tabindex="-1" role="dialog" id="settings-modal">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Kollokvium settings</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="txt-nick">Nickname</label>
+                                            <input type="text" class="form-control" id="txt-nick"
+                                                placeholder="Nickname displayed in chat...">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group" id="languages">
+                                            <label for="txt-nick">Language (used by translation & subtitles) </label>
+                                        </div>
+                                        <div class="form-check">
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="sel-video">Video input</label>
-                                        <select class="form-control" id="sel-video">
-                                            <option value="">Auto detected</option>
-                                        </select>
+                                            <input class="form-check-input" type="checkbox" id="show-text-to-speech"
+                                                value="true">
+                                            <label for="txt-nick">Enable text to speech</label>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="sel-audio-in">Audio input</label>
-                                        <select class="form-control" id="sel-audio-in">
-                                            <option value="">Auto detected</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="sel-audio-out">Audio output</label>
+                                </div>
 
-                                        <select class="form-control" id="sel-audio-out">
-                                            <option value="">Auto detected</option>
-                                        </select>
-                                    </div>
+                                <hr>
 
-                                    <div class="form-group">
-                                        <label for="sel-video-res">Camera resolution</label>
-                                        <div class="input-group mb-3">
 
-                                            <select class="form-control" id="sel-video-res" data-container="body"
-                                                data-toggle="popover" data-placement="top"
-                                                data-content="The device cannot use that resolution try another ( lower probably )">
-                                                <option value="">Use recommended settings</option>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="sel-video">Video input</label>
+                                            <select class="form-control" id="sel-video">
+                                                <option value="">Auto detected</option>
                                             </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="sel-audio-in">Audio input</label>
+                                            <select class="form-control" id="sel-audio-in">
+                                                <option value="">Auto detected</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-audio-out">Audio output</label>
+
+                                            <select class="form-control" id="sel-audio-out">
+                                                <option value="">Auto detected</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="sel-video-res">Camera resolution</label>
+                                            <div class="input-group mb-3">
+
+                                                <select class="form-control" id="sel-video-res" data-container="body"
+                                                    data-toggle="popover" data-placement="top"
+                                                    data-content="The device cannot use that resolution try another ( lower probably )">
+                                                    <option value="">Use recommended settings</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+
+                                        <div id="video-preview-container" class="d-flex">
+                                            <video id="video-preview" autoplay muted playsinline
+                                                class="align-self-center">
+
+                                            </video>
+                                        </div>
+
+
+                                        <div class="alert alert-info">
+
+                                            <p>Apply virtual background <span class="badge badge-primary">beta</span>
+                                            </p>
+
+                                            <input type="button" class="btn btn-link" id="apply-virtual-bg"
+                                                value="Try virtual backgrounds">
+
+                                            <input type="button" class="btn btn-link hide" id="remove-virtual-bg"
+                                                value="Remove virtual background">
+
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
-
-                                    <div id="video-preview-container" class="d-flex">
-                                        <video id="video-preview" autoplay muted playsinline class="align-self-center">
-
-                                        </video>
-                                    </div>
 
 
-                                    <div class="alert alert-info">
 
-                                        <p>Apply virtual background <span class="badge badge-primary">beta</span></p>
 
-                                        <input type="button" class="btn btn-link" id="apply-virtual-bg"
-                                            value="Try virtual backgrounds">
-
-                                        <input type="button" class="btn btn-link hide" id="remove-virtual-bg"
-                                            value="Remove virtual background">
-
-                                    </div>
-                                </div>
                             </div>
-
-
-
-
-
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-link pull-left" id="clear-settings" disabled>Clear
-                            settings</button>
-                        <button type="button" class="btn btn-primary" id="save-settings">Save
-                            changes</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link pull-left" id="clear-settings" disabled>Clear
+                                settings</button>
+                            <button type="button" class="btn btn-primary" id="save-settings">Save
+                                changes</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-    </main>
+        </main>
+
+    </div>
 
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
