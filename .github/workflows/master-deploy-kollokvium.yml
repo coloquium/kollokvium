@@ -50,3 +50,4 @@ jobs:
 
     - run: | 
         az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
+        az cdn endpoint load --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
