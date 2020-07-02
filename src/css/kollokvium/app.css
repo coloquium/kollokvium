@@ -221,6 +221,12 @@ main .overlay {
   cursor: pointer;
 }
 
+#main-bar{
+  min-height:70px;
+  background: rgba(0, 0, 0, 0.7);
+  color:#fff;
+}
+
 .top-bar {
   position: absolute;
   top: 70px;
