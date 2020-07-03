@@ -51,7 +51,9 @@ export class AppBase {
 
                     } else this.rtc = new WebRTC(broker, AppDomain.rtcConfig);
 
+                    this.rtc.isEncrypted = false;
 
+                    AppDomain.logger.log("RTC is running e2ee state", this.rtc.isEncrypted);
 
                     resolve(broker);
                 }

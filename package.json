@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.7.13",
+  "version": "1.7.14",
   "description": "",
   "main": "dist/server.js",
   "repository": {
@@ -20,7 +20,20 @@
     {
       "name": "Tibi Covaci",
       "url": "https://github.com/tibor19"
+    },
+    {
+      "name": "Chris Matthieu",
+      "url": "https://github.com/chrismatthieu"
+    },
+    {
+      "name": "Ersin Basaran",
+      "url": "https://github.com/basarane"
+    },
+    {
+      "name": "Ricky Davies",
+      "url": "https://github.com/kaista82"
     }
+  
   ],
   "scripts": {
     "build": "concurrently \"npm run build:client\" \"npm run build:server\"",
