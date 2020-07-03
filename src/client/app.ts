@@ -81,16 +81,30 @@ export class App extends AppBase {
      * @memberof App
      */
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
+        AppDomain.logger.log(`Get UserMedia` ,constraints);
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
-            cb(mediaStream);
-        }).catch(() => {
+            AppDomain.logger.log(`Successfully retrieved a media stream`)
+            // try get the 'MediaStreamTrack capabillities'
+            try {
+                AppDomain.logger.log(`try get MediaStreamTrack capabilities & constraints`)
+               
+                mediaStream.getTracks().forEach(track => {
+                            AppDomain.logger.log(`Track kind ${track.kind}`,track.getCapabilities(), track.getConstraints())
+                });           
+                
+            } catch (err) {
+                AppDomain.logger.log(`Unable to get MediaStreamTrack capabilities & constraints.`);
 
+            }
+
+            cb(mediaStream);
+        }).catch((err) => {
             navigator.mediaDevices.getUserMedia(UserSettings.failSafeConstraints()).then((mediaStream: MediaStream) => {
                 cb(mediaStream);
             }).catch(err => {
-                AppDomain.logger.error("getLocalStream error", err);
+                AppDomain.logger.error(`getLocalStream error`, err);
                 let supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
-                AppDomain.logger.log("The following media constraints are supported");
+                AppDomain.logger.log("The following media constraints are supported:");
                 for (let constraint in supportedConstraints) {
                     if (supportedConstraints.hasOwnProperty(constraint)) {
                         AppDomain.logger.log(constraint)
@@ -332,17 +346,10 @@ export class App extends AppBase {
         DOMUtils.get("#show-journal").classList.toggle("hide");
         DOMUtils.get("#toggle-grid").classList.toggle("hide");
         DOMUtils.get("#record").classList.add("d-none");
-
-
-
-        // Utils.$("#share-screen").classList.toggle("d-none");
         DOMUtils.get("#show-chat").classList.toggle("d-none");
-
         DOMUtils.get(".remote").classList.add("hide");
-
         DOMUtils.get(".overlay").classList.remove("d-none");
         DOMUtils.get(".join").classList.remove("d-none");
-
     }
     /**
      *
@@ -382,7 +389,7 @@ export class App extends AppBase {
 
     }
 
-    displayRecording(blobUrl: string) {
+    displayMeetingRecording(blobUrl: string) {
         let p = document.createElement("p");
         const download = document.createElement("a");
         download.setAttribute("href", blobUrl);
@@ -419,10 +426,7 @@ export class App extends AppBase {
         } catch (err) {
             AppDomain.logger.log(`failed to create SpeechDetector has started`, err)
         }
-
     }
-
-
     onConnectionLost() {
         this.initialize({
             peerId: this.rtc.localPeerId, context: AppDomain.getSlug(this.contextName.value)
@@ -533,7 +537,6 @@ export class App extends AppBase {
         let streams: any;
         if (this.useE2EE) {
             let streams = (event as any).receiver.createEncodedStreams();
-            console.log(event.streams, streams);
             streams.readableStream
                 .pipeThrough(new TransformStream({
                     transform: this.rtc.e2ee.decode.bind(this.rtc.e2ee),
@@ -554,7 +557,6 @@ export class App extends AppBase {
         this.participants.clear();
         DOMUtils.get("#remote-videos").innerHTML = "";
         this.disableConferenceElements();
-
     }
 
     private onLockContext() {
@@ -761,7 +763,7 @@ export class App extends AppBase {
             this.chatComponent.sendMessage(UserSettings.nickname, "I'm now recording the session.");
         }
         this.mediaStreamBlender.onRecordingEnded = (blobUrl: string) => {
-            this.displayRecording(blobUrl);
+            this.displayMeetingRecording(blobUrl);
         };
         this.mediaStreamBlender.onTrackEnded = () => {
             try {
@@ -807,8 +809,8 @@ export class App extends AppBase {
 
             DOMUtils.get("#sidebar").classList.toggle("active");
             //$('#sidebar').toggleClass('active');
-//            DOMUtils.get("#top-bar").classList.toggle("d-inline-flex")
-  //          DOMUtils.get("#top-bar").classList.toggle("hide")
+            //            DOMUtils.get("#top-bar").classList.toggle("d-inline-flex")
+            //          DOMUtils.get("#top-bar").classList.toggle("hide")
         });
 
 
@@ -1145,7 +1147,7 @@ export class App extends AppBase {
             } else if (this.contextName.value.length <= 6 && this.useE2EE && this.sharedSecret.length < 6) {
                 $("#context-name").popover("show");
                 this.startButton.disabled = true;
-            
+
             }
         });
 

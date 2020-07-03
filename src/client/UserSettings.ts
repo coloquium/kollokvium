@@ -1,30 +1,30 @@
 import { SlugHistory } from './SlugHistory';
 import { DetectResolutions } from "./Helpers/DetectResolutions";
 import { DOMUtils } from './Helpers/DOMUtils';
+import { AppDomain } from './AppDomain';
 export class UserSettings {
 
-    
     static slugHistory: SlugHistory;
     static videoDevice: string;
     static audioDeviceIn: string;
-    static  audioDeviceOut: string;
+    static audioDeviceOut: string;
     static videoResolution: string;
     static showQuickStart: boolean;
-    static  facingMode: string; // should be enums?
-    static  language: string;
+    static facingMode: string; // should be enums?
+    static language: string;
     static nickname: string;
     static failSafeConstraints(): MediaStreamConstraints {
         return {
             video: true, audio: true,
         };
     }
-    static cameraResolutions(current?:string) {
+    static cameraResolutions(current?: string) {
         let parent = DOMUtils.get("#sel-video-res");
-        DetectResolutions.candidates.forEach ( (candidate:any) => {
+        DetectResolutions.candidates.forEach((candidate: any) => {
             let option = document.createElement("option");
             option.textContent = `${candidate.label} ${candidate.width} x ${candidate.height} ${candidate.ratio}`;
             option.value = candidate.label;
-            if(current === candidate.label) option.selected = true;
+            if (current === candidate.label) option.selected = true;
             parent.append(option);
         });
     }
@@ -84,23 +84,28 @@ export class UserSettings {
                 }
             };
         } else { // Nothing set at all, default..
-            return {
-                video: {
-                    width: { min: 320, max: 1280, ideal: 1280 },
-                    height: { min: 240, max: 720, ideal: 720 },
-                    frameRate: 30,
-                    facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' },
-                }, audio: true,
-            };
+            let defaultConstraints = AppDomain.defaultConstraints;
+            defaultConstraints.video["facingMode"] = { ideal: shouldFaceUser ? 'user' : 'environment' };
+            AppDomain.logger.log(`Using defaultConstraints`, defaultConstraints);
+            return defaultConstraints;
+            // return {
+            //     video: {
+            //         width: { min: 320, max: 1280, ideal: 640 },
+            //         height: { min: 240, max: 720, ideal: 360 },
+            //         frameRate: 30,
+            //         facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' },
+            //     }, audio: true,
+            // };
 
         };
         if (videoDeviceId) {
             constraints.video["deviceId"] = videoDeviceId
         }
+        AppDomain.logger.log(`Current constraints`, constraints);
         return constraints;
     }
 
-  
+
 
     static load() {
         UserSettings.slugHistory = new SlugHistory();
@@ -120,8 +125,8 @@ export class UserSettings {
         else {
             UserSettings.slugHistory.history = new Array<string>();
             UserSettings.nickname = Math.random().toString(36).substring(8);
-            UserSettings.audioDeviceIn = ""; 
-            UserSettings.audioDeviceOut = ""; 
+            UserSettings.audioDeviceIn = "";
+            UserSettings.audioDeviceOut = "";
             UserSettings.videoDevice = "";
             UserSettings.videoResolution = "";
             UserSettings.showQuickStart = true;

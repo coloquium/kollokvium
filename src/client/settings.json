@@ -17,5 +17,13 @@
                 "urls": "stun:stun.l.google.com:19302"
             }
         ]
+    },
+    "defaultConstraints": {
+        "video": {
+            "width": 640,
+            "height":360,
+            "frameRate": 30
+        },
+        "audio": true
     }
 }

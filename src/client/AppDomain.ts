@@ -21,6 +21,11 @@ export class AppDomain {
     static get serverUrl(): string {
         return this.getServerUrl();
     };
+
+    static get defaultConstraints(): MediaStreamConstraints {
+        return appConfig.defaultConstraints as MediaStreamConstraints;
+    }
+
     static get domain(): string {
         return appConfig.domain;
     };
