@@ -56,7 +56,6 @@ export class UserSettings {
                 video: {
                     width: { min: 320, max: 1280, ideal: 1280 },
                     height: { min: 240, max: 720, ideal: 720 },
-                    frameRate: 30,
                     facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' }
                 }
             };
@@ -68,7 +67,6 @@ export class UserSettings {
                 video: {
                     width: { exact: preferedResolution.width },
                     height: { exact: preferedResolution.height },
-                    frameRate: 30,
                     facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' }
                 }
             };
@@ -79,7 +77,6 @@ export class UserSettings {
                 video: {
                     width: { exact: preferedResolution.width },
                     height: { exact: preferedResolution.height },
-                    frameRate: 30,
                     facingMode: { ideal: shouldFaceUser ? 'user' : 'environment' }
                 }
             };

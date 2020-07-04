@@ -1178,7 +1178,7 @@ export class App extends AppBase {
         });
 
 
-        if (this.supportsE2EE) {
+        if (AppDomain.supportsE2EE) {
             AppDomain.logger.log(`Seems like the client can do e2ee, showing dialog`);
             DOMUtils.get("#e2ee-dialog").classList.toggle("hide");
         }
@@ -1193,6 +1193,7 @@ export class App extends AppBase {
                 this.textToSpeechMessage.value = "";
             }
         });
+        
         /*
             Parse hotkeys
         */
@@ -1205,24 +1206,18 @@ export class App extends AppBase {
         });
 
         hotkeys("ctrl+b", () => {
-
             AppDomain.logger.log(`Recording each participant`);
-
             this.participants.forEach((p: AppParticipantComponent, id: string) => {
                 p.recordStream(id);
             });
-
         });
 
         hotkeys("ctrl+u", (e: KeyboardEvent) => {
             let reports = this.getRTCStatsReport();
             reports.then((chunks: Array<string>) => {
                 chunks.forEach(c => {
-
                     // Create a file for each for download
-
                     let data = `<html><body>${c}</body></html>`
-
                     let blob = new Blob([data], { type: "text/html" });
                     let blobUrl = window.URL.createObjectURL(blob);
                     var a = document.createElement("a");
@@ -1233,7 +1228,7 @@ export class App extends AppBase {
                     console.log(c);
                 });
             });
-
+            // todo: dump all entrys if the ILogger into a html file also , and pass back.
             e.preventDefault()
         });
 

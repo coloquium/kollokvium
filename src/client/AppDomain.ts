@@ -15,6 +15,11 @@ export class AppDomain {
     
     static logger: ILogger = new AppLogger(appConfig.logToConsole);
 
+
+    static get supportsE2EE(): boolean {
+        return !!window["RTCRtpSender"].prototype["createEncodedStreams"] && appConfig.e2eeSupport;
+    }
+
     static get version(): string {
         return process.env.KOLLOKVIUM_VERSION || appConfig.version
     };

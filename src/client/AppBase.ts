@@ -10,17 +10,13 @@ export class AppBase {
     onReady: (broker: Controller) => void;
     e2eeContext: any;
 
-    get supportsE2EE(): boolean {
-        return !!window["RTCRtpSender"].prototype["createEncodedStreams"];
-    }
 
     getRTCStatsReport(): Promise<string[]> {
         let a = Array.from(this.rtc.peers.values()).map((conn: WebRTCConnection) => {
             return new Promise<string>((resolve, reject) => {
                 conn.RTCPeer.getStats().then((stats: RTCStatsReport) => {
-                    let statsOutput = "";
+                    let statsOutput = `<h1>PeerID - ${conn.id}</h1><hr/>`;
                     stats.forEach(report => {
-                        statsOutput += `<h1>PeerID - ${conn.id}</h1><hr/>`
                         statsOutput += `<h2>Report: ${report.type}</h3>\n<strong>ID:</strong> ${report.id}<br>\n` +
                             `<strong>Timestamp:</strong> ${report.timestamp}<br>\n`;
                         Object.keys(report).forEach(statName => {
@@ -28,7 +24,6 @@ export class AppBase {
                                 statsOutput += `<strong>${statName}:</strong> ${report[statName]}<br>\n`;
                             }
                         });
-
                     });
                     resolve(statsOutput);
                 }).catch(err => resolve(err));
@@ -37,7 +32,7 @@ export class AppBase {
         return Promise.all(a);
     }
     constructor() {
-        AppDomain.logger.log(`Client supports E2EE`, this.supportsE2EE);
+        AppDomain.logger.log(`Client supports E2EE`, AppDomain.supportsE2EE);
     }
     initialize(params?: any): Promise<Controller> {
         return new Promise<Controller>((resolve, reject) => {
@@ -45,16 +40,12 @@ export class AppBase {
                 this.factory = new Factory(AppDomain.serverUrl, ["broker"], params || {});
                 this.factory.onOpen = (broker: any) => {
 
-                    if (this.supportsE2EE) {
+                    if (AppDomain.supportsE2EE) {
+                        AppDomain.logger.log("Client can run in e2ee mode");
                         this.e2eeContext = new E2EEBase(performance.now().toString());
                         this.rtc = new WebRTC(broker, AppDomain.rtcConfig, this.e2eeContext);
-
                     } else this.rtc = new WebRTC(broker, AppDomain.rtcConfig);
-
-                    this.rtc.isEncrypted = false;
-
-                    AppDomain.logger.log("RTC is running e2ee state", this.rtc.isEncrypted);
-
+                    this.rtc.isEncrypted = false; // set isEncrypted to false, until a key is set, and user want's it..
                     resolve(broker);
                 }
             } catch (err) {

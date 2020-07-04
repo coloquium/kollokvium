@@ -22,16 +22,16 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 2. Instanet messages/Chat  (P2P DataChannels) 
 3. Share files (P2P DataChannels)
 4. Screen sharing, Chooose between tab's, windows or the desktop. (P2P Streams)
-5. Random room generator or user defined room names
+5. Random room generator or user-defined room names
 6. No login and registration required
-7. Multiple stream recording ( record the meeting  or single participant ), Recording done locally.
+7. Multiple stream recording ( record the meeting or single participant ), Recording done locally.
 8. Lock / unlock rooms
-9.  Subtitles / captions ( speech recognition)
-10. Auto translate of Subtitles / captions ( from source to prefered langugee )
+9. Subtitles / captions (Speech recognition)
+10. Auto translate of Subtitles / captions ( from source to prefered language)
 11. Picture-In-Picture support (renders all streams into PiP element)
 12. Active speaker - Indication of who is talking
-13. Active speaker view / grid view 
-14. E2EE ( commin in 1.8 , currently in dev (canary at https://dev-wss.kollokvium.net/) and will require Chrome 84+)
+13. Active speaker view and grid view 
+14. E2EE (Currently in test for canary/beta (will require Chrome 84+)
 
 ..and more
 
@@ -62,10 +62,15 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 1. `broadcast mode` - A view/mode where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
 2. `advanced mode`  - A view/mode that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.
 3. Finalize the electron builds for Windows, OSX and Linux  
-4. `e2ee mode`  - a mode where E2EE encryption wrapps all existing features (will be implemented in thor-io.vnext)
+4. `e2ee mode`  -In test mode (Chrome 84+ needed).
+5. Electron clients for Windows, Mac OSX and Linux
 
 ## Install 
 Clone the repository and run `npm install`  see package.json for build scripts.
+
+## Build scripts
+
+TBD
 
 ## Quick deploy guides
 
@@ -84,7 +89,7 @@ If you want to deploy only the front-end as a static site, build the application
 
 ## Issues & Questions
 
-Goodluck, and if run into problems, bugs or questions or just have ideas to share. post them here under issues
+Good Luck, and if run into problems, bugs or questions or just have ideas to share. post them here under issues (https://github.com/coloquium/kollokvium/issues)
 
 Regards
     Team Kollokvium (colloquium)
