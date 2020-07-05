@@ -8,7 +8,7 @@
     "translateKey": "AIzaSyC79hpb4DKEUgGc6qk3AyTv3ysba2bR_94",
     "logToConsole": true,
     "rtcConfig": {
-        "sdpSemantics": "unified-plan",
+        "sdpSemantics": "plan-b",
         "iceTransportPolicy": "all",
         "rtcpMuxPolicy": "require",
         "bundlePolicy": "max-bundle",
@@ -21,7 +21,6 @@
                     "stun:stun2.l.google.com:19302",
                     "stun:stun3.l.google.com:19302",
                     "stun:stun4.l.google.com:19302",
-                    "stun:stunserver.org:3478",
                     "stun:[2A00:1450:4010:C01::7F]:19302"
                 ]
             }
