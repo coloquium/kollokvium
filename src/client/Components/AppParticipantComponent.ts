@@ -11,8 +11,8 @@ export class AppParticipantComponent {
     onAudioTrackLost: (id: string, s: MediaStream, t: MediaStreamTrack) => void;
     recorder: MediaStreamRecorder;
     isRecording: boolean;
-    
-    usesE2EE:boolean;
+
+    usesE2EE: boolean;
 
     constructor(public id: string) {
         this.streams = new Map<string, MediaStream>();
@@ -71,9 +71,14 @@ export class AppParticipantComponent {
     }
 
     addVideo(id: string, mediaStream: MediaStream, node: HTMLElement) {
+
         let video = document.createElement("video");
         video.classList.add("p" + this.id);
         video.classList.add("s" + mediaStream.id);
+        mediaStream.getVideoTracks().forEach(t => {
+            video.classList.add("t" + t.id);
+        });
+
         video.poster = "/img/novideo.png";
         video.srcObject = mediaStream;
         video.width = 1280;
@@ -152,7 +157,6 @@ export class AppParticipantComponent {
 
     captureImage(): Promise<ImageBitmap> {
         let track = this.videoTracks[0];
-        const img = document.createElement('img');
         let imageCapture = new ImageCapture(track)
         return new Promise<ImageBitmap>((resolve, reject) => {
             imageCapture.grabFrame()
@@ -163,9 +167,6 @@ export class AppParticipantComponent {
         });
     }
     addVideoTrack(t: MediaStreamTrack, stream: MediaStream) {
-        //  this.videoTracks.push(t);
-        //   let stream = new MediaStream([t]);
-
         stream.getVideoTracks()[0].onended = () => {
             if (this.onVideoTrackLost)
                 this.onVideoTrackLost(this.id, stream, t);
@@ -179,11 +180,10 @@ export class AppParticipantComponent {
             // todo: would be an delagated event
             if (this.onAudioTrackLost)
                 this.onAudioTrackLost(this.id, stream, t);
-
         };
         this.onAudioTrackAdded(this.id, stream, t);
     }
-    addTrack(id:string,t: MediaStreamTrack, s: MediaStream) {
+    addTrack(id: string, t: MediaStreamTrack, s: MediaStream) {
         if (!this.streams.has(id)) this.streams.set(id, s);
         if (t.kind == "video") {
             this.addVideoTrack(t, s)

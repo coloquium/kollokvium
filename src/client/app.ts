@@ -81,17 +81,17 @@ export class App extends AppBase {
      * @memberof App
      */
     getLocalStream(constraints: MediaStreamConstraints, cb: Function) {
-        AppDomain.logger.log(`Get UserMedia` ,constraints);
+        AppDomain.logger.log(`Get UserMedia`, constraints);
         navigator.mediaDevices.getUserMedia(constraints).then((mediaStream: MediaStream) => {
             AppDomain.logger.log(`Successfully retrieved a media stream`)
             // try get the 'MediaStreamTrack capabillities'
             try {
                 AppDomain.logger.log(`try get MediaStreamTrack capabilities & constraints`)
-               
+
                 mediaStream.getTracks().forEach(track => {
-                            AppDomain.logger.log(`Track kind ${track.kind}`,track.getCapabilities(), track.getConstraints())
-                });           
-                
+                    AppDomain.logger.log(`Track kind ${track.kind}`, track.getCapabilities(), track.getConstraints())
+                });
+
             } catch (err) {
                 AppDomain.logger.log(`Unable to get MediaStreamTrack capabilities & constraints.`);
 
@@ -243,6 +243,7 @@ export class App extends AppBase {
         track.onended = () => {
             this.rtc.removeTrackFromPeers(track);
             this.localMediaStream.removeTrack(track);
+            this.arbitraryChannel.invoke("track-removed", { peerId: this.rtc.localPeerId, id: track.id });
             DOMUtils.get(".l-" + track.id).remove();
         };
         let container = DOMUtils.get(".local") as HTMLElement;
@@ -261,18 +262,16 @@ export class App extends AppBase {
             return this.participants.get(id);
         } else {
             let participant = new AppParticipantComponent(id);
-
             participant.onVideoTrackAdded = (id: string, mediaStream: MediaStream) => {
                 let node = participant.render();
                 participant.addVideo(id, mediaStream, node);
                 DOMUtils.get("#remote-videos").append(node);
                 this.numOfPeers++;
                 this.updatePageTitle();
-
             }
             participant.onAudioTrackAdded = (id: string, mediaStream: MediaStream) => {
                 this.audioNodes.add(id, mediaStream);
-            };
+            }
             participant.onVideoTrackLost = (id: string, stream: MediaStream) => {
                 let p = DOMUtils.getAll(`li video.s${stream.id}`);
                 p.forEach(n => n.parentElement.remove());
@@ -532,9 +531,17 @@ export class App extends AppBase {
             }
         });
     }
+    /**
+     *
+     *
+     * @private
+     * @param {MediaStreamTrack} track
+     * @param {WebRTCConnection} connection
+     * @param {RTCTrackEvent} event
+     * @memberof App
+     */
     private onRemoteTrack(track: MediaStreamTrack, connection: WebRTCConnection, event: RTCTrackEvent) {
         let participant = this.tryAddParticipant(connection.id);
-        let streams: any;
         if (this.useE2EE) {
             let streams = (event as any).receiver.createEncodedStreams();
             streams.readableStream
@@ -542,10 +549,15 @@ export class App extends AppBase {
                     transform: this.rtc.e2ee.decode.bind(this.rtc.e2ee),
                 }))
                 .pipeTo(streams.writableStream);
-        } else {
-            streams = event.streams[0];
         }
-        participant.addTrack(event.streams[0].id, event.track, event.streams[0]);
+        if (event.streams[0]) {
+            participant.addTrack(event.streams[0].id, event.track, event.streams[0]);
+        } else {
+            let stream = new MediaStream([track])
+            participant.addTrack(stream.id, event.track, stream);
+
+        }
+
         this.factory.getController("broker").invoke("whois", connection.id);
         if (this.isPipActive) this.refreshPiP();
     }
@@ -643,7 +655,12 @@ export class App extends AppBase {
             AppDomain.logger.error(err);
         };
 
-        this.rtc.onRemoteTrack = this.onRemoteTrack.bind(this);
+        this.rtc.onRemoteVideoTrack = this.onRemoteTrack.bind(this);
+
+        this.rtc.onRemoteAudioTrack = (track: MediaStreamTrack, connection: WebRTCConnection, event: RTCTrackEvent) => {
+            // no op
+        };
+
         this.arbitraryChannel = this.rtc.createDataChannel(`arbitrary-${AppDomain.contextPrefix}-dc`);
 
         this.chatComponent = new ChatComponent(this.arbitraryChannel, UserSettings);
@@ -670,6 +687,12 @@ export class App extends AppBase {
             }
         }
 
+        this.arbitraryChannel.on("track-removed", (data: any) => {
+            const el = DOMUtils.get(`.t${data.id}`);
+            if (el) {
+                el.parentElement.remove();
+            }
+        });
         this.arbitraryChannel.on("lowresRequest", this.onLowresRequest.bind(this));
         this.arbitraryChannel.on("textToSpeech", this.onTextToSpeech.bind(this));
 
@@ -1193,7 +1216,7 @@ export class App extends AppBase {
                 this.textToSpeechMessage.value = "";
             }
         });
-        
+
         /*
             Parse hotkeys
         */
@@ -1224,8 +1247,6 @@ export class App extends AppBase {
                     a.href = blobUrl;
                     a.download = `${Math.random().toString(36).substring(8)}.html`;
                     a.click();
-
-                    console.log(c);
                 });
             });
             // todo: dump all entrys if the ILogger into a html file also , and pass back.

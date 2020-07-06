@@ -8,7 +8,7 @@
     "translateKey": "AIzaSyC79hpb4DKEUgGc6qk3AyTv3ysba2bR_94",
     "logToConsole": true,
     "rtcConfig": {
-        "sdpSemantics": "plan-b",
+        "sdpSemantics": "unified-plan",
         "iceTransportPolicy": "all",
         "rtcpMuxPolicy": "require",
         "bundlePolicy": "max-bundle",

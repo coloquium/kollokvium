@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.7.16",
+  "version": "1.7.17",
   "description": "",
   "main": "dist/server.js",
   "repository": {
@@ -33,7 +33,6 @@
       "name": "Ricky Davies",
       "url": "https://github.com/kaista82"
     }
-  
   ],
   "scripts": {
     "build": "concurrently \"npm run build:client\" \"npm run build:server\"",
@@ -85,7 +84,7 @@
     "hotkeys-js": "^3.7.6",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",
-    "thor-io.client-vnext": "^2.1.0-beta.1",
+    "thor-io.client-vnext": "^2.1.0-beta.2",
     "thor-io.vnext": "^2.0.5-beta.3",
     "utf-8-validate": "^5.0.2",
     "webrtc-adapter": "^7.5.1",
