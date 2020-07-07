@@ -100,7 +100,7 @@
     "concurrently": "^5.1.0",
     "copy-webpack-plugin": "^5.1.1",
     "cross-env": "^7.0.2",
-    "electron": "^8.2.0",
+    "electron": "^8.2.4",
     "electron-packager": "^14.2.1",
     "html-webpack-plugin": "^4.0.4",
     "ts-loader": "^6.2.2",
