@@ -56,7 +56,7 @@ body {
 
 main {
   position: relative;
-  background-image: url(../../img/background.png);
+  background-image: url(../../img/background.jpg);
   background-size: cover;
   height: 100vh;
   min-height: 25rem;
@@ -227,18 +227,6 @@ main .overlay {
   color:#fff;
 }
 
-.top-bar {
-  position: absolute;
-  top: 70px;
-  width: 100% !important;
-  z-index: 80;
-  min-height: 70px;
-  background: rgba(255, 255, 255, 0.9);
-  left: 50%;
-  transform: translate(-50%, 0);
-  max-width: 50%;
- 
-}
 
 #file-form {
   position: absolute;
@@ -586,16 +574,25 @@ i.fa-lock {
   min-width: 80px;
   max-width: 80px;
   min-height: 100vh;
- 
+
+}
+
+#sidebar-controls i {
+  margin-bottom: 1rem;
 }
 
 @media (max-width: 768px) {
   #sidebar {
     margin-left: -80px;
+
   }
   #sidebar.active {
     margin-left: 0;
   }
+ #sidebar-controls i{
+    margin-bottom:10px;
+  }
+  
 }
 
 #sidebar {
@@ -621,3 +618,4 @@ i.fa-lock {
   font-size: 1.1em;
   display: block;
 }
+

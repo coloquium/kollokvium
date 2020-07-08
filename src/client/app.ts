@@ -318,7 +318,7 @@ export class App extends AppBase {
 
         DOMUtils.get("#sidebar").classList.toggle("hide");
 
-        DOMUtils.get("#top-bar").classList.add("hide")
+        DOMUtils.get("#sidebar-controls").classList.add("hide")
 
         DOMUtils.get("#mute-speakers").classList.toggle("hide");
         this.generateSubtitles.classList.toggle("hide");
@@ -327,6 +327,9 @@ export class App extends AppBase {
 
         if ('pictureInPictureEnabled' in document)
             DOMUtils.get("#toggle-pip").classList.toggle("hide");
+
+
+        DOMUtils.get("#share-screen").parentElement.classList.toggle("d-none");
 
         slug.value = "";
 
@@ -367,6 +370,10 @@ export class App extends AppBase {
 
         if ('pictureInPictureEnabled' in document)
             DOMUtils.get("#toggle-pip").classList.toggle("hide");
+
+
+
+        DOMUtils.get("#share-screen").parentElement.classList.toggle("d-none");            
 
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
@@ -832,8 +839,8 @@ export class App extends AppBase {
 
             DOMUtils.get("#sidebar").classList.toggle("active");
             //$('#sidebar').toggleClass('active');
-            //            DOMUtils.get("#top-bar").classList.toggle("d-inline-flex")
-            //          DOMUtils.get("#top-bar").classList.toggle("hide")
+            //            DOMUtils.get("#sidebar-controls").classList.toggle("d-inline-flex")
+            //          DOMUtils.get("#sidebar-controls").classList.toggle("hide")
         });
 
 
