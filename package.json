@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.7.19",
+  "version": "1.7.20",
   "description": "",
   "main": "dist/server.js",
   "repository": {
@@ -57,7 +57,7 @@
     "thor-io.vnext": "^2.0.5-beta.3",
     "utf-8-validate": "^5.0.2",
     "webrtc-adapter": "^7.6.3",
-    "ws": "^7.3clear.1",
+    "ws": "^7.3.1",
     "yargs": "^15.4.0"
   },
   "devDependencies": {
