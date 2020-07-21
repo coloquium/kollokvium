@@ -31,7 +31,8 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 11. Picture-In-Picture support (renders all streams into PiP element)
 12. Active speaker - Indication of who is talking
 13. Active speaker view and grid view 
-14. E2EE (Currently in test for canary/beta (will require Chrome 84+)
+14. E2EE , Currently in beta.Require Chrome 84+
+15. Electron clients ( can be found in this repo https://github.com/coloquium/kollokvium-electron )
 
 ..and more
 
@@ -41,17 +42,17 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 `ctrl-r` Start / stop recording of meeting ( applies to recoring of everyone participating)
 
-`ctrl-g`  Toogle active-speaker vide / grid view (default).
+`ctrl-g` Toogle active-speaker vide / grid view (default).
 
-`ctrl-m`  Mute / un-mute microphone.
+`ctrl-m` Mute / un-mute microphone.
 
-`ctrl-v`  Mute / un-mute camera.
+`ctrl-v` Mute / un-mute camera.
 
-`ctrl+q`  Mute / un-mute all audio.
+`ctrl+q` Mute / un-mute all audio.
 
-`ctrl+s`  Enable / disable subtitles (captions).
+`ctrl+s` Enable / disable subtitles (captions).
 
-`ctrl+i`  Hide / show chat & fileshare window.
+`ctrl+i` Hide / show chat & fileshare window.
 
 `ctrl-u` Get statistics for each RTCPeerConnection. Generate 1-n HTML based reports that is passedf back to client as downloadable files.
 
@@ -59,11 +60,10 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 ## Planned features / addons
 
-1. `broadcast mode` - A view/mode where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
-2. `advanced mode`  - A view/mode that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.
-3. Finalize the electron builds for Windows, OSX and Linux  
-4. `e2ee mode`  -In test mode (Chrome 84+ needed).
-5. Electron clients for Windows, Mac OSX and Linux
+1. Publish the Electron clients 
+2.`broadcast mode` - A view/mode where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
+3.`advanced mode`  - A view/mode that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.
+
 
 ## Install 
 Clone the repository and run `npm install`  see package.json for build scripts.
