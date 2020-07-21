@@ -86,7 +86,7 @@ export class App extends AppBase {
             AppDomain.logger.log(`Successfully retrieved a media stream`)
             // try get the 'MediaStreamTrack capabillities'
             try {
-                AppDomain.logger.log(`try get MediaStreamTrack capabilities & constraints`)
+                AppDomain.logger.log(`Try get MediaStreamTrack capabilities & constraints`)
 
                 mediaStream.getTracks().forEach(track => {
                     AppDomain.logger.log(`Track kind ${track.kind}`, track.getCapabilities(), track.getConstraints())
@@ -270,6 +270,7 @@ export class App extends AppBase {
                 this.updatePageTitle();
             }
             participant.onAudioTrackAdded = (id: string, mediaStream: MediaStream) => {
+                AppDomain.logger.log(`audioNode added ${id}`);
                 this.audioNodes.add(id, mediaStream);
             }
             participant.onVideoTrackLost = (id: string, stream: MediaStream) => {
@@ -373,7 +374,7 @@ export class App extends AppBase {
 
 
 
-        DOMUtils.get("#share-screen").parentElement.classList.toggle("d-none");            
+        DOMUtils.get("#share-screen").parentElement.classList.toggle("d-none");
 
         this.startButton.classList.add("hide");
         this.generateSubtitles.classList.toggle("hide");
@@ -549,7 +550,9 @@ export class App extends AppBase {
      */
     private onRemoteTrack(track: MediaStreamTrack, connection: WebRTCConnection, event: RTCTrackEvent) {
         let participant = this.tryAddParticipant(connection.id);
+        let tracks = event.streams[0].getTracks();
         if (this.useE2EE) {
+            AppDomain.logger.log(`Client uses E2EE.`)
             let streams = (event as any).receiver.createEncodedStreams();
             streams.readableStream
                 .pipeThrough(new TransformStream({
@@ -557,14 +560,10 @@ export class App extends AppBase {
                 }))
                 .pipeTo(streams.writableStream);
         }
-        if (event.streams[0]) {
-            participant.addTrack(event.streams[0].id, event.track, event.streams[0]);
-        } else {
-            let stream = new MediaStream([track])
-            participant.addTrack(stream.id, event.track, stream);
-
-        }
-
+        tracks.forEach((t: MediaStreamTrack) => {
+            AppDomain.logger.log(`Adding ${t.kind} track to participant ${participant.id}`);
+            participant.addTrack(event.streams[0].id, t, event.streams[0]);
+        });
         this.factory.getController("broker").invoke("whois", connection.id);
         if (this.isPipActive) this.refreshPiP();
     }

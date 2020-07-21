@@ -31,12 +31,12 @@ export class E2EEBase implements IE2EE {
         for (let j = 0; j < data.length && j < max; j++) {
             bytes += (data[j] < 16 ? '0' : '') + data[j].toString(16) + ' ';
         }
-        console.log(performance.now().toFixed(2), direction, bytes.trim(),
-            'len=' + encodedFrame.data.byteLength,
-            'type=' + (encodedFrame.type || 'audio'),
-            'ts=' + encodedFrame.timestamp,
-            'ssrc=' + encodedFrame.synchronizationSource
-        );
+        // console.log(performance.now().toFixed(2), direction, bytes.trim(),
+        //     'len=' + encodedFrame.data.byteLength,
+        //     'type=' + (encodedFrame.type || 'audio'),
+        //     'ts=' + encodedFrame.timestamp,
+        //     'ssrc=' + encodedFrame.synchronizationSource
+        // );
     }
 
     encode(encodedFrame: any, controller: any) {
@@ -76,8 +76,8 @@ export class E2EEBase implements IE2EE {
         const checksum = encodedFrame.data.byteLength > 4 ? view.getUint32(encodedFrame.data.byteLength - 4) : false;
         if (this.currentCryptoKey) {
             if (checksum !== 0xDEADBEEF) {
-                console.log('Corrupted frame received, checksum ' +
-                    checksum.toString(16));
+                // console.log('Corrupted frame received, checksum ' +
+                //     checksum.toString(16));
                 return; // This can happen when the key is set and there is an unencrypted frame in-flight.
             }
             const keyIdentifier = view.getUint8(encodedFrame.data.byteLength - 5);
