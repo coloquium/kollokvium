@@ -549,21 +549,33 @@ export class App extends AppBase {
      * @memberof App
      */
     private onRemoteTrack(track: MediaStreamTrack, connection: WebRTCConnection, event: RTCTrackEvent) {
+
+
         let participant = this.tryAddParticipant(connection.id);
-        let tracks = event.streams[0].getTracks();
-        if (this.useE2EE) {
-            AppDomain.logger.log(`Client uses E2EE.`)
-            let streams = (event as any).receiver.createEncodedStreams();
-            streams.readableStream
-                .pipeThrough(new TransformStream({
-                    transform: this.rtc.e2ee.decode.bind(this.rtc.e2ee),
-                }))
-                .pipeTo(streams.writableStream);
+
+        if (event.streams[0]) {
+
+            let tracks = event.streams[0].getTracks();
+
+
+            if (this.useE2EE) {
+                AppDomain.logger.log(`Client uses E2EE.`)
+                let streams = (event as any).receiver.createEncodedStreams();
+                streams.readableStream
+                    .pipeThrough(new TransformStream({
+                        transform: this.rtc.e2ee.decode.bind(this.rtc.e2ee),
+                    }))
+                    .pipeTo(streams.writableStream);
+            }
+                tracks.forEach((t: MediaStreamTrack) => {
+                    AppDomain.logger.log(`Adding ${t.kind} track to participant ${participant.id}`);
+                    participant.addTrack(event.streams[0].id, t, event.streams[0]);
+                });
+            
+        } else {
+            AppDomain.logger.log(`Adding yet another track ${track.kind} track to participant ${participant.id}`);
+            participant.addTrack(track.id, track, new MediaStream([track]));
         }
-        tracks.forEach((t: MediaStreamTrack) => {
-            AppDomain.logger.log(`Adding ${t.kind} track to participant ${participant.id}`);
-            participant.addTrack(event.streams[0].id, t, event.streams[0]);
-        });
         this.factory.getController("broker").invoke("whois", connection.id);
         if (this.isPipActive) this.refreshPiP();
     }
@@ -1282,9 +1294,7 @@ export class App extends AppBase {
         });
 
 
-        this.initialize({ ts: performance.now() }).then((broker: any) => {
-            if (this.slug.length <= 6)
-                $("#random-slug").popover("show");
+        this.initialize({ ts: performance.now() }).then((broker: any) => {           
             this.onInitlialized(broker);
             this.factory.onClose = (reason: any) => {
                 AppDomain.logger.error("Lost connection", reason);
