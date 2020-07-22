@@ -549,31 +549,17 @@ export class App extends AppBase {
      * @memberof App
      */
     private onRemoteTrack(track: MediaStreamTrack, connection: WebRTCConnection, event: RTCTrackEvent) {
-
-
         let participant = this.tryAddParticipant(connection.id);
-
-        if (event.streams[0]) {
-
-            let tracks = event.streams[0].getTracks();
-
-
-            if (this.useE2EE) {
-                AppDomain.logger.log(`Client uses E2EE.`)
-                let streams = (event as any).receiver.createEncodedStreams();
-                streams.readableStream
-                    .pipeThrough(new TransformStream({
-                        transform: this.rtc.e2ee.decode.bind(this.rtc.e2ee),
-                    }))
-                    .pipeTo(streams.writableStream);
-            }
-                tracks.forEach((t: MediaStreamTrack) => {
-                    AppDomain.logger.log(`Adding ${t.kind} track to participant ${participant.id}`);
-                    participant.addTrack(event.streams[0].id, t, event.streams[0]);
-                });
-            
+        if (this.useE2EE && event.streams[0]) {
+            AppDomain.logger.log(`Client uses E2EE.`)
+            let streams = (event as any).receiver.createEncodedStreams();
+            streams.readableStream
+                .pipeThrough(new TransformStream({
+                    transform: this.rtc.e2ee.decode.bind(this.rtc.e2ee),
+                }))
+                .pipeTo(streams.writableStream);
+                participant.addTrack(event.streams[0].id, track, event.streams[0]);
         } else {
-            AppDomain.logger.log(`Adding yet another track ${track.kind} track to participant ${participant.id}`);
             participant.addTrack(track.id, track, new MediaStream([track]));
         }
         this.factory.getController("broker").invoke("whois", connection.id);
@@ -673,11 +659,8 @@ export class App extends AppBase {
             AppDomain.logger.error(err);
         };
 
-        this.rtc.onRemoteVideoTrack = this.onRemoteTrack.bind(this);
+        this.rtc.onRemoteTrack = this.onRemoteTrack.bind(this);
 
-        this.rtc.onRemoteAudioTrack = (track: MediaStreamTrack, connection: WebRTCConnection, event: RTCTrackEvent) => {
-            // no op
-        };
 
         this.arbitraryChannel = this.rtc.createDataChannel(`arbitrary-${AppDomain.contextPrefix}-dc`);
 
@@ -1294,7 +1277,7 @@ export class App extends AppBase {
         });
 
 
-        this.initialize({ ts: performance.now() }).then((broker: any) => {           
+        this.initialize({ ts: performance.now() }).then((broker: any) => {
             this.onInitlialized(broker);
             this.factory.onClose = (reason: any) => {
                 AppDomain.logger.error("Lost connection", reason);
