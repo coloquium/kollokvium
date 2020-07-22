@@ -564,6 +564,7 @@ export class App extends AppBase {
         }
         this.factory.getController("broker").invoke("whois", connection.id);
         if (this.isPipActive) this.refreshPiP();
+        
     }
 
     private onLeaveContext() {
