@@ -1364,7 +1364,16 @@ export class App extends AppBase {
           a.click();
         });
       });
-      // todo: dump all entrys if the ILogger into a html file also , and pass back.
+
+      AppDomain.logger.serialize().then ( appLog => {
+        let blobUrl = window.URL.createObjectURL(new Blob([appLog], { type: "text/html" }));
+        var a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `AppDomainLogger.html`;
+        a.click();
+      });
+
+      
       e.preventDefault();
     });
 
