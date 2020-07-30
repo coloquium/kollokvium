@@ -1,4 +1,4 @@
-import { IE2EE } from "thor-io.client-vnext/src/E2EE/EncodeDecode";
+import { IE2EE } from "thor-io.client-vnext/src/E2EE/E2EEBase";
 
 /**
  * Primitive encrypion

@@ -1,5 +1,5 @@
 export class MediaUtils {
-    static CheckStream(tracks: Array<MediaStreamTrack>, state:string): boolean {
+    static checkStream(tracks: Array<MediaStreamTrack>, state:string): boolean {
         return tracks.filter((t: MediaStreamTrack) => { return t.readyState === state; }) ? true : false;
     }
 

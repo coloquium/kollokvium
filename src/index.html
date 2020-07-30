@@ -1,6 +1,14 @@
 <html lang="en-US">
 
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'UA-160656421-1');
+    </script>
     <title>Kollokvium | A free multi-party video conference for you and your friends!</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -31,7 +39,8 @@
     <div class="wrapper d-flex w-100 h-100">
 
         <nav class="hide bg-dark hide d-flex-inline justify-content-center" id="sidebar">
-            <ul id="sidebar-controls" class="list-unstyled components text-center d-flex-inline justify-content-center mt-2">
+            <ul id="sidebar-controls"
+                class="list-unstyled components text-center d-flex-inline justify-content-center mt-2">
                 <li class=" p-1 only-desktop">
                     <i class="far fas fa-th-large fa-2x hide" id="toggle-grid" data-hotkey="ctrl+g"
                         title="toggle active speaker / grid view"></i>
@@ -275,7 +284,8 @@
                                 </div>
                                 <hr>
                                 <p class="mb-0 p-1">
-                                    When using E2EE you and your friends needs (all) shared-secret-key (enter above) before start/join. 
+                                    When using E2EE you and your friends needs (all) shared-secret-key (enter above)
+                                    before start/join.
                                     They also also need Chrome 84+.
                                 </p>
                             </div>

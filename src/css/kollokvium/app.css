@@ -63,6 +63,10 @@ main {
   width: 100%;
   overflow: hidden;
 }
+main.no-background{
+  background-image:none;
+  background-color: #333;
+}
 
 main .full {
   position: absolute;
