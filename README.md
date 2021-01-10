@@ -76,7 +76,8 @@ TBD
 
 ## Local development
 
-Build and and luanch using `npm start` and then browse to `localhost:1337` 
+Build and and launch using `npm start` and then browse to `localhost:1337` or for frontend only development use `npm start:debug` which is much smoother. Pleaase note
+that npm start:debug is using a shared wss server hosted by us by default. please study scripts sections of `package.json` for futher information.
 
 ### Azure deploy
 To deploy to Azure you need an Azure account, and you need to create an Azure Wep Application, and a storage account to host the Static Website.
@@ -90,6 +91,10 @@ If you want to deploy only the front-end as a static site, build the application
 ## Issues & Questions
 
 Good Luck, and if run into problems, bugs or questions or just have ideas to share. post them here under issues (https://github.com/coloquium/kollokvium/issues)
+
+## Other 
+
+Thanks to Sami Anas, https://www.pexels.com/sv-se/@samianas for greate background image we currently use.
 
 Regards
     Team Kollokvium (colloquium)
