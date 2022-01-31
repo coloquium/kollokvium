@@ -873,10 +873,6 @@ export class App extends AppBase {
     this.greenScreenComponent = new GreenScreenComponent("gss");
 
     this.greenScreenComponent.onApply = (mediaStream) => {
-
-   alert()
-    
-
       let a = this.localMediaStream.getVideoTracks()[0];
       this.localMediaStream.removeTrack(a);
       this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
