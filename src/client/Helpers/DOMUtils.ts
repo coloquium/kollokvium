@@ -16,6 +16,12 @@ export class DOMUtils {
         }, options);
         return element as T;
     }
+    static removeChilds(parent):void{
+        while (parent.firstChild) {
+            parent.firstChild.remove()
+        }
+    }
+
     static create<T extends HTMLElement>(p: string | T, textContent?: string, attr?: Object): T {
         let node: T;
         typeof (p) === "string" ? node = document.createElement(p) as T : node = p;
@@ -33,6 +39,13 @@ export class DOMUtils {
         return text.replace(regex, (url: string) => {
             return `<a href="${url}" target="_blank">${url}</a>`;
         });
+    }
+    static toDOM(html: string): any {
+        var d = document, i, a = d.createElement("div"), b = d.createDocumentFragment();
+        a.innerHTML = html;
+        while (i = a.firstChild)
+            b.appendChild(i);
+        return b;
     }
     static makeDraggable(el: HTMLElement) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;

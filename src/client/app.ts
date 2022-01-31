@@ -635,7 +635,7 @@ export class App extends AppBase {
       connection.peerConnection.close();
     });
     this.participants.clear();
-    DOMUtils.get("#remote-videos").innerHTML = "";
+    DOMUtils.removeChilds("#remote-videos")
     this.disableConferenceElements();
   }
 
@@ -985,6 +985,7 @@ export class App extends AppBase {
     this.languagePicker.value = UserSettings.language;
     DOMUtils.on("change", this.languagePicker, () => {
       UserSettings.language = this.languagePicker.value;
+      this.chatComponent.language = this.languagePicker.value;
     });
 
     DOMUtils.on("click", this.lockContext, () => {

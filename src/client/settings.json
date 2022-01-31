@@ -3,7 +3,7 @@
     "host": "",
     "contextPrefix": "kollokvium",
     "serverUrl": "",
-    "version": "1.7.11",
+    "version": "1.8.0",
     "reconnectInterval": 10000,
     "translateKey": "AIzaSyC79hpb4DKEUgGc6qk3AyTv3ysba2bR_94",
     "logToConsole": true,
