@@ -35,7 +35,12 @@ export class GreenScreenComponent extends AppComponent {
         this.gss.stop();
     }
     
-    init(src: string,_fps:number = 25) {
+    init(src: string,_fps:number = 25):Promise<boolean> {
+
+
+        return new Promise<boolean>( (resolve, reject) => {
+
+      
        
         this.fps = _fps;        
         this.gss = new GreenScreenStream(GreenScreenMethod.VirtualBackground,this.canvas,this.canvas.width,this.canvas.height);
@@ -73,11 +78,15 @@ export class GreenScreenComponent extends AppComponent {
                     this.capturedStream = this.gss.captureStream(this.fps);  
                     v.srcObject =  this.capturedStream; 
                     this.gss.start(_fps);
+                    resolve(true);
             });
         
         }).catch(err => {
+            resolve(false)
             console.error(err)
-        })
+        });
+    });
+    
     }
   
 
@@ -113,6 +122,15 @@ export class GreenScreenComponent extends AppComponent {
                 <ul class="list-unstyled">
                      ${this.renderImages()}
                 </ul>
+                <div class="text-center">
+                <button id="enable-custom-gss" class="btn btn-primary">
+                Use my image
+                </button>
+                </div>
+                <div class="mb-3 hide" id="gss-custom-form">
+                <label for="gss-custom" class="form-label">Pick a image/label>
+                <input class="form-control" type="file" id="gss-custom" accept="image/*">
+              </div>
                 </div>
                 <div class="col-md-9">
                 <h5>Preview</h5>
@@ -140,26 +158,65 @@ export class GreenScreenComponent extends AppComponent {
 
         opts.forEach((el: HTMLImageElement) => {
             el.addEventListener("click", () => {
-                DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false;
+              
                 if(!this.capturedStream){                
-                this.init(el.src);
+                this.init(el.src).then( r => {
+                    DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false;
+                }).catch( err => {
+                    DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = true;
+                })
+
                 }else{
                     this.gss.setBackground(el.src);
-                    console.log("swap");
+                 
                 }
             });
         });
 
-        DOMUtils.get(".btn-primary", dom).addEventListener("click", () => {
+        DOMUtils.get("#apply-virtualbg", dom).addEventListener("click", () => {
+        
             this.onApply(this.capturedStream);
         });
-        DOMUtils.get(".btn-secondary", dom).addEventListener("click", () => {
-          
+        DOMUtils.get(".btn-secondary", dom).addEventListener("click", () => {          
                 if(!this.capturedStream){
-                    this.gss.stop(true);
-                    
+                    this.gss.stop(true);                    
                 }
 
+        });
+
+       DOMUtils.get<HTMLInputElement>("#gss-custom", dom).addEventListener("change", (evt: any) => {
+            DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = true;
+            const file = evt.target.files[0];
+            const reader = new FileReader();
+            reader.onloadend = (e: any) => {
+                const base64 = e.target.result;               
+                const image = new Image();
+                image.addEventListener("load", () => {
+                    if (!this.capturedStream) {
+                        this.init(image.src).then( r => {
+                            DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false
+                        });
+
+                    } else {
+                        this.gss.backgroundSource = image;
+                    }  DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false
+                }
+                );
+                image.src = base64;          
+            }
+            reader.readAsDataURL(file)
+        });        
+        
+        DOMUtils.get("#enable-custom-gss",dom).addEventListener("click", () => {
+            if(!this.capturedStream){
+                this.init(this.backgrounds[0]);
+          }
+         
+
+          DOMUtils.get("#gss-custom-form").classList.remove("hide");
+          DOMUtils.get("#enable-custom-gss").classList.add("hide");
+           
+               
         });
         return dom;
 

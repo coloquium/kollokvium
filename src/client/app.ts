@@ -874,7 +874,7 @@ export class App extends AppBase {
 
     this.greenScreenComponent.onApply = (mediaStream) => {
 
-   
+   alert()
     
 
       let a = this.localMediaStream.getVideoTracks()[0];
