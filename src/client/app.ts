@@ -137,12 +137,15 @@ export class App extends AppBase {
    * @memberof App
    */
   shareScreen() {
-    const gdmOptions = {
-      video: {
+
+    // displaymediastreamconstraints typings seems to be incomplete
+    const gdmOptions:any = 
+      {
+        video:true,
         cursor: "always",
-      },
-      audio: false,
-    };
+        audio:false,
+      };
+
     navigator.mediaDevices["getDisplayMedia"](gdmOptions)
       .then((stream: MediaStream) => {
         stream.getVideoTracks().forEach((t: MediaStreamTrack) => {
@@ -867,8 +870,12 @@ export class App extends AppBase {
       }
     };
     this.greenScreenComponent = new GreenScreenComponent("gss");
+
     this.greenScreenComponent.onApply = (mediaStream) => {
-      DOMUtils.get("video#preview").remove();
+
+   
+    
+
       let a = this.localMediaStream.getVideoTracks()[0];
       this.localMediaStream.removeTrack(a);
       this.localMediaStream.addTrack(mediaStream.getVideoTracks()[0]);
@@ -900,6 +907,8 @@ export class App extends AppBase {
           DOMUtils.get("#apply-virtual-bg").classList.toggle("hide");
           DOMUtils.get("#remove-virtual-bg").classList.toggle("hide");
           this.greenScreenComponent.stop();
+          this.greenScreenComponent.capturedStream = null;
+          DOMUtils.get<HTMLVideoElement>("video#preview").srcObject = mediaStream;
         }
       );
     });

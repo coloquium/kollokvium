@@ -26,5 +26,5 @@
         },
         "audio": true
     },
-    "e2eeSupport" : true
+    "e2eeSupport" : false
 }

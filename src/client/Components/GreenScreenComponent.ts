@@ -1,6 +1,7 @@
 import { AppComponent } from './AppComponent';
-import { GreenScreenStream } from 'greenscreenstream';
+import { GreenScreenMethod, GreenScreenStream } from 'greenscreenstream';
 import { DOMUtils } from '../Helpers/DOMUtils';
+import { Utils } from 'thor-io.client-vnext';
 export class GreenScreenComponent extends AppComponent {
 
 
@@ -14,6 +15,7 @@ export class GreenScreenComponent extends AppComponent {
     handle: number;
     capturedStream: MediaStream;
     canvas: HTMLCanvasElement;
+    fps: number;
 
     constructor(public id: string) {
         super()
@@ -29,9 +31,15 @@ export class GreenScreenComponent extends AppComponent {
 
     }
 
-    start(src: string) {
-        this.gss = new GreenScreenStream(true,src,this.canvas);
+    stop(){
+        this.gss.stop();
+    }
+    
+    init(src: string,_fps:number = 25) {
        
+        this.fps = _fps;        
+        this.gss = new GreenScreenStream(GreenScreenMethod.VirtualBackground,this.canvas,this.canvas.width,this.canvas.height);
+
         this.gss.bufferVert =`
         uniform float time;
         uniform vec2 resolution;   
@@ -40,54 +48,38 @@ export class GreenScreenComponent extends AppComponent {
         uniform vec4 chromaKey; 
         uniform vec2 maskRange;
         out vec4 fragColor;
-
         void mainImage( out vec4 fragColor, in vec2 fragCoord )
             {
-                vec2 q = 1. -fragCoord.xy / resolution.xy;
-                
+                vec2 q = 1. -fragCoord.xy / resolution.xy;                
                 vec3 bg = texture( background, q ).xyz;
-                vec3 fg = texture( webcam, q ).xyz;
-                
-                vec3 dom = vec3(0,1.0,0);
-                
-                float maxrb = max( fg.r, fg.b );
-                
-                float k = clamp( (fg.g-maxrb)*5.0, 0.0, 1.0 );
-                
-
-                float dg = fg.g; 
-                
+                vec3 fg = texture( webcam, q ).xyz;                
+                vec3 dom = vec3(0,1.0,0);                
+                float maxrb = max( fg.r, fg.b );                
+                float k = clamp( (fg.g-maxrb)*5.0, 0.0, 1.0 );            
+                float dg = fg.g;                 
                 fg.g = min( fg.g, maxrb*0.8 ); 
-                
                 fg += dg - fg.g;
-
                 fragColor = vec4( mix(fg, bg, k), 1.0 );
             }
-
             void main(){    
                 mainImage(fragColor,gl_FragCoord.xy);      
             }        
         `;
        
-        this.gss.addVideoTrack(this.mediaTrack);
-
-
-        this.gss.onReady = () =>
-        {
-            let v = document.querySelector("video#preview") as HTMLVideoElement;
-            v.srcObject = this.getMediaStream();   
-        }
+        this.gss.initialize(src).then ( p => {
+            console.log(src);
+            this.gss.addVideoTrack(this.mediaTrack).then( s => {
+                    const v = DOMUtils.get<HTMLVideoElement>("video#preview");
+                    this.capturedStream = this.gss.captureStream(this.fps);  
+                    v.srcObject =  this.capturedStream; 
+                    this.gss.start(_fps);
+            });
+        
+        }).catch(err => {
+            console.error(err)
+        })
     }
-
-    stop() {
-        this.gss = undefined;
-    }
-
-    getMediaStream(fps?: number): MediaStream {
-        this.gss.render(fps);
-        this.capturedStream = this.gss.captureStream(fps)
-        return this.capturedStream;
-    }
+  
 
     setMediaTrack(videoTrack: MediaStreamTrack) {
         this.mediaTrack = videoTrack;
@@ -132,8 +124,8 @@ export class GreenScreenComponent extends AppComponent {
             </div>
 
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary">Apply</button>
+            <div class="modal-footer" id="gss-action">
+              <button type="button" class="btn btn-primary" id="apply-virtualbg">Apply</button>
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -148,7 +140,13 @@ export class GreenScreenComponent extends AppComponent {
 
         opts.forEach((el: HTMLImageElement) => {
             el.addEventListener("click", () => {
-                this.start(el.src);
+                DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false;
+                if(!this.capturedStream){                
+                this.init(el.src);
+                }else{
+                    this.gss.setBackground(el.src);
+                    console.log("swap");
+                }
             });
         });
 
@@ -156,7 +154,12 @@ export class GreenScreenComponent extends AppComponent {
             this.onApply(this.capturedStream);
         });
         DOMUtils.get(".btn-secondary", dom).addEventListener("click", () => {
-            this.stop();
+          
+                if(!this.capturedStream){
+                    this.gss.stop(true);
+                    
+                }
+
         });
         return dom;
 
