@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.7.24",
+  "version": "1.8.1",
   "description": "",
   "main": "dist/server.js",
   "repository": {
@@ -40,7 +40,7 @@
     "build:server": "webpack --config=webpack.server.js",
     "start": "node dist/server.js",
     "start:secure": "node dist/server.js -s",
-    "start:debug": "x WSS_SERVER_URL='wss://dev-wss.kollokvium.net' webpack-dev-server",
+    "start:debug": "cross-env WSS_SERVER_URL='wss://dev-wss.kollokvium.net' webpack-dev-server",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "license": "MIT",
@@ -49,7 +49,7 @@
     "applicationinsights": "^1.8.8",
     "bufferutil": "^4.0.3",
     "express": "^4.17.1",
-    "greenscreenstream": "^1.0.1-beta.2",
+    "greenscreenstream": "^1.0.0-beta.4",
     "hotkeys-js": "^3.8.1",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",

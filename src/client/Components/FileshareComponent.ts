@@ -51,7 +51,7 @@ export class FileShareComponent extends AppComponent {
         let time = document.createElement("time");
         time.textContent = `(${(new Date()).toLocaleTimeString().substr(0, 5)})`;
         let messageText = document.createElement("span");
-        messageText.innerHTML = DOMUtils.makeLink("Hey,the file is ready to download, click to download ");
+        messageText.textContent =  "Hey,the file is ready to download, click to download ";
         sender.textContent = fileInfo.sender;
         message.prepend(time);
         message.prepend(sender);

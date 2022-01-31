@@ -433,6 +433,7 @@ i.fa-lock {
 
 .greenscreen-option {
   max-width: 100%;
+  cursor: pointer;
 }
 
 .greenscreen-preview {
@@ -623,3 +624,8 @@ i.fa-lock {
   display: block;
 }
 
+.chat-translation{
+  text-decoration: none;
+  font-size: 11px;
+  font-style: normal;
+}

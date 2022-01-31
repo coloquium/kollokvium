@@ -10,10 +10,8 @@ import { AppLogger } from './Helpers/AppLogger';
 
 const appConfig = require("./settings.json");
 export class AppDomain {
-
     
     static logger: ILogger = new AppLogger(appConfig.logToConsole);
-
 
     static get supportsE2EE(): boolean {
         return !!window["RTCRtpSender"].prototype["createEncodedStreams"] && appConfig.e2eeSupport;
