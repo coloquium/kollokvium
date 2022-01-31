@@ -433,6 +433,7 @@ i.fa-lock {
 
 .greenscreen-option {
   max-width: 100%;
+  cursor: pointer;
 }
 
 .greenscreen-preview {

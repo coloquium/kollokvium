@@ -783,7 +783,8 @@ export class App extends AppBase {
    */
   constructor() {
     super();
-
+    AppDomain.logger.log(`Kollokvium version ${AppDomain.version}.`);
+  
     this.numUnreadMessages = 0;
     this.participants = new Map<string, AppParticipantComponent>();
 

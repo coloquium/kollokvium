@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.7.24",
+  "version": "1.8.1",
   "description": "",
   "main": "dist/server.js",
   "repository": {
