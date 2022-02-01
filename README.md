@@ -19,9 +19,9 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 ## Feature list  (current)
 
 1. 1-many participants ( P2P Streams )
-2. Instanet messages/Chat  (P2P DataChannels) 
-3. Share files (P2P DataChannels)
-4. Screen sharing, Chooose between tab's, windows or the desktop. (P2P Streams)
+2. Instanet messages/Chat  (P2P DataChannels) with **immediate translation**
+3. Share files (P2P DataChannels) - fast and secure **no uploads**.
+4. Screen sharing, Chooose between tab's, windows or the desktop. - P2P Streams 
 5. Random room generator or user-defined room names
 6. No login and registration required
 7. Multiple stream recording ( record the meeting or single participant ), Recording done locally.
@@ -31,8 +31,9 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 11. Picture-In-Picture support (renders all streams into PiP element)
 12. Active speaker - Indication of who is talking
 13. Active speaker view and grid view 
-14. E2EE , Currently in beta.Require Chrome 84+
+14. E2EE , Currently disabled
 15. Electron clients ( can be found in this repo https://github.com/coloquium/kollokvium-electron )
+16. Virtual backgrounds (secure) - Predefined or custom virtual backgrounds - **clientside only**
 
 ..and more
 
@@ -60,9 +61,9 @@ Our implementation adds advanced video routing concepts such as stream forwardin
 
 ## Planned features / addons
 
-1. Publish the Electron clients 
-2.`broadcast mode` - A view/mode where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
-3.`advanced mode`  - A view/mode that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.
+`broadcast mode` - A view/mode where user can create a room/space for 1-many broadcasts for lectures, presentations and such scenarios 
+
+`advanced mode`  - A view/mode that let's the "organizer" (meeting creator) mute video/audio remotly,kick, ban, lock and set meeting pin-codes etc.  **2022-01-31 - Currently developing ***
 
 
 ## Install 
@@ -70,7 +71,7 @@ Clone the repository and run `npm install`  see package.json for build scripts.
 
 ## Build scripts
 
-TBD
+See package.json ( scripts section/object)
 
 ## Quick deploy guides
 
@@ -83,7 +84,7 @@ that npm start:debug is using a shared wss server hosted by us by default. pleas
 To deploy to Azure you need an Azure account, and you need to create an Azure Wep Application, and a storage account to host the Static Website.
 
 ### Heroku apps
-Fork the repository and connect to Heroku and run deploy.
+Fork the repository and connect to Heroku and run deploy, modify settings.json
 
 ### Deploy front end only 
 If you want to deploy only the front-end as a static site, build the application and copy all the files from dist/client folder to the root of you web application. 
