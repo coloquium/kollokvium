@@ -1,6 +1,6 @@
 {
   "name": "kollokvium",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "",
   "main": "dist/server.js",
   "repository": {
@@ -49,7 +49,7 @@
     "applicationinsights": "^1.8.10",
     "bufferutil": "^4.0.6",
     "express": "^4.17.2",
-    "greenscreenstream": "^3.0.0-beta.2",
+    "greenscreenstream": "^3.0.0-beta.3",
     "hotkeys-js": "^3.8.7",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",
