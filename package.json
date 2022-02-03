@@ -3,6 +3,9 @@
   "version": "1.8.4",
   "description": "",
   "main": "dist/server.js",
+  "engines": {
+    "node": "16.13.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/coloquium/kollokvium.git",

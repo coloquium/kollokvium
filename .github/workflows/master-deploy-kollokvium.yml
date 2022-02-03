@@ -15,10 +15,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Read node from package.json
+      uses: culshaw/read-package-node-version-actions@v1
+      id: package-node-version
+      with:
+        fallback-version: '16.13.2'
+
+    - name: Show version number
+      run: echo "Using node version ${{ steps.package-version.outputs.version }}"
+    
     - name: Set up Node.js version
       uses: actions/setup-node@v1
       with:
-        node-version: '12.x'
+        node-version: '${{ steps.package-version.outputs.version }}'
+
 
     - name: 'Install dependencies, and build'
       env:
