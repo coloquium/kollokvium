@@ -16,10 +16,8 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Read node from package.json
-      uses: tibor19/read-package-node-version-actions@v2.1.0
+      uses: culshaw/read-package-node-version-actions
       id: package-version
-      with:
-        fallback-version: '16.13'
 
     - name: Show version number
       run: echo "Using node version ${{ steps.package-version.outputs.version }}"
