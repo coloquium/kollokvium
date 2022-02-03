@@ -55,7 +55,7 @@ export class GreenScreenComponent extends AppComponent {
         out vec4 fragColor;
         void mainImage( out vec4 fragColor, in vec2 fragCoord )
             {
-                vec2 q = 1. -fragCoord.xy / resolution.xy;                
+                vec2 q = 1. -fragCoord.xy / resolution.xy;                      
                 vec3 bg = texture( background, q ).xyz;
                 vec3 fg = texture( webcam, q ).xyz;                
                 vec3 dom = vec3(0,1.0,0);                
@@ -128,7 +128,7 @@ export class GreenScreenComponent extends AppComponent {
                 </button>
                 </div>
                 <div class="mb-3 hide" id="gss-custom-form">
-                <label for="gss-custom" class="form-label">Pick a image/label>
+                <label for="gss-custom" class="form-label">Pick a image</label>
                 <input class="form-control" type="file" id="gss-custom" accept="image/*">
               </div>
                 </div>
