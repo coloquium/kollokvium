@@ -64,19 +64,23 @@
     "yargs": "^15.4.1"
   },
   "devDependencies": {
+    "@opentelemetry/api": "^1.0.4",
+    "@opentelemetry/tracing": "^0.24.0",
     "@types/bootstrap": "^4.6.1",
     "@types/express": "^4.17.13",
     "@types/jquery": "^3.5.13",
     "@types/ws": "^5.1.0",
     "@types/yargs": "^15.0.14",
-    "concurrently": "^5.3.0",
-    "copy-webpack-plugin": "^5.1.2",
+    "applicationinsights-native-metrics": "^0.0.7",
+    "concurrently": "^7.0.0",
+    "copy-webpack-plugin": "^10.2.4",
     "cross-env": "^7.0.3",
     "html-webpack-plugin": "^4.5.2",
+    "node-loader": "^2.0.0",
     "ts-loader": "^6.2.2",
     "typescript": "^3.9.10",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.3"
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
   }
 }
