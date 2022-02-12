@@ -6,11 +6,15 @@
   font-weight: 400;
   src: url('../webfonts/nanum-gothic-v17-latin-regular.eot');
   /* IE9 Compat Modes */
-  src: local('NanumGothic'), url('../webfonts/nanum-gothic-v17-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  url('../webfonts/nanum-gothic-v17-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-  url('../webfonts/nanum-gothic-v17-latin-regular.woff') format('woff'), /* Modern Browsers */
-  url('../webfonts/nanum-gothic-v17-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-  url('../webfonts/nanum-gothic-v17-latin-regular.svg#NanumGothic') format('svg');
+  src: local('NanumGothic'), url('../webfonts/nanum-gothic-v17-latin-regular.eot?#iefix') format('embedded-opentype'),
+    /* IE6-IE8 */
+    url('../webfonts/nanum-gothic-v17-latin-regular.woff2') format('woff2'),
+    /* Super Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-regular.woff') format('woff'),
+    /* Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-regular.ttf') format('truetype'),
+    /* Safari, Android, iOS */
+    url('../webfonts/nanum-gothic-v17-latin-regular.svg#NanumGothic') format('svg');
   /* Legacy iOS */
 }
 
@@ -22,11 +26,15 @@
   font-weight: 800;
   src: url('../webfonts/nanum-gothic-v17-latin-800.eot');
   /* IE9 Compat Modes */
-  src: local('NanumGothic ExtraBold'), local('NanumGothic-ExtraBold'), url('../webfonts/nanum-gothic-v17-latin-800.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  url('../webfonts/nanum-gothic-v17-latin-800.woff2') format('woff2'), /* Super Modern Browsers */
-  url('../webfonts/nanum-gothic-v17-latin-800.woff') format('woff'), /* Modern Browsers */
-  url('../webfonts/nanum-gothic-v17-latin-800.ttf') format('truetype'), /* Safari, Android, iOS */
-  url('../webfonts/nanum-gothic-v17-latin-800.svg#NanumGothic') format('svg');
+  src: local('NanumGothic ExtraBold'), local('NanumGothic-ExtraBold'), url('../webfonts/nanum-gothic-v17-latin-800.eot?#iefix') format('embedded-opentype'),
+    /* IE6-IE8 */
+    url('../webfonts/nanum-gothic-v17-latin-800.woff2') format('woff2'),
+    /* Super Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-800.woff') format('woff'),
+    /* Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-800.ttf') format('truetype'),
+    /* Safari, Android, iOS */
+    url('../webfonts/nanum-gothic-v17-latin-800.svg#NanumGothic') format('svg');
   /* Legacy iOS */
 }
 
@@ -38,11 +46,15 @@
   font-weight: 700;
   src: url('../webfonts/nanum-gothic-v17-latin-700.eot');
   /* IE9 Compat Modes */
-  src: local('NanumGothic Bold'), local('NanumGothic-Bold'), url('../webfonts/nanum-gothic-v17-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  url('../webfonts/nanum-gothic-v17-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
-  url('../webfonts/nanum-gothic-v17-latin-700.woff') format('woff'), /* Modern Browsers */
-  url('../webfonts/nanum-gothic-v17-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
-  url('../webfonts/nanum-gothic-v17-latin-700.svg#NanumGothic') format('svg');
+  src: local('NanumGothic Bold'), local('NanumGothic-Bold'), url('../webfonts/nanum-gothic-v17-latin-700.eot?#iefix') format('embedded-opentype'),
+    /* IE6-IE8 */
+    url('../webfonts/nanum-gothic-v17-latin-700.woff2') format('woff2'),
+    /* Super Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-700.woff') format('woff'),
+    /* Modern Browsers */
+    url('../webfonts/nanum-gothic-v17-latin-700.ttf') format('truetype'),
+    /* Safari, Android, iOS */
+    url('../webfonts/nanum-gothic-v17-latin-700.svg#NanumGothic') format('svg');
   /* Legacy iOS */
 }
 
@@ -63,8 +75,9 @@ main {
   width: 100%;
   overflow: hidden;
 }
-main.no-background{
-  background-image:none;
+
+main.no-background {
+  background-image: none;
   background-color: #333;
 }
 
@@ -225,10 +238,10 @@ main .overlay {
   cursor: pointer;
 }
 
-#main-bar{
-  min-height:70px;
+#main-bar {
+  min-height: 70px;
   background: rgba(0, 0, 0, 0.7);
-  color:#fff;
+  color: #fff;
 }
 
 
@@ -513,6 +526,7 @@ i.fa-lock {
   from {
     opacity: 1;
   }
+
   to {
     opacity: 0;
   }
@@ -541,9 +555,11 @@ i.fa-lock {
   .remote {
     top: 180px;
   }
+
   .fa-2x {
     font-size: 1.2rem;
   }
+
   .local {
     position: absolute;
     top: 60px;
@@ -553,6 +569,7 @@ i.fa-lock {
     max-height: 100px;
     object-fit: cover;
   }
+
   .local video {
     max-width: 100px;
     max-height: 100px;
@@ -591,13 +608,15 @@ i.fa-lock {
     margin-left: -80px;
 
   }
+
   #sidebar.active {
     margin-left: 0;
   }
- #sidebar-controls i{
-    margin-bottom:10px;
+
+  #sidebar-controls i {
+    margin-bottom: 10px;
   }
-  
+
 }
 
 #sidebar {
@@ -624,8 +643,33 @@ i.fa-lock {
   display: block;
 }
 
-.chat-translation{
+.chat-translation {
   text-decoration: none;
   font-size: 11px;
   font-style: normal;
+}
+
+.gss-imagelist {
+  max-height: 466;
+
+  overflow: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+
+#gss-loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 400px;
+  
+  padding: 2rem;
+
+  top: 220;
+  
+  z-index: 100;
+  
+  
 }
