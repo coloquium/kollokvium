@@ -2,6 +2,7 @@ import { AppComponent } from './AppComponent';
 import { GreenScreenMethod, GreenScreenStream } from 'greenscreenstream';
 import { DOMUtils } from '../Helpers/DOMUtils';
 import { Utils } from 'thor-io.client-vnext';
+import { App } from '../app';
 export class GreenScreenComponent extends AppComponent {
 
 
@@ -32,8 +33,6 @@ export class GreenScreenComponent extends AppComponent {
         this.backgrounds.push('/img/greenscreen/costarica.jpg');
         this.backgrounds.push('/img/greenscreen/desert.jpg');
         this.backgrounds.push('/img/greenscreen/beach.jpg');
-
-
         this.background = this.backgrounds[0]; // set first as default
         this.canvas = document.createElement("canvas") as HTMLCanvasElement;
         this.canvas.width = 640; this.canvas.height = 360;
@@ -46,14 +45,7 @@ export class GreenScreenComponent extends AppComponent {
 
     init(src: string, _fps: number = 25): Promise<boolean> {
 
-
-
-
-
         return new Promise<boolean>((resolve, reject) => {
-
-
-
             this.fps = _fps;
             this.gss = new GreenScreenStream(GreenScreenMethod.VirtualBackground, this.canvas, this.canvas.width, this.canvas.height);
 
@@ -84,7 +76,6 @@ export class GreenScreenComponent extends AppComponent {
         `;
 
             this.gss.initialize(src).then(p => {
-
                 this.gss.addVideoTrack(this.mediaTrack).then(s => {
                     const v = DOMUtils.get<HTMLVideoElement>("video#preview");
                     this.capturedStream = this.gss.captureStream(this.fps);
@@ -92,16 +83,38 @@ export class GreenScreenComponent extends AppComponent {
                     this.gss.start(_fps);
                     DOMUtils.get("#gss-loader").classList.add("hide");
                     resolve(true);
-
-
                 });
-
             }).catch(err => {
                 resolve(false)
                 console.error(err)
             });
         });
+    }
 
+    scaleImage(image: HTMLImageElement): Promise<HTMLImageElement> {
+        return new Promise<HTMLImageElement>((resolve, reject) => {
+            createImageBitmap(image, {
+                resizeWidth: this.canvas.width
+                , resizeHeight: this.canvas.height, resizeQuality: 'high'
+            }).then(bm => {
+                const canvas = document.createElement('canvas');
+
+                canvas.width = bm.width;
+                canvas.height = bm.height;
+
+
+                console.log(`${bm.width} x ${bm.height} is the image size`)
+        
+
+                const ctx = canvas.getContext('bitmaprenderer');
+                ctx.transferFromImageBitmap(bm);
+                canvas.toBlob(blob => {
+                    var img = document.body.appendChild(new Image());
+                    img.src = URL.createObjectURL(blob);
+                    resolve(img);
+                });
+            }).catch(reject)
+        });
     }
 
 
@@ -230,21 +243,23 @@ export class GreenScreenComponent extends AppComponent {
                 const base64 = e.target.result;
                 const image = new Image();
                 image.addEventListener("load", () => {
-                    if (!this.capturedStream) {
-                        this.init(image.src).then(r => {
-                            DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false
-                        });
-
-                    } else {
-                        this.gss.backgroundSource = image;
-                    } DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false
+                    // scale and resize image provided by user to SD 16:9
+                    this.scaleImage(image).then(scaled => {                      
+                        if (!this.capturedStream) {
+                            this.init(scaled.src).then(r => {
+                                DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false
+                            });
+                        } else {
+                            this.gss.backgroundSource = scaled;
+                        }
+                        DOMUtils.get<HTMLButtonElement>("#apply-virtualbg").disabled = false
+                    })
                 }
                 );
                 image.src = base64;
             }
             reader.readAsDataURL(file)
         });
-
         DOMUtils.get("#enable-custom-gss", dom).addEventListener("click", () => {
             if (!this.capturedStream) {
                 this.init(this.backgrounds[0]);
