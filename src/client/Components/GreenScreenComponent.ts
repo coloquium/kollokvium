@@ -17,6 +17,7 @@ export class GreenScreenComponent extends AppComponent {
     canvas: HTMLCanvasElement;
     fps: number;
 
+    
     constructor(public id: string) {
 
 
