@@ -1,8 +1,7 @@
 import { AppComponent } from './AppComponent';
-import { GreenScreenMethod, GreenScreenStream } from 'greenscreenstream';
 import { DOMUtils } from '../Helpers/DOMUtils';
-import { Utils } from 'thor-io.client-vnext';
 import { App } from '../app';
+import { GreenScreenMethod, GreenScreenStream, VideoResolution } from '@virtualscenery/greenscreenstream';
 export class GreenScreenComponent extends AppComponent {
 
 
@@ -47,7 +46,7 @@ export class GreenScreenComponent extends AppComponent {
 
         return new Promise<boolean>((resolve, reject) => {
             this.fps = _fps;
-            this.gss = new GreenScreenStream(GreenScreenMethod.VirtualBackground, this.canvas, this.canvas.width, this.canvas.height);
+            this.gss = new GreenScreenStream(GreenScreenMethod.VirtualBackground,VideoResolution.SD,this.canvas);
 
             this.gss.bufferVert = `
         uniform float time;
