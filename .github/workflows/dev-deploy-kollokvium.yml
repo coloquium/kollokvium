@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: 'Set up Node.js'
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '12.x'
+        node-version: '16.x'
 
     - name: 'Install dependencies, and build'
       env:
@@ -29,7 +29,7 @@ jobs:
         npm run build --if-present
 
     - name: 'Deploy to Azure Web App'
-      uses: azure/webapps-deploy@v1
+      uses: azure/webapps-deploy@v2
       with:
         app-name: 'dev-kollokvium'
         slot-name: 'production'
@@ -37,7 +37,7 @@ jobs:
         package: './dist'
 
     - name: 'Deploy to Azure Storage'
-      uses: tibor19/static-website-deploy@v1
+      uses: tibor19/static-website-deploy@v2
       with:
         enabled-static-website: 'true'
         remove-existing-files: 'true'
