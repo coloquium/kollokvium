@@ -70,12 +70,12 @@
     "@types/ws": "^5.1.0",
     "@types/yargs": "^15.0.14",
     "concurrently": "^5.3.0",
-    "copy-webpack-plugin": "^5.1.2",
+    "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
     "html-webpack-plugin": "^4.5.2",
     "ts-loader": "^6.2.2",
     "typescript": "^3.9.10",
-    "webpack": "^4.46.0",
+    "webpack": "^5.75.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^4.11.1"
   }
