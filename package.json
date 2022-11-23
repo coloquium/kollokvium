@@ -58,7 +58,7 @@
     "mediastreamblender": "^1.0.0-beta.4",
     "thor-io.client-vnext": "^2.2.0-beta.3",
     "thor-io.vnext": "^2.0.6",
-    "utf-8-validate": "^5.0.8",
+    "utf-8-validate": "^5.0.10",
     "webrtc-adapter": "^7.7.1",
     "ws": "^7.5.6",
     "yargs": "^15.4.1"
