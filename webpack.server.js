@@ -10,12 +10,17 @@ const package = require('./package.json');
 
 module.exports = {
   target: "node",
+  mode: process.env.WEBPACK_DEV_SERVER ? "development" : "production",
   watch: false,
   entry: {
     server: Path.join(sourceFolder, 'backend', 'server.ts')
   },
   module: {
     rules: [
+      {
+        test: /\.node$/,
+        loader: "node-loader",
+      },      
       {
         test: /\.ts$/,
         use: {
@@ -25,7 +30,9 @@ module.exports = {
     ],
   },
   plugins: [
-    new CopyPlugin(assetFolders.map(folder => new Object({ from : Path.join(sourceFolder, folder), to: folder}))),
+    new CopyPlugin({
+      patterns: assetFolders.map(folder => new Object({ from : Path.join(sourceFolder, folder), to: folder}))
+    }),
     new Webpack.DefinePlugin({
       'process.env.KOLLOKVIUM_VERSION': JSON.stringify(process.env.KOLLOKVIUM_VERSION || package.version)
     })

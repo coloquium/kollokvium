@@ -27,7 +27,12 @@ module.exports = {
   },
   plugins: [
 
-    new CopyPlugin(assetFolders.map(folder => new Object({ from: Path.join(sourceFolder, folder), to: folder }))),
+    new CopyPlugin({
+      patterns: assetFolders.map(folder => new Object({ from: Path.join(sourceFolder, folder), to: folder })),
+      options: {
+        concurrency: 100,
+      }
+    }),
 
     new HtmlWebpackPlugin({
       template: Path.join(sourceFolder, 'index.html')
