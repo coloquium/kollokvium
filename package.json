@@ -58,7 +58,7 @@
     "applicationinsights-native-metrics": "^0.0.8",
     "bufferutil": "^4.0.7",
     "express": "^4.18.2",
-    "hotkeys-js": "^3.8.7",
+    "hotkeys-js": "^3.10.1",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",
     "thor-io.client-vnext": "^2.2.0-beta.5",
