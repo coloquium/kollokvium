@@ -48,7 +48,7 @@ export class BrowserInfo {
         let version = navigator.appVersion;
         let userAgent = navigator.userAgent;
         const isMobileDevice = !!(/Android|webOS|iPhone|iPad|iPod|BB10|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(navigator.userAgent || ''));
-        const isEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveOrOpenBlob || !!navigator.msSaveBlob);
+        const isEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!(<any>navigator).msSaveOrOpenBlob || !!(<any>navigator).msSaveBlob);
         const isOpera = !!window["opera"] || navigator.userAgent.indexOf(' OPR/') >= 0;
         const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1 && ('netscape' in window) && / rv:/.test(navigator.userAgent);
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
