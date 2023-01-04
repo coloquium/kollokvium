@@ -10,8 +10,9 @@ import yargs from 'yargs';
 
 import { ThorIO } from 'thor-io.vnext';
 import { Broker } from './controllers/broker';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
-console.clear();
 
 let port = +process.env.PORT;
 let server: http.Server | https.Server;
@@ -92,4 +93,4 @@ ws.on('connection', (ws, req) => {
 
 server.listen(port);
 
-console.log(`Kollokvium version ${process.env.KOLLOKVIUM_VERSION} is listening on ${port}`);
+console.log(`Kollokvium version ${process.env.KOLLOKVIUM_VERSION} is listening on ${port} , openAI key ${process.env.OPENAIKEY}`);
