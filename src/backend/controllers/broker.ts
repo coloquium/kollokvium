@@ -10,6 +10,8 @@ import { defaultClient as appInsightsClient } from 'applicationinsights';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
 import { Utils } from 'thor-io.client-vnext';
 import { Configuration, OpenAIApi } from 'openai';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @ControllerProperties("broker", false, 5 * 1000)
 export class Broker extends ControllerBase {
@@ -20,6 +22,8 @@ export class Broker extends ControllerBase {
     constructor(connection: Connection) {
         super(connection);
         this.connections = new Array<ExtendedPeerConnection>();
+
+   
     }
     onopen() {
         if (this.queryParameters.has("context") && this.queryParameters.has("peerId")) {
@@ -145,9 +149,10 @@ export class Broker extends ControllerBase {
     }
 
     @CanInvoke(true)
-    textCompletion(data:{prompt:string}){             
+    textCompletion(data:{prompt:string}){     
+        console.log( process.env.OPENAIKEY);        
         const configuration = new Configuration({
-            apiKey: "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"
+            apiKey: process.env.OPENAIKEY || ""
         });           
         const openai = new OpenAIApi(configuration);      
         const sendRequest = async (q:string) => {        
@@ -172,9 +177,11 @@ export class Broker extends ControllerBase {
     }
 
     @CanInvoke(true)
-    askAI(data:{prompt:string}){             
+    askAI(data:{prompt:string}){    
+        console.log( process.env.OPENAIKEY);        
+          
         const configuration = new Configuration({
-            apiKey: "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"
+            apiKey: process.env.OPENAIKEY || ""
         });           
         const openai = new OpenAIApi(configuration);      
         const sendRequest = async (q:string) => {        
