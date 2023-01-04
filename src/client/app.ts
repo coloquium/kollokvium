@@ -139,12 +139,12 @@ export class App extends AppBase {
   shareScreen() {
 
     // displaymediastreamconstraints typings seems to be incomplete
-    const gdmOptions:any = 
-      {
-        video:true,
-        cursor: "always",
-        audio:false,
-      };
+    const gdmOptions: any =
+    {
+      video: true,
+      cursor: "always",
+      audio: false,
+    };
 
     navigator.mediaDevices["getDisplayMedia"](gdmOptions)
       .then((stream: MediaStream) => {
@@ -253,9 +253,8 @@ export class App extends AppBase {
    * @memberof App
    */
   updatePageTitle() {
-    document.title = `(${this.numOfPeers + 1}) Kollokvium  - ${
-      this.slug
-    } | A free multi-party video conference for you and your friends!`;
+    document.title = `(${this.numOfPeers + 1}) Kollokvium  - ${this.slug
+      } | A free multi-party video conference for you and your friends!`;
   }
 
   /**
@@ -514,14 +513,17 @@ export class App extends AppBase {
     this.factory.getController("broker").invoke("onliners", {}); // refresh onliners
   }
 
-  private onContextCreated() {}
+  private onContextCreated() { }
 
   private onContextChanged() {
     this.rtc.connectContext();
   }
 
-  private onLocalStream() {}
+  private onLocalStream() { }
   private onTranscript(data: any) {
+
+
+
     let parent = DOMUtils.get(`.subs${data.peerId}`);
     if (parent) {
       let targetLanguage = UserSettings.language || navigator.language;
@@ -551,7 +553,7 @@ export class App extends AppBase {
             this.journalComponent.add(data.sender, data.text, "", data.lang);
           });
       } else {
-        this.journalComponent.add(data.sender, data.text, "", data.lang);
+        this.journalComponent.add(data.sender, data.text, data.text, data.lang);
         this.addSubtitles(parent, data.text);
       }
     }
@@ -580,7 +582,7 @@ export class App extends AppBase {
         .then((result) => {
           Transcriber.textToSpeech(result, targetLanguage);
         })
-        .catch(() => {});
+        .catch(() => { });
     } else {
       Transcriber.textToSpeech(data.text, targetLanguage);
     }
@@ -729,7 +731,9 @@ export class App extends AppBase {
       `arbitrary-${AppDomain.contextPrefix}-dc`
     );
 
-    this.chatComponent = new ChatComponent(this.arbitraryChannel, UserSettings);
+    this.journalComponent = new JournalComponent(this.factory, this.arbitraryChannel);
+    this.chatComponent = new ChatComponent(this.arbitraryChannel, this.journalComponent,this.factory,
+      UserSettings);
 
     this.fileshareComponent = new FileShareComponent(
       this.rtc.createDataChannel(`blob-${AppDomain.contextPrefix}-dc`),
@@ -784,7 +788,7 @@ export class App extends AppBase {
   constructor() {
     super();
     AppDomain.logger.log(`Kollokvium version ${AppDomain.version}.`);
-  
+
     this.numUnreadMessages = 0;
     this.participants = new Map<string, AppParticipantComponent>();
 
@@ -1118,7 +1122,7 @@ export class App extends AppBase {
             lang: lang,
             sender: UserSettings.nickname,
           });
-          this.journalComponent.add(UserSettings.nickname, result, "", lang);
+          this.journalComponent.add(UserSettings.nickname, result, result, lang);
         };
         this.transcriber.start();
         this.generateSubtitles.classList.toggle("flash");
@@ -1298,9 +1302,11 @@ export class App extends AppBase {
 
     DOMUtils.on("click", this.startButton, () => {
       this.enableConferenceElements();
-      this.journalComponent = new JournalComponent();
+
+
       UserSettings.slugHistory.addToHistory(this.contextName.value);
       UserSettings.save();
+
       this.factory.getController("broker").invoke("changeContext", {
         context: AppDomain.getSlug(this.contextName.value),
         audio: MediaUtils.checkStream(
@@ -1372,7 +1378,7 @@ export class App extends AppBase {
         });
       });
 
-      AppDomain.logger.serialize().then ( appLog => {
+      AppDomain.logger.serialize().then(appLog => {
         let blobUrl = window.URL.createObjectURL(new Blob([appLog], { type: "text/html" }));
         var a = document.createElement("a");
         a.href = blobUrl;
@@ -1380,7 +1386,7 @@ export class App extends AppBase {
         a.click();
       });
 
-      
+
       e.preventDefault();
     });
 
@@ -1413,6 +1419,7 @@ export class App extends AppBase {
     this.initialize({ ts: performance.now() })
       .then((broker: any) => {
         this.onInitlialized(broker);
+
         this.factory.onClose = (reason: any) => {
           AppDomain.logger.error("Lost connection", reason);
           if (this.numReconnects < 10) {

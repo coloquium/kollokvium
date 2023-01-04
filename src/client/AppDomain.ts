@@ -53,6 +53,12 @@ export class AppDomain {
         let result = location.protocol + "//" + host + (port.length > 0 ? ":" + port : "");
         return result;
     }
+
+
+    static getOpenAIKEY(){
+        return appConfig.openaiKey;
+    }
+
     static getServerUrl() {
         const serverUrl = process.env.WSS_SERVER_URL || appConfig.serverUrl;
 

@@ -1,5 +1,5 @@
+<!DOCTYPE html>
 <html lang="en-US">
-
 <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160656421-1"></script>
@@ -123,6 +123,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-info" id="btn-summarize" >Summarize</button>
                             <button type="button" class="btn btn-primary" id="generate-journal">Download</button>
                         </div>
                     </div>
@@ -157,9 +158,14 @@
                             <span aria-hidden="true">&times;</span>
                         </span>
                     </div>
-                    <div class="card-body" style="overflow:auto">
-                        <p class="card-text" id="chat-messages">
-                        </p>
+                    <div class="card-body">       
+                        <div class="d-flex justify-content-end">
+                           Want to ask AI for help?  just type i.e ' @ai who is elvis? '
+                        </div>                                         
+                        <div style="overflow:auto">
+                            <p class="card-text" id="chat-messages" >
+                            </p>
+                        </div>
                     </div>
                     <div class="card-footer">
                         <div class="form">

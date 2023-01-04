@@ -6,9 +6,10 @@ import {
     Signal,
 } from 'thor-io.vnext'
 
+import { defaultClient as appInsightsClient } from 'applicationinsights';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
 import { Utils } from 'thor-io.client-vnext';
-import { defaultClient as appInsightsClient } from 'applicationinsights';
+import { Configuration, OpenAIApi } from 'openai';
 
 @ControllerProperties("broker", false, 5 * 1000)
 export class Broker extends ControllerBase {
@@ -27,7 +28,7 @@ export class Broker extends ControllerBase {
             appInsightsClient && appInsightsClient.trackTrace({ message: "contecrReconnected" });
         } else {
             this.peer = new ExtendedPeerConnection(Utils.newGuid(), Utils.newGuid());
-            appInsightsClient && appInsightsClient.trackTrace({ message: "contextCreated" });
+           appInsightsClient && appInsightsClient.trackTrace({ message: "contextCreated" });
         }
         this.invoke(this.peer, "contextCreated", this.alias);
     }
@@ -41,7 +42,7 @@ export class Broker extends ControllerBase {
             return pre.peer.context == this.peer.context;
         };
         this.invokeTo(expression, this.peer, "lockContext", this.alias);
-        appInsightsClient && appInsightsClient.trackTrace({ message: "lockContext" });
+       appInsightsClient && appInsightsClient.trackTrace({ message: "lockContext" });
     }
     @CanInvoke(true)
     isRoomLocked(slug: string) {
@@ -74,7 +75,7 @@ export class Broker extends ControllerBase {
             appInsightsClient && appInsightsClient.trackTrace({ message: "contextChanged" });
         } else {
             this.invoke(this.peer, "contextChangedFailure", this.alias);
-            appInsightsClient && appInsightsClient.trackTrace({ message: "contextChangedFailure" });
+           appInsightsClient && appInsightsClient.trackTrace({ message: "contextChangedFailure" });
         }
     }
     @CanInvoke(true)
@@ -115,7 +116,7 @@ export class Broker extends ControllerBase {
             }
         ); // self also..
         this.invoke(onliners, "onliners");
-        appInsightsClient && appInsightsClient.trackTrace({ message: "onliners" });
+       appInsightsClient && appInsightsClient.trackTrace({ message: "onliners" });
     }
     @CanInvoke(true)
     ping(ts: number) {
@@ -128,6 +129,7 @@ export class Broker extends ControllerBase {
             name: 'context',
             value: this.connections.length
         });
+
         appInsightsClient && appInsightsClient.trackTrace({ message: "isAlive" });
     }
 
@@ -141,6 +143,62 @@ export class Broker extends ControllerBase {
             this.invoke(match, "whois");
         }
     }
+
+    @CanInvoke(true)
+    textCompletion(data:{prompt:string}){             
+        const configuration = new Configuration({
+            apiKey: "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"
+        });           
+        const openai = new OpenAIApi(configuration);      
+        const sendRequest = async (q:string) => {        
+            const completionResponse = await openai.createCompletion({
+                echo: false,
+                model: "text-davinci-003",
+                prompt: q,
+                temperature: .7,
+                max_tokens: 256,
+                top_p: 1,
+                frequency_penalty: 0,
+                presence_penalty: 0,
+                stream: false,
+                stop: ["{}"],
+            });
+            return completionResponse.data;            
+        };
+
+        sendRequest(data.prompt).then( r => {         
+            this.invoke(r,"textCompletionResult");
+        });                 
+    }
+
+    @CanInvoke(true)
+    askAI(data:{prompt:string}){             
+        const configuration = new Configuration({
+            apiKey: "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"
+        });           
+        const openai = new OpenAIApi(configuration);      
+        const sendRequest = async (q:string) => {        
+            const completionResponse = await openai.createCompletion({
+                echo: false,
+                model: "text-davinci-003",
+                prompt: q,
+                temperature: .9,
+                max_tokens: 256,
+                top_p: 1,
+                frequency_penalty: 0,
+                presence_penalty: 0,
+                stream: false,
+                stop: ["{}"],
+            });
+            return completionResponse.data;            
+        }
+
+        sendRequest(data.prompt).then( r => {
+         
+            this.invoke(r,"askAI")
+        });                 
+    }
+
     getOnliners(): Array<any> {
         return this.getExtendedPeerConnections(this.peer).map((p: Broker) => {
             return {
@@ -149,11 +207,11 @@ export class Broker extends ControllerBase {
             };
         });
     }
+
     getExtendedPeerConnections(peerConnetion: ExtendedPeerConnection): Array<ControllerBase> {
         let match = this.findOn(this.alias, (pre: Broker) => {
             return pre.peer.context === this.peer.context && pre.peer.peerId !== peerConnetion.peerId;
         });
         return match;
-    }
-
+    }    
 }
