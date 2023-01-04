@@ -109,6 +109,10 @@ export class Transcriber {
             this.isRunning = true;
         }
         this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+
+
+       
+
             let interim = '';
             let final = "";
             for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -224,6 +228,8 @@ export class Transcriber {
                 method: "POST",
                 body: JSON.stringify(payload)
             });
+
+            
             result.then((response: Response) => {
                 response.json().then((result) => {
                     if (Array.isArray(result.data.translations)) {

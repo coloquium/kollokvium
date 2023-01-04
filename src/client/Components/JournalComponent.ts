@@ -1,9 +1,37 @@
+import { ClientFactory, Controller, DataChannel } from "thor-io.client-vnext";
 import { DOMUtils } from "../Helpers/DOMUtils";
+import { IChatAIResponse } from "./ChatComponent";
 
 export class JournalComponent {
     data: any[];
-    constructor() {
+    controller: Controller;
+    constructor(public clientFactory: ClientFactory, public dc: DataChannel) {
         this.data = new Array<any>();
+        this.controller = this.clientFactory.getController("broker") as Controller;
+
+
+        DOMUtils.on("click", DOMUtils.get("#btn-summarize"), (e) => {
+            const textToSummarize = this.data.map((p) => {
+                return `${p.sender}:${p.text}`
+            }).join("\n");
+
+            this.controller.invoke("textCompletion", {
+                prompt: `Turn chat into a summary:${textToSummarize}`
+            });
+        });
+
+        this.controller.on("textCompletionResult", (r: IChatAIResponse) => {
+            const data = {
+                text: r.choices[0].text,
+                from: "OPENAI",
+                language: "en"
+            }
+            this.dc.invoke("chatMessage", data);
+            this.add("OPENAI", data.text, data.text, "en");
+            this.refresh(); 
+        });
+
+
     }
     add(sender: string, text: string, originText: string, language: string) {
         this.data.push({
@@ -12,12 +40,13 @@ export class JournalComponent {
             originText: originText,
             text: text,
             language: language
-        });        
+        });
+    
     }
 
 
 
-    download(){
+    download() {
         let result = this.render();
 
         let data = `
@@ -41,15 +70,21 @@ export class JournalComponent {
         </html>
         `;
 
-       
-            let blob = new Blob([data], {type: "text/html"});
-            let blobUrl = window.URL.createObjectURL(blob);
-            var a = document.createElement("a");
-            a.href = blobUrl;
-            a.download = `${Math.random().toString(36).substring(8)}.html`;
-            a.click();
-        
-        
+
+        let blob = new Blob([data], { type: "text/html" });
+        let blobUrl = window.URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `${Math.random().toString(36).substring(8)}.html`;
+        a.click();
+
+
+    }
+
+    refresh(): void {
+
+        DOMUtils.get("#journal-content div.journal").remove();
+        DOMUtils.get("#journal-content").append(this.render());
     }
 
     render(): HTMLElement {
