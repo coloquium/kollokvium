@@ -21,15 +21,16 @@ export class ChatComponent extends AppComponent {
   
     constructor(public dc: DataChannel,        
         public journal: JournalComponent,
+        public clientFactory: ClientFactory,
         public userSettings: UserSettings) {
         super();
         this.language = UserSettings.language;
 
-       // this.controller = this.clientFactory.getController("broker") as Controller;
+       this.controller = this.clientFactory.getController("broker") as Controller;
 
-        // this.controller.on("askAI", (r: IChatAIResponse) => {           
-        //     this.sendMessage("AI", r.choices[0].text + "{}")                      
-        // });
+        this.controller.on("askAI", (r: IChatAIResponse) => {           
+            this.sendMessage("AI", r.choices[0].text + "{}")                      
+        });
 
         
         this.dc.on("chatMessage", (data: any) => {
@@ -44,30 +45,20 @@ export class ChatComponent extends AppComponent {
 
         DOMUtils.on("keydown", this.chatMessage, (e) => {
             if (e.keyCode == 13) {
-
                 let text = this.chatMessage.value;
-
-                console.log(text,text.startsWith("@ai"));
-
                 if(text.startsWith("@ai")){
-
-                    console.log("asking ai",text);
-
                     this.controller.invoke("askAI", {
                         prompt: text.replace("@ai","")
                     });
-
-                 
-                    
-                }else                     
-                this.sendMessage(UserSettings.nickname, text)
-               
-
+                    this.sendMessage(UserSettings.nickname, `Asking AI:${text.replace("@ai","")}`);                    
+                
+                }else {
+                    this.sendMessage(UserSettings.nickname, text)
+                }     
                 this.chatMessage.value = "";
             }
         });
       
-        
     }
 
 

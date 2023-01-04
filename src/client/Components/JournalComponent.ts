@@ -41,6 +41,8 @@ export class JournalComponent {
             text: text,
             language: language
         });
+
+        this.refresh(); 
     
     }
 

@@ -20,7 +20,6 @@ export class Broker extends ControllerBase {
     constructor(connection: Connection) {
         super(connection);
         this.connections = new Array<ExtendedPeerConnection>();
-        console.log("created a controller");
     }
     onopen() {
         if (this.queryParameters.has("context") && this.queryParameters.has("peerId")) {
@@ -165,11 +164,10 @@ export class Broker extends ControllerBase {
                 stop: ["{}"],
             });
             return completionResponse.data;            
-        }
+        };
 
-        sendRequest(data.prompt).then( r => {
-         
-            this.invoke(r,"textCompletionResult")
+        sendRequest(data.prompt).then( r => {         
+            this.invoke(r,"textCompletionResult");
         });                 
     }
 

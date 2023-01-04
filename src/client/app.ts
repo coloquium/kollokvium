@@ -732,8 +732,7 @@ export class App extends AppBase {
     );
 
     this.journalComponent = new JournalComponent(this.factory, this.arbitraryChannel);
-    
-    this.chatComponent = new ChatComponent(this.arbitraryChannel, this.journalComponent,
+    this.chatComponent = new ChatComponent(this.arbitraryChannel, this.journalComponent,this.factory,
       UserSettings);
 
     this.fileshareComponent = new FileShareComponent(
