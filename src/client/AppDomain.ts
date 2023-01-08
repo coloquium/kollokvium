@@ -37,9 +37,7 @@ export class AppDomain {
     static get host(): string {
         return this.getHost();
     };
-    static get translateKey(): string {
-        return appConfig.translateKey || ""
-    };
+    
 
     static getSlug(value: string): string {
         return `${this.contextPrefix}-${value}`;

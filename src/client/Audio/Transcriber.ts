@@ -1,3 +1,7 @@
+import axios from "axios";
+import { response } from "express";
+import { ClientFactory } from "thor-io.client-vnext";
+
 declare var webkitSpeechRecognition: any;
 
 export class Transcriber {
@@ -79,7 +83,8 @@ export class Transcriber {
             ['日本語', ['ja-JP']],
             ['Lingua latīna', ['la']]];
 
-    constructor(public peeId: string, mediaStream: MediaStream, public lang?: string) {
+    constructor(      
+        public peeId: string, mediaStream: MediaStream, public lang?: string) {
 
         this.recognition = new webkitSpeechRecognition();
         this.recognition.continuous = true;
@@ -110,9 +115,6 @@ export class Transcriber {
         }
         this.recognition.onresult = (event: SpeechRecognitionEvent) => {
 
-
-       
-
             let interim = '';
             let final = "";
             for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -135,7 +137,6 @@ export class Transcriber {
 
 
         this.stop = () => {
-
             if (this.isRunning) {
                 this.isRunning = false;
                 this.recognition.stop();
@@ -146,10 +147,8 @@ export class Transcriber {
             if (!this.isRunning) {
                 this.recognition.start();
             }
-
         };
         if (this.onReady) this.onReady(this);
-
     }
 
 
@@ -215,34 +214,29 @@ export class Transcriber {
         return selectLanguage;
     }
 
-    static translateCaptions(key: string, phrase: string, from: string, to: string): Promise<string> {
 
-
-        let payload = {
-            source: from.indexOf("-") > -1 ? from.substr(0, 2) : from,
-            target: to.indexOf("-") > -1 ? to.substr(0, 2) : to,
-            q: phrase
-        }
-        return new Promise<string>((resolve, reject) => {
-            let result = fetch(`https://www.googleapis.com/language/translate/v2/?key=${key}`, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            });
-
-            
-            result.then((response: Response) => {
-                response.json().then((result) => {
-                    if (Array.isArray(result.data.translations)) {
-                        resolve(result.data.translations[0].translatedText)
-                    } else resolve(phrase);
-                }).catch(() => {
-                    resolve(phrase); // pass non translated text back
-                });
-            }).catch(() => {
-                reject(phrase);
-            })
-        });
-
+     static async translate(text:string,from:string,to:string){
+        const headers = { 'Content-Type': 'application/json' }
+        const data = `Translate "${text}" from ${from} to ${to}.`;
+        return await axios.post("/api/translate/openai/",{
+            prompt: data
+        },{headers});
+    
     }
 
+    static translateCaptions(phrase: string, from: string, to: string): Promise<string> {
+        return new Promise<string>((resolve, reject) => {           
+            const result =  Transcriber.translate(phrase,from,to);
+            result.then( response => {
+                if(response.data.choices.length > 0){
+                    resolve(response.data.choices[0].text);
+                }else reject(phrase);
+            }).catch ( err => {
+                reject(phrase);
+            });
+        });
+    }
 }
+
+
+
