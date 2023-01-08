@@ -1,6 +1,5 @@
 import { BrowserInfo } from "./BrowserInfo";
 import { ILogger } from "./ILogger";
-
 export class AppLogger implements ILogger {
   items: Map<
     string,

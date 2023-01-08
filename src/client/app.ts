@@ -532,9 +532,12 @@ export class App extends AppBase {
         targetLanguage.indexOf("-") > -1
           ? targetLanguage.substr(0, 2)
           : targetLanguage;
-      if (data.lang !== targetLanguage && AppDomain.translateKey) {
+
+
+          
+
+      if (data.lang !== targetLanguage ) {
         Transcriber.translateCaptions(
-          AppDomain.translateKey,
           data.text,
           data.lang,
           UserSettings.language || navigator.language
@@ -552,7 +555,11 @@ export class App extends AppBase {
             this.addSubtitles(parent, data.text);
             this.journalComponent.add(data.sender, data.text, "", data.lang);
           });
+
+          
       } else {
+
+
         this.journalComponent.add(data.sender, data.text, data.text, data.lang);
         this.addSubtitles(parent, data.text);
       }
@@ -572,9 +579,8 @@ export class App extends AppBase {
 
   private onTextToSpeech(data: any) {
     let targetLanguage = UserSettings.language || navigator.language;
-    if (data.lang !== targetLanguage && AppDomain.translateKey) {
+    if (data.lang !== targetLanguage ) {
       Transcriber.translateCaptions(
-        AppDomain.translateKey,
         data.text,
         data.lang,
         UserSettings.language || navigator.language

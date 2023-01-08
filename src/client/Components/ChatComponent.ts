@@ -28,10 +28,9 @@ export class ChatComponent extends AppComponent {
 
        this.controller = this.clientFactory.getController("broker") as Controller;
 
-        this.controller.on("askAI", (r: IChatAIResponse) => {           
+        this.controller.on("askAIResult", (r: IChatAIResponse) => {           
             this.sendMessage("AI", r.choices[0].text + "{}")                      
         });
-
         
         this.dc.on("chatMessage", (data: any) => {
 
@@ -47,9 +46,11 @@ export class ChatComponent extends AppComponent {
             if (e.keyCode == 13) {
                 let text = this.chatMessage.value;
                 if(text.startsWith("@ai")){
+                    
                     this.controller.invoke("askAI", {
                         prompt: text.replace("@ai","")
                     });
+
                     this.sendMessage(UserSettings.nickname, `Asking AI:${text.replace("@ai","")}`);                    
                 
                 }else {
@@ -77,9 +78,9 @@ export class ChatComponent extends AppComponent {
         
         let chatMessages = DOMUtils.get("#chat-messages");
 
-
         if (this.language != msg.language) {
-            Transcriber.translateCaptions(AppDomain.translateKey, msg.text, msg.language, this.language).then(translate => {
+
+            Transcriber.translateCaptions(msg.text, msg.language, this.language).then(translate => {
                 let translated = DOMUtils.makeLink(translate);
                 let template = `<div>
                     <mark>${msg.from}</mark>
@@ -96,6 +97,7 @@ export class ChatComponent extends AppComponent {
                    chatMessages.prepend(DOMUtils.toDOM(template));
             });
 
+
         } else {
             let template = `<div>
                 <mark>${msg.from}</mark>
@@ -104,6 +106,7 @@ export class ChatComponent extends AppComponent {
                 </div>`
             chatMessages.prepend(DOMUtils.toDOM(template));
         }
+        
     }
 
 }

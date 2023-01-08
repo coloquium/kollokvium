@@ -3,9 +3,8 @@
     "host": "",
     "contextPrefix": "kollokvium",
     "serverUrl": "",
-    "version": "1.8.9",
+    "version": "1.9.0",
     "reconnectInterval": 10000,
-    "translateKey": "AIzaSyC79hpb4DKEUgGc6qk3AyTv3ysba2bR_94",
     "openaiKey":"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",
     "logToConsole": true,
     "rtcConfig": {
