@@ -101,7 +101,7 @@ export class JournalComponent {
             sender.textContent = entry.sender;
             line.append(sender);
             let text = document.createElement("span");
-            text.textContent = `${entry.text}`;
+            text.textContent = DOMUtils.linkify(`${entry.text}`);
             line.append(text);
             if (entry.originText.length > 0) {
                 let origin = document.createElement("em");

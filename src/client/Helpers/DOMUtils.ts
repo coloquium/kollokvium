@@ -34,7 +34,14 @@ export class DOMUtils {
         }
         return node;
     }
-    static makeLink(text: string) {
+
+    static prettify(text:string):string{
+        let result = text.replace(/^["'](.+(?=["']$))["']$/, '$1'); // remove qoutes at start and end of string
+        return result;
+    }
+
+    static linkify(text: string) {    
+        text = DOMUtils.prettify(text);
         const regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
         return text.replace(regex, (url: string) => {
             return `<a href="${url}" target="_blank">${url}</a>`;

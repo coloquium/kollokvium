@@ -1,5 +1,5 @@
 
-import express, { response } from 'express';
+import express from 'express';
 import { openAIRequest } from './openAIRequest';
 export const router = express.Router();
 
