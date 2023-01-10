@@ -35,7 +35,7 @@ export class ChatComponent extends AppComponent {
         this.dc.on("chatMessage", (data: any) => {
 
             if (this.onChatMessage) this.onChatMessage(data);       
-            journal.add(data.from,data.text,data.text,"en");
+            journal.add("microphone",data.from,data.text,data.text,"en");
             this.render(data);
 
         });
@@ -70,7 +70,7 @@ export class ChatComponent extends AppComponent {
             language: this.language || navigator.languages[0]
         }        
         this.dc.invoke("chatMessage", data);
-        this.journal.add(data.from,data.text,data.text,this.language);
+        this.journal.add("keyboard",data.from,data.text,data.text,this.language);
         this.render(data);
     }
     render(msg: any) {

@@ -27,14 +27,15 @@ export class JournalComponent {
                 language: "en"
             }
             this.dc.invoke("chatMessage", data);
-            this.add("OPENAI", data.text, data.text, "en");
+            this.add("robot","OPENAI", data.text, data.text, "en");
             this.refresh(); 
         });
 
 
     }
-    add(sender: string, text: string, originText: string, language: string) {
+    add(origin:string,sender: string, text: string, originText: string, language: string) {
         this.data.push({
+            origin: origin,
             time: new Date().toLocaleTimeString().substr(0, 5),
             sender: sender,
             originText: originText,
@@ -100,6 +101,15 @@ export class JournalComponent {
             let sender = document.createElement("mark");
             sender.textContent = entry.sender;
             line.append(sender);
+
+            let origin = document.createElement("i");
+          
+            origin.classList.add("fas");
+            origin.classList.add(`fa-${entry.origin}`)
+            origin.classList.add("mx-2");
+
+            line.append(origin);
+
             let text = document.createElement("span");
             text.textContent = DOMUtils.linkify(`${entry.text}`);
             line.append(text);

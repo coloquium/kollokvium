@@ -544,7 +544,7 @@ export class App extends AppBase {
         )
           .then((result) => {
             this.addSubtitles(parent, result, data.text);
-            this.journalComponent.add(
+            this.journalComponent.add("microphone",
               data.sender,
               result,
               data.text,
@@ -553,14 +553,14 @@ export class App extends AppBase {
           })
           .catch(() => {
             this.addSubtitles(parent, data.text);
-            this.journalComponent.add(data.sender, data.text, "", data.lang);
+            this.journalComponent.add("microphone",data.sender, data.text, "", data.lang);
           });
 
           
       } else {
 
 
-        this.journalComponent.add(data.sender, data.text, data.text, data.lang);
+        this.journalComponent.add("microphone",data.sender, data.text, data.text, data.lang);
         this.addSubtitles(parent, data.text);
       }
     }
@@ -1109,7 +1109,9 @@ export class App extends AppBase {
       }
     );
 
-    DOMUtils.on("click", this.generateSubtitles, () => {
+    const activeTranscriber = () => {
+      $("#subtitles").popover("hide");
+      
       if (!this.transcriber) {
         this.transcriber = new Transcriber(
           this.rtc.localPeerId,
@@ -1128,19 +1130,33 @@ export class App extends AppBase {
             lang: lang,
             sender: UserSettings.nickname,
           });
-          this.journalComponent.add(UserSettings.nickname, result, result, lang);
+          this.journalComponent.add("microphone",UserSettings.nickname, result, result, lang);
         };
         this.transcriber.start();
         this.generateSubtitles.classList.toggle("flash");
         DOMUtils.get(".transcript-bar").classList.remove("hide");
         this.transcriber.onStop = () => {
+
           DOMUtils.get(".transcript-bar").classList.add("hide");
+
           this.generateSubtitles.classList.remove("flash");
           this.transcriber = null;
+
+
+          $("#subtitles").popover("show");
+          setTimeout(() => {
+            $("#subtitles").popover("hide");
+          }, 10000);
+
+          
         };
       } else {
         if (this.transcriber) this.transcriber.stop();
       }
+    }
+
+    DOMUtils.on("click", this.generateSubtitles, () => {
+        activeTranscriber();
     });
 
     DOMUtils.on("click", muteSpeakers, () => {
