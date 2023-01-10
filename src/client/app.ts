@@ -20,6 +20,7 @@ import { SpeechDetector } from "./Audio/SpeechDetector";
 import { AppBase } from "./AppBase";
 import { FileShareComponent } from "./Components/FileshareComponent";
 import { ChatComponent } from "./Components/ChatComponent";
+import { randomName } from "./Helpers/RandomName";
 
 export class App extends AppBase {
   mediaStreamBlender: MediaStreamBlender;
@@ -833,8 +834,12 @@ export class App extends AppBase {
     let videoResolution = DOMUtils.get<HTMLInputElement>("#sel-video-res");
 
     UserSettings.load();
+
+
     UserSettings.cameraResolutions(UserSettings.videoResolution);
     this.nickname.value = UserSettings.nickname;
+   
+    DOMUtils.get("#peerlanguage").textContent = UserSettings.language;
 
     this.audioNodes = new AudioNodes();
     this.mediaStreamBlender = new MediaStreamBlender();
@@ -993,6 +998,11 @@ export class App extends AppBase {
     DOMUtils.on("change", this.languagePicker, () => {
       UserSettings.language = this.languagePicker.value;
       this.chatComponent.language = this.languagePicker.value;
+
+      DOMUtils.get("#peerlanguage").textContent = UserSettings.language;
+
+      //notify broker
+
     });
 
     DOMUtils.on("click", this.lockContext, () => {
@@ -1086,11 +1096,16 @@ export class App extends AppBase {
     });
 
     DOMUtils.on("click", DOMUtils.get("#generate-slug"), () => {
-      this.contextName.value = Math.random()
-        .toString(36)
-        .substring(2)
-        .toLocaleLowerCase();
-      this.startButton.disabled = false;
+
+      // this.contextName.value = Math.random()
+      //   .toString(36)
+      //   .substring(2)
+      //   .toLocaleLowerCase();
+
+        this.contextName.value = randomName()
+
+        this.startButton.disabled = false;
+
     });
 
     DOMUtils.on(
@@ -1111,7 +1126,7 @@ export class App extends AppBase {
 
     const activeTranscriber = () => {
       $("#subtitles").popover("hide");
-      
+
       if (!this.transcriber) {
         this.transcriber = new Transcriber(
           this.rtc.localPeerId,

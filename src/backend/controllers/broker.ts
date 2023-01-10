@@ -149,6 +149,7 @@ export class Broker extends ControllerBase {
         openAIRequest(data.prompt).then(r => {
             this.invoke(r, "textCompletionResult");
         }).catch(err => {
+            console.log(err);
             this.invokeError("Unable to fullfill the openAI Request");
         });
     }
@@ -158,6 +159,7 @@ export class Broker extends ControllerBase {
         openAIRequest(data.prompt).then(r => {
             this.invoke(r, "askAIResult")
         }).catch(err => {
+            console.log(err);
             this.invokeError("Unable to fullfill the openAI Request");
         });
     }

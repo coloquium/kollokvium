@@ -5,6 +5,9 @@ export const openAIRequest = async (prompt: string) => {
         apiKey: process.env.OPENAIKEY || ""
     });
     const openai = new OpenAIApi(configuration);
+
+    console.log(`${prompt} ${process.env.OPENAIKEY}`)
+
     const completionResponse = await openai.createCompletion({
         echo: false,
         model: "text-davinci-003",
