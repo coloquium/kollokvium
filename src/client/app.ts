@@ -345,7 +345,7 @@ export class App extends AppBase {
       p.onanimationend = () => {
         p.remove();
       };
-      p.textContent = text;
+      p.textContent = DOMUtils.prettify(text);
       parent.append(p);
     }
   }
