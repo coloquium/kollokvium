@@ -6,14 +6,12 @@ export const openAIRequest = async (prompt: string) => {
     });
     const openai = new OpenAIApi(configuration);
 
-    console.log(`${prompt} ${process.env.OPENAIKEY}`)
-
     const completionResponse = await openai.createCompletion({
         echo: false,
         model: "text-davinci-003",
         prompt: prompt,
         temperature: .9,
-        max_tokens: 256,
+        max_tokens: 2048,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,

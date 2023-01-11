@@ -9,15 +9,14 @@ import {
 import { defaultClient as appInsightsClient } from 'applicationinsights';
 import { ExtendedPeerConnection } from '../Models/ExtendedPeerConnection';
 import { Utils } from 'thor-io.client-vnext';
-import { openAIRequest } from '../openAIRequest';
 
-
-@ControllerProperties("broker", false, 5 * 1000)
+@ControllerProperties("broker", false, 10 * 1000)
 export class Broker extends ControllerBase {
     peer: ExtendedPeerConnection;
     nickname: string;
     isOrganizer: boolean;
     connections: Array<ExtendedPeerConnection>;
+    language: string;
     constructor(connection: Connection) {
         super(connection);
         this.connections = new Array<ExtendedPeerConnection>();
@@ -108,6 +107,17 @@ export class Broker extends ControllerBase {
             }, "nicknameChange")
     }
     @CanInvoke(true)
+    setLanguage(language: string) {
+        this.language = language;
+        this.invokeTo((pre: Broker) => {
+            return pre.peer.context == this.peer.context;
+        },
+            {
+                nickname: this.nickname, peerId: this.peer.peerId
+            }, "languageChange")
+    }
+
+    @CanInvoke(true)
     onliners() {
         let onliners = this.getOnliners();
         onliners.push(
@@ -143,28 +153,6 @@ export class Broker extends ControllerBase {
             this.invoke(match, "whois");
         }
     }
-
-    @CanInvoke(true)
-    textCompletion(data: { prompt: string }) {
-        openAIRequest(data.prompt).then(r => {
-            this.invoke(r, "textCompletionResult");
-        }).catch(err => {
-            console.log(err);
-            this.invokeError("Unable to fullfill the openAI Request");
-        });
-    }
-
-    @CanInvoke(true)
-    askAI(data: { prompt: string }) {
-        openAIRequest(data.prompt).then(r => {
-            this.invoke(r, "askAIResult")
-        }).catch(err => {
-            console.log(err);
-            this.invokeError("Unable to fullfill the openAI Request");
-        });
-    }
-
-
     getOnliners(): Array<any> {
         return this.getExtendedPeerConnections(this.peer).map((p: Broker) => {
             return {
