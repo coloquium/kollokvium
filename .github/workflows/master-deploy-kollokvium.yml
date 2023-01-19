@@ -10,6 +10,9 @@ on:
 
 jobs:
   build-and-deploy:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +29,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '${{ steps.package-version.outputs.version }}'
-
 
     - name: 'Install dependencies, and build'
       env:
