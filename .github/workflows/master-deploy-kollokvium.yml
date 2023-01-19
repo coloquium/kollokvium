@@ -36,25 +36,30 @@ jobs:
         npm install
         npm run build --if-present
 
+    - name: Login to Azure
+      uses: azure/login@v1.4.6
+      with:
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        # creds: ${{ secrets.AZURE_CREDENTIALS_master }}
+
     - name: 'Deploy to Azure Web App'
-      uses: azure/webapps-deploy@v1
+      uses: azure/webapps-deploy@v2.2.5
       with:
         app-name: 'kollokvium'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_master_kollokvium }}
+        # publish-profile: ${{ secrets.AzureAppService_PublishProfile_master_kollokvium }}
         package: './dist'
 
     - name: 'Deploy to Azure Storage'
-      uses: tibor19/static-website-deploy@v1
+      uses: tibor19/static-website-deploy@v2
       with:
         enabled-static-website: 'true'
         folder: 'dist/client'
         connection-string: ${{ secrets.AzureStorage_Connection_String_master_kollokvium }}
 
-    - name: 'Azure Login and Purge CDN Endpoint'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS_master }}
 
-    - run: | 
+    - name: 'Purge CDN Endpoint'
+      run: | 
         az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
