@@ -40,6 +40,7 @@ module.exports = {
     new Webpack.DefinePlugin({
       'process.env.APPINSIGHTS_INSTRUMENTATIONKEY': JSON.stringify(process.env.APPINSIGHTS_INSTRUMENTATIONKEY),
       'process.env.WSS_SERVER_URL': JSON.stringify(process.env.WSS_SERVER_URL),
+      'process.env.OPENAIKEY': JSON.stringify(process.env.OPENAIKEY),
       'process.env.KOLLOKVIUM_VERSION': JSON.stringify(process.env.KOLLOKVIUM_VERSION || package.version)
     })
   ],

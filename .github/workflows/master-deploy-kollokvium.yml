@@ -42,6 +42,7 @@ jobs:
       env:
         WSS_SERVER_URL: 'wss://wss.kollokvium.se'
         APPINSIGHTS_INSTRUMENTATIONKEY: ${{ secrets.AzureAppService_AppInsights_master_kollokvium }}
+        OPENAIKEY: ${{ secrets.OpenAIKey }}
       run: |
         npm run build
 

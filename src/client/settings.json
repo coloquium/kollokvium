@@ -5,7 +5,7 @@
     "serverUrl": "",
     "version": "1.9.0",
     "reconnectInterval": 10000,
-    "openaiKey":"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",
+    "openaiKey":"",
     "logToConsole": true,
     "rtcConfig": {
         "sdpSemantics": "unified-plan",

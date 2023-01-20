@@ -54,7 +54,7 @@ export class AppDomain {
 
 
     static getOpenAIKEY(){
-        return appConfig.openaiKey;
+        return process.env.OPENAIKEY || appConfig.openaiKey;
     }
 
     static getServerUrl() {

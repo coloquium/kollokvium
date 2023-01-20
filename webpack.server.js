@@ -34,6 +34,7 @@ module.exports = {
       patterns: assetFolders.map(folder => new Object({ from : Path.join(sourceFolder, folder), to: folder}))
     }),
     new Webpack.DefinePlugin({
+      'process.env.OPENAIKEY': JSON.stringify(process.env.OPENAIKEY),
       'process.env.KOLLOKVIUM_VERSION': JSON.stringify(process.env.KOLLOKVIUM_VERSION || package.version)
     })
   ],
