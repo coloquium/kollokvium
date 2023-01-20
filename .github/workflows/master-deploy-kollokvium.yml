@@ -85,6 +85,7 @@ jobs:
         enabled-static-website: 'true'
         folder: 'dist/client'
         storage-account-name: 'kollokvium'
+        remove-existing-files: 'true'
 
     - name: 'Purge CDN Endpoint'
       run: | 
