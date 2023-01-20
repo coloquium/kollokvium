@@ -80,11 +80,11 @@ jobs:
         package: './dist'
 
     - name: 'Deploy to Azure Storage'
-      uses: tibor19/static-website-deploy@v2
+      uses: tibor19/static-website-deploy@v3
       with:
         enabled-static-website: 'true'
         folder: 'dist/client'
-        connection-string: ${{ secrets.AzureStorage_Connection_String_master_kollokvium }}
+        storage-account-name: 'kollokvium'
 
     - name: 'Purge CDN Endpoint'
       run: | 
