@@ -5,18 +5,23 @@ import https from 'https';
 import express from 'express';
 import webSocket from 'ws';
 
+import bodyParser from "body-parser";
+
 import {setup as setupAppInsights, defaultClient as appInsightsClient } from 'applicationinsights';
 import yargs from 'yargs';
 
 import { ThorIO } from 'thor-io.vnext';
 import { Broker } from './controllers/broker';
 import * as dotenv from 'dotenv';
+import { router } from './routes';
+
 dotenv.config();
 
 
 let port = +process.env.PORT;
 let server: http.Server | https.Server;
 let app = express();
+
 let rtc = new ThorIO(
     [
         Broker,
@@ -26,9 +31,11 @@ let rtc = new ThorIO(
 
 let argv = yargs.boolean('s').alias('s', 'use-ssl').argv;
 let rootPath = path.resolve('.');
+
 if (fs.existsSync(path.join(rootPath, 'dist'))) {
     rootPath = path.join(rootPath, 'dist');
 }
+
 let clientPath = path.join(rootPath, "client");
 
 let keyFile = path.join(rootPath, 'cert', 'selfsigned.key');
@@ -48,8 +55,18 @@ if(process.env.APPINSIGHTS_INSTRUMENTATIONKEY){
 
     
 if (fs.existsSync(clientPath)) {
+
+    console.log(`Setting up API router.`);
+
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
+ 
+    app.use("/api",router);
+    
     console.log(`Serving client files from ${clientPath}.`);
-    app.use("/", express.static(clientPath));
+
+    app.use("/", express.static(clientPath));       
+
 }
 else {
     console.log(`Serving no client files.`);
@@ -80,13 +97,6 @@ else {
 
 const ws = new webSocket.Server({ server });
 ws.on('connection', (ws, req) => {
-
-
-
-
-//    console.log(req.headers, req["query"]);
-
-
     rtc.addWebSocket (ws, req);
     appInsightsClient && appInsightsClient.trackEvent({ name: 'new client', time: new Date()});
 });
