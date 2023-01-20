@@ -7,54 +7,85 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - ".github/workflows/**"
 
+  workflow_dispatch:
+    
 jobs:
-  build-and-deploy:
+  build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Read node from package.json
-      uses: tibor19/node-version-from-package-json@v1
+      uses: tibor19/node-version-from-package-json@v2
       id: package-version
 
     - name: Show version number
       run: echo "Using node version ${{ steps.package-version.outputs.version }}"
     
     - name: Set up Node.js version
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: '${{ steps.package-version.outputs.version }}'
+        cache: 'npm'
 
+    - name: 'Install dependencies'
+      run: |
+        npm install
 
-    - name: 'Install dependencies, and build'
+    - name: 'Build and test the project'
       env:
         WSS_SERVER_URL: 'wss://wss.kollokvium.se'
         APPINSIGHTS_INSTRUMENTATIONKEY: ${{ secrets.AzureAppService_AppInsights_master_kollokvium }}
       run: |
-        npm install
-        npm run build --if-present
+        npm run build
+
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v3
+      with:
+        name: .kolo
+        path: ./dist
+
+  deploy:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v3
+      with:
+        name: .kolo
+        path: ./dist
+     
+    - name: Login to Azure
+      uses: azure/login@v1.4.6
+      with:
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
 
     - name: 'Deploy to Azure Web App'
-      uses: azure/webapps-deploy@v1
+      uses: azure/webapps-deploy@v2.2.5
       with:
         app-name: 'kollokvium'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_master_kollokvium }}
         package: './dist'
 
     - name: 'Deploy to Azure Storage'
-      uses: tibor19/static-website-deploy@v1
+      uses: tibor19/static-website-deploy@v2
       with:
         enabled-static-website: 'true'
         folder: 'dist/client'
         connection-string: ${{ secrets.AzureStorage_Connection_String_master_kollokvium }}
 
-    - name: 'Azure Login and Purge CDN Endpoint'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS_master }}
-
-    - run: | 
+    - name: 'Purge CDN Endpoint'
+      run: | 
         az cdn endpoint purge --ids '${{ secrets.AZURE_CDN_ENDPOINT_master }}' --content-paths '/*'
