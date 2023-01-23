@@ -67,6 +67,7 @@
     "openai": "^3.1.0",
     "thor-io.client-vnext": "^2.2.0-beta.5",
     "thor-io.vnext": "^2.0.6",
+    "unique-names-generator": "^4.7.1",
     "utf-8-validate": "^5.0.10",
     "webrtc-adapter": "^8.2.0",
     "ws": "^8.11.0",
@@ -80,7 +81,6 @@
     "@types/webrtc": "0.0.26",
     "@types/ws": "^8.5.4",
     "@types/yargs": "^17.0.19",
-
     "concurrently": "^7.6.0",
     "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",

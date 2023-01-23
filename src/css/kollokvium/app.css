@@ -469,7 +469,7 @@ i.fa-lock {
 
 .transcript-bar {
   position: absolute;
-  top: 100px;
+  bottom: 120px;
   z-index: 2000;
   width: 100%;
   height: 80px;
@@ -564,7 +564,7 @@ i.fa-lock {
     position: absolute;
     top: 60px;
     right: 10px;
-    z-index: 2000;
+    z-index: 2100;
     cursor: none;
     max-height: 100px;
     object-fit: cover;

@@ -1,6 +1,6 @@
 import { ClientFactory, Controller, DataChannel } from "thor-io.client-vnext";
+import { Transcriber } from "../Audio/Transcriber";
 import { DOMUtils } from "../Helpers/DOMUtils";
-import { IChatAIResponse } from "./ChatComponent";
 
 export class JournalComponent {
     data: any[];
@@ -9,32 +9,35 @@ export class JournalComponent {
         this.data = new Array<any>();
         this.controller = this.clientFactory.getController("broker") as Controller;
 
-
         DOMUtils.on("click", DOMUtils.get("#btn-summarize"), (e) => {
-            const textToSummarize = this.data.map((p) => {
+         
+            const textToSummarize = this.data.map((p) => {            
                 return `${p.sender}:${p.text}`
             }).join("\n");
 
-            this.controller.invoke("textCompletion", {
-                prompt: `Turn chat into a summary:${textToSummarize}`
+            Transcriber.textCompletion(`Turn this chat into a summary:\n${textToSummarize}`).then( r => {
+
+
+
+                const data = {
+                    text: r.choices[0].text,
+                    from: "OPENAI",
+                    language: "en"
+                }
+                this.dc.invoke("chatMessage", data);
+                this.add("robot","OPENAI", data.text, data.text, "en");
+                this.refresh();
             });
+
+       
         });
 
-        this.controller.on("textCompletionResult", (r: IChatAIResponse) => {
-            const data = {
-                text: r.choices[0].text,
-                from: "OPENAI",
-                language: "en"
-            }
-            this.dc.invoke("chatMessage", data);
-            this.add("OPENAI", data.text, data.text, "en");
-            this.refresh(); 
-        });
-
+       
 
     }
-    add(sender: string, text: string, originText: string, language: string) {
+    add(origin:string,sender: string, text: string, originText: string, language: string) {
         this.data.push({
+            origin: origin,
             time: new Date().toLocaleTimeString().substr(0, 5),
             sender: sender,
             originText: originText,
@@ -100,8 +103,17 @@ export class JournalComponent {
             let sender = document.createElement("mark");
             sender.textContent = entry.sender;
             line.append(sender);
+
+            let origin = document.createElement("i");
+          
+            origin.classList.add("fas");
+            origin.classList.add(`fa-${entry.origin}`)
+            origin.classList.add("mx-2");
+
+            line.append(origin);
+
             let text = document.createElement("span");
-            text.textContent = `${entry.text}`;
+            text.textContent = DOMUtils.linkify(`${entry.text}`);
             line.append(text);
             if (entry.originText.length > 0) {
                 let origin = document.createElement("em");

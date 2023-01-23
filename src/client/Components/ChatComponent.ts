@@ -6,13 +6,7 @@ import { AppComponent } from './AppComponent';
 import { Transcriber } from "../Audio/Transcriber";
 import { JournalComponent } from "./JournalComponent";
 
-export interface IChatAIResponse {
-    id: string
-    choices: [{
-        text: string;
-    }],
-    errors:[]
-}
+
 export class ChatComponent extends AppComponent {
     onChatMessage: (args: any) => void
     chatMessage?: HTMLInputElement;
@@ -28,14 +22,10 @@ export class ChatComponent extends AppComponent {
 
        this.controller = this.clientFactory.getController("broker") as Controller;
 
-        this.controller.on("askAIResult", (r: IChatAIResponse) => {           
-            this.sendMessage("AI", r.choices[0].text + "{}")                      
-        });
         
         this.dc.on("chatMessage", (data: any) => {
-
             if (this.onChatMessage) this.onChatMessage(data);       
-            journal.add(data.from,data.text,data.text,"en");
+            journal.add("keyboard",data.from,data.text,data.text,"en");
             this.render(data);
 
         });
@@ -47,21 +37,21 @@ export class ChatComponent extends AppComponent {
                 let text = this.chatMessage.value;
                 if(text.startsWith("@ai")){
                     
-                    this.controller.invoke("askAI", {
-                        prompt: text.replace("@ai","")
+                    const prompt =  text.replace("@ai","");
+
+                    this.sendMessage(UserSettings.nickname, `Asking AI:${prompt}{}`);   
+
+                    Transcriber.textCompletion(prompt).then( r => {
+                        this.sendMessage("AI", r.choices[0].text);    
                     });
 
-                    this.sendMessage(UserSettings.nickname, `Asking AI:${text.replace("@ai","")}`);                    
-                
                 }else {
                     this.sendMessage(UserSettings.nickname, text)
                 }     
                 this.chatMessage.value = "";
             }
-        });
-      
+        });      
     }
-
 
     sendMessage(sender: string, message: string) {
         const data = {
@@ -69,9 +59,8 @@ export class ChatComponent extends AppComponent {
             from: sender,
             language: this.language || navigator.languages[0]
         }        
-        
         this.dc.invoke("chatMessage", data);
-        this.journal.add(data.from,data.text,data.text,"en");
+        this.journal.add("keyboard",data.from,data.text,data.text,this.language);
         this.render(data);
     }
     render(msg: any) {
@@ -81,7 +70,7 @@ export class ChatComponent extends AppComponent {
         if (this.language != msg.language) {
 
             Transcriber.translateCaptions(msg.text, msg.language, this.language).then(translate => {
-                let translated = DOMUtils.makeLink(translate);
+                let translated = DOMUtils.linkify(translate);
                 let template = `<div>
                     <mark>${msg.from}</mark>
                     <time>(${(new Date()).toLocaleTimeString().substring(0, 5)})</time>
@@ -92,7 +81,7 @@ export class ChatComponent extends AppComponent {
                 let template = `<div>
                 <mark>${msg.from}</mark>
                 <time>(${(new Date()).toLocaleTimeString().substring(0, 5)})</time>
-                <span>${DOMUtils.makeLink(msg.text)}</span>
+                <span>${DOMUtils.linkify(msg.text)}</span>
                 </div>`
                    chatMessages.prepend(DOMUtils.toDOM(template));
             });
@@ -102,7 +91,7 @@ export class ChatComponent extends AppComponent {
             let template = `<div>
                 <mark>${msg.from}</mark>
                 <time>(${(new Date()).toLocaleTimeString().substring(0, 5)})</time>
-                <span>${DOMUtils.makeLink(msg.text)}</span>
+                <span>${DOMUtils.linkify(msg.text)}</span>
                 </div>`
             chatMessages.prepend(DOMUtils.toDOM(template));
         }
