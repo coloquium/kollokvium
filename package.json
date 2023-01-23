@@ -55,7 +55,7 @@
     "@opentelemetry/instrumentation": "^0.34.0",
     "@opentelemetry/sdk-trace-base": "^1.8.0",
     "@virtualscenery/greenscreenstream": "^3.0.2",
-    "applicationinsights": "^2.3.6",
+    "applicationinsights": "^2.4.1",
     "applicationinsights-native-metrics": "^0.0.8",
     "axios": "^1.2.2",
     "bufferutil": "^4.0.7",
