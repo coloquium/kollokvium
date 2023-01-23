@@ -67,7 +67,7 @@
     "openai": "^3.1.0",
     "thor-io.client-vnext": "^2.2.0-beta.5",
     "thor-io.vnext": "^2.0.6",
-    "utf-8-validate": "^5.0.10",
+    "utf-8-validate": "^6.0.1",
     "webrtc-adapter": "^8.2.0",
     "ws": "^8.11.0",
     "yargs": "^17.6.2"
