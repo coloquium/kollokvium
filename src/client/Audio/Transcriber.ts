@@ -1,8 +1,18 @@
 import axios from "axios";
 import { response } from "express";
 import { ClientFactory } from "thor-io.client-vnext";
+import { openAIRequest } from "../../backend/openAIRequest";
 
 declare var webkitSpeechRecognition: any;
+
+
+export interface IChatAIResponse {
+    id: string
+    choices: [{
+        text: string;
+    }],
+    errors:[]
+}
 
 export class Transcriber {
 
@@ -175,7 +185,7 @@ export class Transcriber {
                 return
             }
             const voiceschanged = () => {
-                voices = speechSynthesis.getVoices()
+                voices = speechSynthesis.getVoices();
                 resolve(voices)
                 speechSynthesis.onvoiceschanged = voiceschanged
             }
@@ -216,20 +226,26 @@ export class Transcriber {
 
 
      static async translate(text:string,from:string,to:string){
-        const headers = { 'Content-Type': 'application/json' }
         const data = `Translate "${text}" from ${from} to ${to}.`;
-        return await axios.post("/api/translate/openai/",{
-            prompt: data
-        },{headers});
-    
+        return Transcriber.textCompletion(data);   
     }
+
+    static async textCompletion(prompt:string){
+        const headers = { 'Content-Type': 'application/json' }
+        const response=  await axios.post<IChatAIResponse>("/api/translate/openai/",{
+            prompt: prompt
+        },{headers});   
+        return response.data;
+    }
+
+
 
     static translateCaptions(phrase: string, from: string, to: string): Promise<string> {
         return new Promise<string>((resolve, reject) => {           
             const result =  Transcriber.translate(phrase,from,to);
             result.then( response => {
-                if(response.data.choices.length > 0){
-                    resolve(response.data.choices[0].text);
+                if(response.choices.length > 0){
+                    resolve(response.choices[0].text);
                 }else reject(phrase);
             }).catch ( err => {
                 reject(phrase);
@@ -237,6 +253,5 @@ export class Transcriber {
         });
     }
 }
-
 
 
