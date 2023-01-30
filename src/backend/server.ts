@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs';
+
 import http from 'http';
 import https from 'https';
 import express from 'express';
 import webSocket from 'ws';
+    
 
 import bodyParser from "body-parser";
 
@@ -59,8 +61,8 @@ if (fs.existsSync(clientPath)) {
     console.log(`Setting up API router.`);
 
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
- 
+    app.use(bodyParser.urlencoded({ extended: true })); 
+
     app.use("/api",router);
     
     console.log(`Serving client files from ${clientPath}.`);
