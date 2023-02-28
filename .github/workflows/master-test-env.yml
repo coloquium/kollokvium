@@ -43,12 +43,20 @@ jobs:
       run: |
         npm install
 
+    - name: Login to Azure
+      uses: azure/login@v1.4.6
+      with:
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+
     - name: 'Get variables for build'
       run: |
         rg=`az webapp list --query "[?name == '${{ env.APP_NAME }}'].resourceGroup" -o tsv`
-        APPINSIGHTS_INSTRUMENTATIONKEY=`az webapp config appsettings list -n ${{ env.APP_NAME }} -s {{ env.SLOT_NAME }} -g ${rg} --query "[?name == 'APPINSIGHTS_INSTRUMENTATIONKEY'].value" -o tsv`
-        hostnames=(`az webapp config hostname list --webapp-name ${{ env.APP_NAME }} -s {{ env.SLOT_NAME }} -g ${rg} --query [].name -o tsv`)
+        APPINSIGHTS_INSTRUMENTATIONKEY=`az webapp config appsettings list -n ${{ env.APP_NAME }} -g ${rg} --query "[?name == 'APPINSIGHTS_INSTRUMENTATIONKEY'].value" -o tsv`
+        hostnames=(`az webapp config hostname list --webapp-name ${{ env.APP_NAME }} -g ${rg} --query [].name -o tsv`)
         [[ ${#hostnames[@]} -gt 1 ]] && wss="${hostnames[1]}" || wss="${hostnames[0]}"
+        echo "RESOURCE_GROUP=$rg" >> $GITHUB_ENV
         echo "APPINSIGHTS_INSTRUMENTATIONKEY=$APPINSIGHTS_INSTRUMENTATIONKEY" >> $GITHUB_ENV
         echo "WSS_SERVER_URL=wss://${wss}" >> $GITHUB_ENV
         
