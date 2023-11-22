@@ -65,7 +65,7 @@
     "hotkeys-js": "^3.10.1",
     "image-capture": "^0.4.0",
     "mediastreamblender": "^1.0.0-beta.4",
-    "openai": "^3.1.0",
+    "openai": "^3.2.1",
     "thor-io.client-vnext": "^2.2.0-beta.5",
     "thor-io.vnext": "^2.0.6",
     "unique-names-generator": "^4.7.1",
