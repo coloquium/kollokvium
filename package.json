@@ -71,7 +71,7 @@
     "unique-names-generator": "^4.7.1",
     "utf-8-validate": "^6.0.3",
     "webrtc-adapter": "^8.2.2",
-    "ws": "^8.12.0",
+    "ws": "^8.14.2",
     "yargs": "^17.6.2"
   },
   "devDependencies": {
@@ -81,7 +81,7 @@
     "@types/express": "^4.17.16",
     "@types/jquery": "^3.5.16",
     "@types/webrtc": "^0.0.33",
-    "@types/ws": "^8.5.4",
+    "@types/ws": "^8.5.10",
     "@types/yargs": "^17.0.20",
     "concurrently": "^7.6.0",
     "copy-webpack-plugin": "^11.0.0",
